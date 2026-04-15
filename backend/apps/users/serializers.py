@@ -18,6 +18,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'email': {'required': True},
             'admission_number': {'required': True},
             'phone': {'required': True},
+            'first_name': {'required': False},
+            'last_name': {'required': False},
+            'role': {'required': False},
         }
 
     def validate(self, attrs):
@@ -26,6 +29,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        # Set defaults for optional fields
+        validated_data.setdefault('first_name', '')
+        validated_data.setdefault('last_name', '')
+        validated_data.setdefault('role', 'STUDENT')
         return User.objects.create_user(**validated_data)
 
 class UserDetailSerializer(serializers.ModelSerializer):
