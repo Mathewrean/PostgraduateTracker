@@ -1,4 +1,6 @@
 import React from 'react'
+import { useCurrentUser } from '../hooks/useAuth'
+import { useUIStore } from '../context/store'
 
 export const Layout = ({ children }) => {
   return (
@@ -21,7 +23,7 @@ export const Sidebar = () => {
   
   const menuItems = {
     STUDENT: [
-      { label: 'Dashboard', path: '/student/dashboard' },
+      { label: 'Dashboard', path: '/dashboard' },
       { label: 'My Profile', path: '/student/profile' },
       { label: 'Current Stage', path: '/student/stage' },
       { label: 'Activities', path: '/student/activities' },
@@ -29,18 +31,18 @@ export const Sidebar = () => {
       { label: 'Notifications', path: '/student/notifications' },
     ],
     SUPERVISOR: [
-      { label: 'Dashboard', path: '/supervisor/dashboard' },
+      { label: 'Dashboard', path: '/dashboard' },
       { label: 'My Students', path: '/supervisor/students' },
       { label: 'Approvals', path: '/supervisor/approvals' },
     ],
     COORDINATOR: [
-      { label: 'Dashboard', path: '/coordinator/dashboard' },
+      { label: 'Dashboard', path: '/dashboard' },
       { label: 'All Students', path: '/coordinator/students' },
       { label: 'Reports', path: '/coordinator/reports' },
       { label: 'Complaints', path: '/coordinator/complaints' },
     ],
     ADMIN: [
-      { label: 'Dashboard', path: '/admin/dashboard' },
+      { label: 'Dashboard', path: '/dashboard' },
       { label: 'Users', path: '/admin/users' },
       { label: 'Reports', path: '/admin/reports' },
       { label: 'Audit Logs', path: '/admin/audit' },
@@ -92,6 +94,3 @@ export const Header = () => {
     </header>
   )
 }
-
-import { useCurrentUser } from '../hooks/useAuth'
-import { useUIStore } from '../context/store'

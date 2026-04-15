@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { authService } from '../services'
-import { useAuthStore } from '../context/store'
+import { authService } from '../../services'
+import { useAuthStore } from '../../context/store'
 import toast from 'react-hot-toast'
 
 export const LoginPage = () => {
@@ -20,15 +20,7 @@ export const LoginPage = () => {
       setToken(response.data.access)
       localStorage.setItem('user', JSON.stringify(response.data.user))
       toast.success('Login successful!')
-      
-      const role = response.data.user.role
-      const dashboards = {
-        STUDENT: '/student/dashboard',
-        SUPERVISOR: '/supervisor/dashboard',
-        COORDINATOR: '/coordinator/dashboard',
-        ADMIN: '/admin/dashboard',
-      }
-      navigate(dashboards[role] || '/dashboard')
+      navigate('/dashboard')
     } catch (error) {
       toast.error(error.response?.data?.error || 'Login failed')
     } finally {

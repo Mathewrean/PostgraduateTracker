@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useAuthStore } from './store'
+import { useAuthStore } from './context/store'
 import { LoginPage } from './pages/auth/LoginPage'
 import { StudentDashboard } from './pages/student/StudentDashboard'
 import { CoordinatorDashboard } from './pages/coordinator/CoordinatorDashboard'
@@ -69,6 +69,14 @@ export const App = () => {
     </BrowserRouter>
   )
 }
+
+// Render the app
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+)
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

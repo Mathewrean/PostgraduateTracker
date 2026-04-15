@@ -1,0 +1,97 @@
+#!/usr/bin/env python
+"""
+Script to create test users for PST application
+"""
+import os
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pst_project.settings')
+django.setup()
+
+from apps.users.models import User
+from apps.students.models import Student
+from django.contrib.auth.models import Group
+
+# Test user data
+test_users = [
+    {
+        'email': 'student@test.com',
+        'password': 'student123',
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'role': 'STUDENT',
+        'admission_number': 'STU001'
+    },
+    {
+        'email': 'student@example.com',
+        'password': 'password123',
+        'first_name': 'Jane',
+        'last_name': 'Smith',
+        'role': 'STUDENT',
+        'admission_number': 'STU002'
+    },
+    {
+        'email': 'supervisor@test.com',
+        'password': 'supervisor123',
+        'first_name': 'Prof',
+        'last_name': 'Supervisor',
+        'role': 'SUPERVISOR',
+        'admission_number': 'SUP001'
+    },
+    {
+        'email': 'coordinator@test.com',
+        'password': 'coordinator123',
+        'first_name': 'Dr',
+        'last_name': 'Coordinator',
+        'role': 'COORDINATOR',
+        'admission_number': 'COORD001'
+    },
+    {
+        'email': 'admin@pst.com',
+        'password': 'admin123',
+        'first_name': 'Admin',
+        'last_name': 'User',
+        'role': 'ADMIN',
+        'admission_number': 'ADMIN001'
+    },
+]
+
+print("Creating test users...")
+for user_data in test_users:
+    try:
+        user, created = User.objects.get_or_create(
+            email=user_data['email'],
+            defaults={
+                'first_name': user_data['first_name'],
+                'last_name': user_data['last_name'],
+                'role': user_data['role'],
+                'admission_number': user_data['admission_number'],
+                'phone': '+254700000000',
+            }
+        )
+        
+        if created:
+            user.set_password(user_data['password'])
+            user.save()
+            
+            # If student, create student profile
+            if user_data['role'] == 'STUDENT':
+                Student.objects.get_or_create(
+                    user=user,
+                    defaults={
+                        'admission_number': user_data['admission_number'],
+                        'department': 'Pure and Applied Mathematics',
+                    }
+                )
+            
+            print(f"✅ Created {user_data['role']}: {user_data['email']}")
+        else:
+            print(f"⏭️  Already exists: {user_data['email']}")
+            
+    except Exception as e:
+        print(f"❌ Error creating {user_data['email']}: {str(e)}")
+
+print("\n✅ Test users setup complete!")
+print("\nYou can now login with:")
+for user_data in test_users:
+    print(f"  - {user_data['email']} / {user_data['password']} ({user_data['role']})")
