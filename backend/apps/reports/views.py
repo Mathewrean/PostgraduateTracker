@@ -19,10 +19,13 @@ class ReportViewSet(viewsets.ViewSet):
 
     def get_permissions(self):
         # Only coordinators and admins can access reports
-        user = self.request.user
-        if user.role not in ['COORDINATOR', 'ADMIN']:
-            return [status.HTTP_403_FORBIDDEN]
-        return super().get_permissions()
+        from rest_framework.permissions import BasePermission
+        
+        class IsCoordinatorOrAdmin(BasePermission):
+            def has_permission(self, request, view):
+                return request.user and request.user.role in ['COORDINATOR', 'ADMIN']
+        
+        return [IsCoordinatorOrAdmin()]
 
     @action(detail=False, methods=['get'])
     def student_progress(self, request):

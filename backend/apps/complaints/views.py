@@ -60,7 +60,8 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         if complaint.status == 'RESOLVED':
             return Response({'error': 'Complaint already resolved'}, status=status.HTTP_400_BAD_REQUEST)
         
-        response_content = request.data.get('response_content')
+        # Accept both 'response_content' and 'response_text' field names
+        response_content = request.data.get('response_content') or request.data.get('response_text')
         if not response_content:
             return Response({'error': 'Response content is required'}, status=status.HTTP_400_BAD_REQUEST)
         

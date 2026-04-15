@@ -36,7 +36,7 @@ class MeetingViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Meeting.objects.filter(models.Q(student=user) | models.Q(supervisor=user))
+        return Meeting.objects.filter(Q(student=user) | Q(supervisor=user))
 
     def create(self, request, *args, **kwargs):
         supervisor_id = request.data.get('supervisor')

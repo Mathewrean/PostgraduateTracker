@@ -19,9 +19,9 @@ class Document(models.Model):
 
     stage = models.ForeignKey(Stage, on_delete=models.CASCADE, related_name='documents')
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='documents')
-    doc_type = models.CharField(max_length=50, choices=DOC_TYPE_CHOICES)
+    doc_type = models.CharField(max_length=50, choices=DOC_TYPE_CHOICES, default='OTHER')
     file = models.FileField(upload_to='documents/%Y/%m/%d/', validators=[
-        FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx'])
+        FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx', 'pptx'])
     ])
     uploaded_at = models.DateTimeField(auto_now_add=True)
     file_size = models.BigIntegerField(null=True, blank=True)

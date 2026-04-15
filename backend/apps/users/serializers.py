@@ -14,6 +14,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['email', 'admission_number', 'phone', 'first_name', 'last_name', 'role', 'password', 'password_confirm']
+        extra_kwargs = {
+            'email': {'required': True},
+            'admission_number': {'required': True},
+            'phone': {'required': True},
+        }
 
     def validate(self, attrs):
         if attrs['password'] != attrs.pop('password_confirm'):
