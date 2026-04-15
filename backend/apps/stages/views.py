@@ -1,0 +1,97 @@
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from django.utils import timezone
+from .models import Stage
+from .serializers import StageSerializer
+from apps.students.models import Student
+
+class StageViewSet(viewsets.ModelViewSet):
+    serializer_class = StageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'STUDENT':
+            try:
+                student = Student.objects.get(user=user)
+                return Stage.objects.filter(student=student)
+            except Student.DoesNotExist:
+                return Stage.objects.none()
+        elif user.role in ['COORDINATOR', 'ADMIN']:
+            return Stage.objects.all()
+        elif user.role == 'SUPERVISOR':
+            return Stage.objects.filter(student__assigned_supervisor=user)
+        return Stage.objects.none()
+
+    @action(detail=False, methods=['get'])
+    def current_stage(self, request):
+        try:
+            student = Student.objects.get(user=request.user)
+            current_stage = Stage.objects.filter(student=student, status='ACTIVE').first()
+            if current_stage:
+                serializer = self.get_serializer(current_stage)
+                return Response(serializer.data)
+            return Response({'error': 'No active stage'}, status=status.HTTP_404_NOT_FOUND)
+        except Student.DoesNotExist:
+            return Response({'error': 'Student profile not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        stage = self.get_object()
+        
+        # Check if user is assigned supervisor
+        if request.user != stage.student.assigned_supervisor:
+            return Response({'error': 'Only assigned supervisor can approve'}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Check all requirements
+        from apps.documents.models import Document
+        from apps.activities.models import Activity
+        
+        # Check mandatory documents
+        mandatory_docs = {
+            'CONCEPT': ['MINUTES', 'TRANSCRIPT', 'FEE_STATEMENT'],
+            'PROPOSAL': ['MINUTES', 'FEE_STATEMENT', 'PROPOSAL'],
+            'THESIS': ['THESIS', 'INTENT_TO_SUBMIT', 'FEE_STATEMENT'],
+        }
+        
+        required_docs = mandatory_docs.get(stage.stage_type, [])
+        uploaded_docs = Document.objects.filter(stage=stage, doc_type__in=required_docs).values_list('doc_type', flat=True)
+        
+        if set(uploaded_docs) != set(required_docs):
+            missing = set(required_docs) - set(uploaded_docs)
+            return Response({
+                'error': 'Missing mandatory documents',
+                'missing': list(missing)
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check all activities are done
+        pending_activities = Activity.objects.filter(stage=stage, status='PLANNED')
+        if pending_activities.exists():
+            return Response({
+                'error': 'All planned activities must be marked as completed'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Approve stage
+        stage.status = 'COMPLETED'
+        stage.approved_by = request.user
+        stage.approval_date = timezone.now()
+        stage.completed_at = timezone.now()
+        stage.save()
+        
+        # Move to next stage
+        stage_progression = {'CONCEPT': 'PROPOSAL', 'PROPOSAL': 'THESIS', 'THESIS': 'COMPLETED'}
+        next_stage_type = stage_progression.get(stage.stage_type)
+        
+        if next_stage_type and next_stage_type != 'COMPLETED':
+            if stage.stage_type == 'THESIS':
+                # Set 3-month unlock date
+                from datetime import timedelta
+                stage.three_month_unlock_date = timezone.now() + timedelta(days=90)
+                stage.status = 'IN_PROGRESS'
+                stage.save()
+            else:
+                Stage.objects.create(student=stage.student, stage_type=next_stage_type)
+        
+        return Response(StageSerializer(stage).data)

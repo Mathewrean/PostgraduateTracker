@@ -1,0 +1,35 @@
+from rest_framework import serializers
+from .models import User
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'admission_number', 'phone', 'first_name', 'last_name', 'role', 'is_active', 'date_joined', 'last_login']
+        read_only_fields = ['date_joined', 'last_login']
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=8)
+    password_confirm = serializers.CharField(write_only=True, min_length=8)
+
+    class Meta:
+        model = User
+        fields = ['email', 'admission_number', 'phone', 'first_name', 'last_name', 'role', 'password', 'password_confirm']
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs.pop('password_confirm'):
+            raise serializers.ValidationError({'password': 'Passwords do not match'})
+        return attrs
+
+    def create(self, validated_data):
+        return User.objects.create_user(**validated_data)
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'admission_number', 'phone', 'first_name', 'last_name', 'role', 'is_active', 'date_joined', 'last_login', 'last_login_ip']
+        read_only_fields = ['date_joined', 'last_login', 'last_login_ip']
+
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'phone']
