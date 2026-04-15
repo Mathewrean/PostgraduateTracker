@@ -10,7 +10,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
 INSTALLED_APPS = [
-    'daphne',  # Django Channels
+    # 'daphne',  # Django Channels - commented for testing
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -21,8 +21,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'django_filters',
-    'django_celery_beat',
-    'django_celery_results',
+    # 'django_celery_beat',  # Commented due to Django 5.0 incompatibility
+    # 'django_celery_results',
     'apps.users',
     'apps.students',
     'apps.supervisors',
