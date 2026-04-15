@@ -2,7 +2,9 @@
 
 A comprehensive full-stack application for managing postgraduate research submissions, tracking stages, managing documents, and coordinating between students, supervisors, and coordinators.
 
-**School**: JOOUST School of Informatics and Innovative Systems
+**Institution**: Jomo Kenyatta University of Agriculture and Technology (JKUAT)  
+**School**: School of Biological, Physical, Mathematics and Actuarial Sciences  
+**Department**: Department of Pure and Applied Mathematics
 
 ---
 
@@ -32,7 +34,7 @@ A comprehensive full-stack application for managing postgraduate research submis
 - 3-month timer per stage (with 90-day lock for thesis)
 
 ✅ **Document Management**
-- Upload/verify documents (PDF, DOC, DOCX)
+- Upload/verify documents (PDF, DOC, DOCX, PPTX)
 - File size validation (<10MB)
 - Document linking to stages
 - Minutes of presentation tracking

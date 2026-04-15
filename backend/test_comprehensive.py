@@ -437,7 +437,7 @@ class TestSuite:
             user_type='student',
             data={
                 'stage': self.stage_concept.id,
-                'document_type': 'CONCEPT_PAPER',
+                'doc_type': 'PROPOSAL',
                 'file': pdf_file
             },
             expected_status=201,
