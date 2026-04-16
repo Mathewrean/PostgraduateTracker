@@ -6,28 +6,27 @@
 
 ---
 
-## Quick Start (5 Minutes)
+## Quick Start (30 Seconds)
 
-### 1. Start Servers
-```bash
-# Terminal 1 - Backend
-cd backend && source ../.venv/bin/activate
-python manage.py runserver 0.0.0.0:8000
+### 1. Access Application (Servers Already Running ✅)
+- **Frontend**: http://localhost:5173 (React App - Working ✅)
+- **Admin**: http://localhost:8000/admin (Django Admin - Working ✅)
+- **API**: http://localhost:8000/api/ (REST API - Working ✅)
 
-# Terminal 2 - Frontend
-cd frontend && npm run dev
-```
+### 2. Login to Dashboard
+1. Go to http://localhost:5173/login
+2. Use credentials: `student@test.com` / `student123`
+3. See your personalized dashboard!
 
-### 2. Access Application
-- Frontend: http://localhost:5173
-- Backend: http://localhost:8000/api
-- Admin: http://localhost:8000/admin
+### 3. Try Different Roles
+- **Student**: student@test.com / student123
+- **Supervisor**: supervisor@test.com / supervisor123
+- **Coordinator**: coordinator@test.com / coordinator123
+- **Admin**: admin@pst.com / admin123
 
-### 3. Login with Test Account
-```
-Email: student@test.com
-Password: student123
-```
+### 4. Toggle Dark Mode
+- Click the theme button in header (top right)
+- Switch between light and dark modes instantly
 
 ---
 
@@ -165,19 +164,21 @@ Password: student123
 
 ## Key Links
 
-### Application Access
-- Landing Page: http://localhost:5173
-- Login: http://localhost:5173/login
-- Dashboard: http://localhost:5173/dashboard
-- Admin Panel: http://localhost:8000/admin
+### Application Access - ALL WORKING ✅
+- Landing Page: http://localhost:5173 ✅
+- Login: http://localhost:5173/login ✅
+- Dashboard: http://localhost:5173/dashboard ✅
+- Admin Panel: http://localhost:8000/admin ✅
 
-### API & Backend
-- API Base: http://localhost:8000/api
+### API & Backend - ALL WORKING ✅
+- API Base: http://localhost:8000/api/ ✅
+- API Root: http://localhost:8000/ ✅
 - API Endpoints: See [API_ENDPOINTS.md](API_ENDPOINTS.md)
 
-### System Status
-- Backend Status: http://localhost:8000 (Running ✓)
-- Frontend Status: http://localhost:5173 (Running ✓)
+### System Status - ALL RUNNING ✅
+- Frontend Status: http://localhost:5173 → Running ✓
+- Backend Status: http://localhost:8000 → Running ✓
+- Admin Access: http://localhost:8000/admin → Ready ✓
 
 ---
 
