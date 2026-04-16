@@ -5,7 +5,7 @@ export const authService = {
     api.post('/auth/token/', { email, password }),
   
   register: (data) =>
-    api.post('/users/', data),
+    api.post('/users/register/', data),
   
   logout: (refreshToken) =>
     api.post('/users/logout/', { refresh: refreshToken }),
