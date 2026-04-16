@@ -11,7 +11,7 @@ import { Toaster } from 'react-hot-toast'
 
 function PrivateRoute({ children, allowedRoles }) {
   const token = useAuthStore((state) => state.token)
-  const user = JSON.parse(localStorage.getItem('user') || 'null')
+  const user = useAuthStore((state) => state.user)
 
   if (!token) {
     return <Navigate to="/login" replace />
@@ -26,7 +26,7 @@ function PrivateRoute({ children, allowedRoles }) {
 
 export const App = () => {
   const token = useAuthStore((state) => state.token)
-  const user = JSON.parse(localStorage.getItem('user') || 'null')
+  const user = useAuthStore((state) => state.user)
 
   return (
     <BrowserRouter>

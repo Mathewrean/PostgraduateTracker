@@ -4,7 +4,7 @@ import { Card, StatCard } from '../../components/Card'
 import { Carousel } from '../../components/Carousel'
 import { Grid, Container, Section } from '../../components/Grid'
 import { Button } from '../../components/Button'
-import { useUIStore } from '../../context/store'
+import { useUIStore, useAuthStore } from '../../context/store'
 import toast from 'react-hot-toast'
 
 /**
@@ -17,16 +17,9 @@ import toast from 'react-hot-toast'
  */
 export const StudentDashboard = () => {
   const isDark = useUIStore((state) => state.isDark)
-  const [user, setUser] = useState(null)
+  const user = useAuthStore((state) => state.user)
   const [currentStage, setCurrentStage] = useState('CONCEPT')
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    // Fetch user from localStorage
-    const userData = JSON.parse(localStorage.getItem('user') || 'null')
-    setUser(userData)
-    setLoading(false)
-  }, [])
+  const [loading, setLoading] = useState(false)
 
   // Carousel slides for featured content
   const carouselSlides = [

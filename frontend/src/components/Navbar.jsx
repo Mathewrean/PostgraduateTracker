@@ -6,8 +6,8 @@ import { useUIStore } from '../context/store'
 export const NavbarComponent = () => {
   const navigate = useNavigate()
   const isDark = useUIStore((state) => state.isDark)
+  const user = useAuthStore((state) => state.user)
   const [menuOpen, setMenuOpen] = useState(false)
-  const user = JSON.parse(localStorage.getItem('user') || 'null')
   const logout = useAuthStore((state) => state.logout)
 
   const handleLogout = () => {

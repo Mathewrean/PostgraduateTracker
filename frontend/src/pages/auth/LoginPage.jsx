@@ -10,6 +10,7 @@ export const LoginPage = () => {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const setToken = useAuthStore((state) => state.setToken)
+  const setUser = useAuthStore((state) => state.setUser)
   const isDark = useUIStore((state) => state.isDark)
   const toggleTheme = useUIStore((state) => state.toggleTheme)
 
@@ -25,7 +26,7 @@ export const LoginPage = () => {
     try {
       const response = await authService.login(email, password)
       setToken(response.data.access)
-      localStorage.setItem('user', JSON.stringify(response.data.user))
+      setUser(response.data.user)
       toast.success('Login successful!')
       navigate('/dashboard')
     } catch (error) {

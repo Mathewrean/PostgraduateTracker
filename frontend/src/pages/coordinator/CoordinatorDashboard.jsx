@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { Layout } from '../../components/Layout'
 import { reportService } from '../../services'
-import { useUIStore } from '../../context/store'
+import { useUIStore, useAuthStore } from '../../context/store'
 
 export const CoordinatorDashboard = () => {
   const isDark = useUIStore((state) => state.isDark)
+  const user = useAuthStore((state) => state.user)
   const [reports, setReports] = useState({})
   const [loading, setLoading] = useState(true)
 
@@ -39,7 +40,7 @@ export const CoordinatorDashboard = () => {
   }, [])
 
   if (loading) return (
-    <Layout>
+    <Layout title="Coordinator Dashboard" user={user}>
       <div className="flex items-center justify-center h-full">
         <p>Loading...</p>
       </div>
@@ -47,7 +48,7 @@ export const CoordinatorDashboard = () => {
   )
 
   return (
-    <Layout>
+    <Layout title="Coordinator Dashboard" user={user}>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold mb-2">Coordinator Dashboard</h1>
