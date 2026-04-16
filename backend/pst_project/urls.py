@@ -27,6 +27,7 @@ class APIRootView(APIView):
 
 urlpatterns = [
     path('', APIRootView.as_view(), name='api-root'),
+    path('api/', APIRootView.as_view(), name='api-root-alt'),
     path('admin/', admin.site.urls),
     path('api/auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
