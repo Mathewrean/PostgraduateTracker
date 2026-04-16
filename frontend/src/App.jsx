@@ -1,5 +1,4 @@
 import React from 'react'
-import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './context/store'
 import { LoginPage } from './pages/auth/LoginPage'
@@ -7,7 +6,6 @@ import { StudentDashboard } from './pages/student/StudentDashboardNew'
 import { CoordinatorDashboard } from './pages/coordinator/CoordinatorDashboard'
 import { LandingPage } from './pages/LandingPage'
 import { UnauthorizedPage } from './pages/UnauthorizedPage'
-import './index.css'
 import { Toaster } from 'react-hot-toast'
 
 function PrivateRoute({ children, allowedRoles }) {
@@ -69,11 +67,3 @@ export const App = () => {
     </BrowserRouter>
   )
 }
-
-// Render the app
-const root = ReactDOM.createRoot(document.getElementById('root'))
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-)
