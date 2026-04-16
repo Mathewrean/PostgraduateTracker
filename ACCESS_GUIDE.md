@@ -2,9 +2,9 @@
 
 **PST (Postgraduate Submissions Tracker)** - A comprehensive system for managing postgraduate research submissions.
 
-**Institution**: Jomo Kenyatta University of Agriculture and Technology (JKUAT)  
-**School**: School of Biological, Physical, Mathematics and Actuarial Sciences  
-**Department**: Department of Pure and Applied Mathematics
+**Institution**: Jaramogi Oginga Odinga University of Science and Technology (JAOCST)  
+**School**: School of Sciences and Technology  
+**Department**: Computer Science and Information Technology
 
 ---
 

@@ -52,7 +52,7 @@ test_users = [
         'first_name': 'Admin',
         'last_name': 'User',
         'role': 'ADMIN',
-        'admission_number': 'ADMIN001'
+        'admission_number': 'ADMIN0001'
     },
 ]
 
@@ -79,13 +79,24 @@ for user_data in test_users:
                 Student.objects.get_or_create(
                     user=user,
                     defaults={
-                        'admission_number': user_data['admission_number'],
-                        'department': 'Pure and Applied Mathematics',
+                        'project_title': f"Research Project by {user_data['first_name']}",
+                        'preferred_supervisor': 'Dr. Willy Kangojo (Coordinator)',
                     }
                 )
             
             print(f"✅ Created {user_data['role']}: {user_data['email']}")
         else:
+            # If exists but doesn't have a student profile and is student role, create it
+            if user_data['role'] == 'STUDENT' and not hasattr(user, 'student_profile'):
+                try:
+                    Student.objects.create(
+                        user=user,
+                        project_title=f"Research Project by {user_data['first_name']}",
+                        preferred_supervisor='Dr. Willy Kangojo (Coordinator)',
+                    )
+                    print(f"✅ Added student profile: {user_data['email']}")
+                except:
+                    pass
             print(f"⏭️  Already exists: {user_data['email']}")
             
     except Exception as e:

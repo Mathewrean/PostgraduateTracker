@@ -24,8 +24,14 @@ export const useUIStore = create((set) => ({
   sidebarOpen: true,
   notifications: [],
   unreadCount: 0,
+  isDark: localStorage.getItem('theme') === 'dark',
   
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
   setNotifications: (notifications) => set({ notifications }),
   setUnreadCount: (count) => set({ unreadCount: count }),
+  toggleTheme: () => set((state) => {
+    const newTheme = !state.isDark
+    localStorage.setItem('theme', newTheme ? 'dark' : 'light')
+    return { isDark: newTheme }
+  }),
 }))

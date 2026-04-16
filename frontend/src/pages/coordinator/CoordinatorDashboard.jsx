@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { Layout } from '../../components/Layout'
 import { reportService } from '../../services'
+import { useUIStore } from '../../context/store'
 
 export const CoordinatorDashboard = () => {
+  const isDark = useUIStore((state) => state.isDark)
   const [reports, setReports] = useState({})
   const [loading, setLoading] = useState(true)
+
+  const cardBg = isDark ? 'bg-gray-800' : 'bg-white'
+  const borderColor = isDark ? 'border-gray-700' : 'border-gray-200'
+  const textColor = isDark ? 'text-gray-300' : 'text-gray-600'
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -32,31 +38,35 @@ export const CoordinatorDashboard = () => {
     fetchReports()
   }, [])
 
-  if (loading) return <div>Loading...</div>
+  if (loading) return (
+    <Layout>
+      <div className="flex items-center justify-center h-full">
+        <p>Loading...</p>
+      </div>
+    </Layout>
+  )
 
   return (
     <Layout>
-      <div className="space-y-8">
-        <h1 className="text-3xl font-bold text-gray-800">Coordinator Dashboard</h1>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Coordinator Dashboard</h1>
+          <p className={textColor}>Overview of all postgraduate submissions</p>
+        </div>
 
-        {/* Student Progress Overview */}
+        {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="card">
-            <p className="text-gray-600 text-sm">Total Students</p>
-            <p className="text-3xl font-bold text-blue-600">{reports.progress?.total_students}</p>
-          </div>
-          <div className="card">
-            <p className="text-gray-600 text-sm">Concept Stage</p>
-            <p className="text-3xl font-bold text-yellow-600">{reports.progress?.stages?.CONCEPT}</p>
-          </div>
-          <div className="card">
-            <p className="text-gray-600 text-sm">Proposal Stage</p>
-            <p className="text-3xl font-bold text-orange-600">{reports.progress?.stages?.PROPOSAL}</p>
-          </div>
-          <div className="card">
-            <p className="text-gray-600 text-sm">Completed</p>
-            <p className="text-3xl font-bold text-green-600">{reports.progress?.stages?.COMPLETED}</p>
-          </div>
+          {[
+            { label: 'Total Students', value: reports.progress?.total_students || 0, color: 'blue' },
+            { label: 'Concept Stage', value: reports.progress?.stages?.CONCEPT || 0, color: 'yellow' },
+            { label: 'Proposal Stage', value: reports.progress?.stages?.PROPOSAL || 0, color: 'orange' },
+            { label: 'Completed', value: reports.progress?.stages?.COMPLETED || 0, color: 'green' },
+          ].map((stat, idx) => (
+            <div key={idx} className={`${cardBg} p-6 rounded-lg border ${borderColor}`}>
+              <p className={textColor}>{stat.label}</p>
+              <p className={`text-3xl font-bold mt-2 text-${stat.color}-600`}>{stat.value}</p>
+            </div>
+          ))}
         </div>
 
         {/* Complaint Statistics */}
