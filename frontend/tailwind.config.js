@@ -2,10 +2,15 @@
 export default {
   content: [
     "./index.html",
-    "./src/**/*.{js,jsx}",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        'display': ['"Playfair Display"', 'serif'],
+        'sans': ['Inter', 'ui-sans-serif', 'system-ui'],
+      },
+    },
   },
   plugins: [],
 }
