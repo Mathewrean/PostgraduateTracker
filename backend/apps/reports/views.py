@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.db.models import Count, Q, Avg, F, ExpressionWrapper
+from django.db.models import Count, Q, Avg, F, ExpressionWrapper, DurationField
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
@@ -60,10 +60,17 @@ class ReportViewSet(viewsets.ViewSet):
         supervisors = Student.objects.values('assigned_supervisor').annotate(
             student_count=Count('id')
         ).filter(assigned_supervisor__isnull=False)
+        supervisor_ids = [item['assigned_supervisor'] for item in supervisors]
+        users_by_id = {
+            user.id: user
+            for user in User.objects.filter(id__in=supervisor_ids).only('id', 'email')
+        }
 
         data = []
         for sup in supervisors:
-            sup_user = User.objects.get(id=sup['assigned_supervisor'])
+            sup_user = users_by_id.get(sup['assigned_supervisor'])
+            if not sup_user:
+                continue
             student_count = sup['student_count']
             approved_count = Stage.objects.filter(
                 approved_by=sup_user,
@@ -104,17 +111,16 @@ class ReportViewSet(viewsets.ViewSet):
         resolved = Complaint.objects.filter(status='RESOLVED').count()
         overdue = Complaint.objects.filter(is_overdue=True).count()
 
-        # Average response time
-        from django.db.models import Avg, F, ExpressionWrapper
-        from django.db.models.functions import Extract
-        
+        # Average response time (database-agnostic; works on SQLite/PostgreSQL)
         avg_response_time = Complaint.objects.filter(
             responded_at__isnull=False
         ).aggregate(
-            avg_time=Avg(ExpressionWrapper(
-                Extract('responded_at', 'epoch') - Extract('submitted_at', 'epoch'),
-                output_field=models.IntegerField()
-            ))
+            avg_time=Avg(
+                ExpressionWrapper(
+                    F('responded_at') - F('submitted_at'),
+                    output_field=DurationField(),
+                )
+            )
         )['avg_time']
 
         return Response({
@@ -123,7 +129,9 @@ class ReportViewSet(viewsets.ViewSet):
             'under_review': under_review,
             'resolved': resolved,
             'overdue': overdue,
-            'avg_response_time_hours': avg_response_time / 3600 if avg_response_time else 0,
+            'avg_response_time_hours': (
+                avg_response_time.total_seconds() / 3600 if avg_response_time else 0
+            ),
         })
 
     @action(detail=False, methods=['get'])

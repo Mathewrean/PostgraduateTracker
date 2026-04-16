@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from django.utils import timezone
 from django.conf import settings
 from .models import Document, Minutes
@@ -18,19 +19,21 @@ class DocumentViewSet(viewsets.ModelViewSet):
         if user.role == 'STUDENT':
             try:
                 student = Student.objects.get(user=user)
-                return Document.objects.filter(student=student)
+                return Document.objects.filter(student=student).select_related('student__user', 'stage', 'verified_by')
             except Student.DoesNotExist:
                 return Document.objects.none()
         elif user.role in ['COORDINATOR', 'ADMIN']:
-            return Document.objects.all()
+            return Document.objects.all().select_related('student__user', 'stage', 'verified_by')
         elif user.role == 'SUPERVISOR':
-            return Document.objects.filter(stage__student__assigned_supervisor=user)
+            return Document.objects.filter(stage__student__assigned_supervisor=user).select_related('student__user', 'stage', 'verified_by')
         return Document.objects.none()
 
     def create(self, request, *args, **kwargs):
         file = request.FILES.get('file')
         stage_id = request.data.get('stage')
         doc_type = request.data.get('doc_type')
+        if not file or not stage_id or not doc_type:
+            return Response({'error': 'stage, doc_type and file are required'}, status=status.HTTP_400_BAD_REQUEST)
 
         # File size validation
         if file and file.size > settings.MAX_FILE_SIZE:
@@ -41,6 +44,10 @@ class DocumentViewSet(viewsets.ModelViewSet):
         try:
             stage = Stage.objects.get(id=stage_id)
             student = stage.student
+            if request.user.role == 'STUDENT' and student.user != request.user:
+                raise PermissionDenied('You can only upload documents for your own stage.')
+            if request.user.role == 'SUPERVISOR' and student.assigned_supervisor != request.user:
+                raise PermissionDenied('You can only upload documents for assigned students.')
             
             # Check if document already exists
             existing = Document.objects.filter(stage=stage, doc_type=doc_type).first()
@@ -63,6 +70,8 @@ class DocumentViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def verify(self, request, pk=None):
         document = self.get_object()
+        if request.user.role not in ['COORDINATOR', 'ADMIN'] and document.student.assigned_supervisor != request.user:
+            raise PermissionDenied('Only the assigned supervisor, coordinator, or admin can verify this document.')
         
         document.is_verified = True
         document.verified_by = request.user

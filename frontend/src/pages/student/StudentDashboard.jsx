@@ -109,63 +109,19 @@ export const StudentDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <p className={textColor}>Start Date</p>
-                <p className="font-semibold">{stage.start_date ? new Date(stage.start_date).toLocaleDateString() : 'N/A'}</p>
+                <p className="font-semibold">{stage.started_at ? new Date(stage.started_at).toLocaleDateString() : 'N/A'}</p>
               </div>
               <div>
                 <p className={textColor}>End Date</p>
-                <p className="font-semibold">{stage.end_date ? new Date(stage.end_date).toLocaleDateString() : 'N/A'}</p>
+                <p className="font-semibold">{stage.completed_at ? new Date(stage.completed_at).toLocaleDateString() : 'N/A'}</p>
               </div>
               <div>
                 <p className={textColor}>Status</p>
-                <p className="font-semibold">{stage.is_approved ? 'Approved' : 'Pending'}</p>
+                <p className="font-semibold">{stage.status || 'N/A'}</p>
               </div>
             </div>
           </div>
         )}
-      </div>
-    </Layout>
-  )
-}
-              <p className="text-xl font-semibold text-green-600">{stage?.status}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Calendar & Activities */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <Calendar activities={activities} />
-          </div>
-          
-          <div className="card">
-            <h3 className="text-xl font-bold mb-4">Activities</h3>
-            <div className="space-y-3">
-              {activities.map((activity) => (
-                <div key={activity.id} className="p-3 bg-gray-50 rounded-lg">
-                  <p className="font-medium text-gray-800">{activity.title}</p>
-                  <p className="text-sm text-gray-600">{activity.planned_date}</p>
-                  <span className={`text-xs font-semibold ${activity.status === 'COMPLETED' ? 'text-green-600' : 'text-yellow-600'}`}>
-                    {activity.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Documents */}
-        <div className="card">
-          <h3 className="text-xl font-bold mb-4">Documents</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {documents.map((doc) => (
-              <div key={doc.id} className="p-4 border rounded-lg">
-                <p className="font-medium text-gray-800">{doc.doc_type}</p>
-                <p className="text-sm text-gray-600">Uploaded: {doc.uploaded_at}</p>
-                <p className="text-sm text-gray-600">Size: {(doc.file_size / 1024 / 1024).toFixed(2)} MB</p>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </Layout>
   )

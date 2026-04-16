@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from django.utils import timezone
 from .models import Activity
 from .serializers import ActivitySerializer
@@ -17,13 +18,13 @@ class ActivityViewSet(viewsets.ModelViewSet):
         if user.role == 'STUDENT':
             try:
                 student = Student.objects.get(user=user)
-                return Activity.objects.filter(stage__student=student)
+                return Activity.objects.filter(stage__student=student).select_related('stage__student__user', 'created_by', 'marked_done_by')
             except Student.DoesNotExist:
                 return Activity.objects.none()
         elif user.role in ['COORDINATOR', 'ADMIN']:
-            return Activity.objects.all()
+            return Activity.objects.all().select_related('stage__student__user', 'created_by', 'marked_done_by')
         elif user.role == 'SUPERVISOR':
-            return Activity.objects.filter(stage__student__assigned_supervisor=user)
+            return Activity.objects.filter(stage__student__assigned_supervisor=user).select_related('stage__student__user', 'created_by', 'marked_done_by')
         return Activity.objects.none()
 
     def create(self, request, *args, **kwargs):
@@ -34,6 +35,10 @@ class ActivityViewSet(viewsets.ModelViewSet):
             stage = Stage.objects.get(id=stage_id)
             if stage.status != 'ACTIVE':
                 return Response({'error': 'Can only add activities to active stages'}, status=status.HTTP_400_BAD_REQUEST)
+            if request.user.role == 'STUDENT' and stage.student.user != request.user:
+                raise PermissionDenied('You can only add activities to your own stage.')
+            if request.user.role == 'SUPERVISOR' and stage.student.assigned_supervisor != request.user:
+                raise PermissionDenied('You can only add activities to students assigned to you.')
             
             activity = Activity.objects.create(
                 stage=stage,
@@ -50,6 +55,10 @@ class ActivityViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def mark_done(self, request, pk=None):
         activity = self.get_object()
+        if request.user.role == 'SUPERVISOR' and activity.stage.student.assigned_supervisor != request.user:
+            raise PermissionDenied('Only the assigned supervisor can mark this activity complete.')
+        if request.user.role == 'STUDENT' and activity.stage.student.user != request.user:
+            raise PermissionDenied('You can only mark your own activities complete.')
         
         if activity.status == 'COMPLETED':
             return Response({'error': 'Activity already completed'}, status=status.HTTP_400_BAD_REQUEST)
@@ -65,16 +74,9 @@ class ActivityViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def calendar(self, request):
         """Get activities for calendar view"""
-        try:
-            student = Student.objects.get(user=request.user)
-            stage_id = request.query_params.get('stage_id')
-            
-            if stage_id:
-                activities = Activity.objects.filter(stage_id=stage_id)
-            else:
-                activities = Activity.objects.filter(stage__student=student)
-            
-            serializer = self.get_serializer(activities, many=True)
-            return Response(serializer.data)
-        except Student.DoesNotExist:
-            return Response({'error': 'Student profile not found'}, status=status.HTTP_404_NOT_FOUND)
+        activities = self.get_queryset()
+        stage_id = request.query_params.get('stage_id')
+        if stage_id:
+            activities = activities.filter(stage_id=stage_id)
+        serializer = self.get_serializer(activities, many=True)
+        return Response(serializer.data)

@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from .models import Student, Supervisor
 from .serializers import StudentSerializer, StudentProfileSerializer, SupervisorSerializer
 from apps.users.permissions import IsStudent, IsSupervisor, IsCoordinator, IsAdmin
@@ -13,12 +14,32 @@ class StudentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.role == 'STUDENT':
-            return Student.objects.filter(user=user)
+            return Student.objects.filter(user=user).select_related('user', 'assigned_supervisor')
         elif user.role in ['COORDINATOR', 'ADMIN']:
-            return Student.objects.all()
+            return Student.objects.all().select_related('user', 'assigned_supervisor')
         elif user.role == 'SUPERVISOR':
-            return Student.objects.filter(assigned_supervisor=user)
+            return Student.objects.filter(assigned_supervisor=user).select_related('user', 'assigned_supervisor')
         return Student.objects.none()
+
+    def create(self, request, *args, **kwargs):
+        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+            raise PermissionDenied('Only coordinators and admins can create student records.')
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+            raise PermissionDenied('Use the profile endpoint for student updates.')
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+            raise PermissionDenied('Use the profile endpoint for student updates.')
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+            raise PermissionDenied('Only coordinators and admins can delete student records.')
+        return super().destroy(request, *args, **kwargs)
 
     @action(detail=False, methods=['get', 'post'])
     def profile(self, request):
@@ -56,3 +77,23 @@ class SupervisorViewSet(viewsets.ModelViewSet):
         elif user.role == 'SUPERVISOR':
             return Supervisor.objects.filter(user=user)
         return Supervisor.objects.none()
+
+    def create(self, request, *args, **kwargs):
+        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+            raise PermissionDenied('Only coordinators and admins can create supervisor records.')
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+            raise PermissionDenied('Only coordinators and admins can update supervisor records.')
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+            raise PermissionDenied('Only coordinators and admins can update supervisor records.')
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+            raise PermissionDenied('Only coordinators and admins can delete supervisor records.')
+        return super().destroy(request, *args, **kwargs)

@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from django.utils import timezone
 from .models import Stage
 from .serializers import StageSerializer
@@ -16,14 +17,34 @@ class StageViewSet(viewsets.ModelViewSet):
         if user.role == 'STUDENT':
             try:
                 student = Student.objects.get(user=user)
-                return Stage.objects.filter(student=student)
+                return Stage.objects.filter(student=student).select_related('student__user', 'approved_by', 'student__assigned_supervisor')
             except Student.DoesNotExist:
                 return Stage.objects.none()
         elif user.role in ['COORDINATOR', 'ADMIN']:
-            return Stage.objects.all()
+            return Stage.objects.all().select_related('student__user', 'approved_by', 'student__assigned_supervisor')
         elif user.role == 'SUPERVISOR':
-            return Stage.objects.filter(student__assigned_supervisor=user)
+            return Stage.objects.filter(student__assigned_supervisor=user).select_related('student__user', 'approved_by', 'student__assigned_supervisor')
         return Stage.objects.none()
+
+    def create(self, request, *args, **kwargs):
+        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+            raise PermissionDenied('Only coordinators and admins can create stages.')
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+            raise PermissionDenied('Only coordinators and admins can update stages.')
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+            raise PermissionDenied('Only coordinators and admins can update stages.')
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+            raise PermissionDenied('Only coordinators and admins can delete stages.')
+        return super().destroy(request, *args, **kwargs)
 
     @action(detail=False, methods=['get'])
     def current_stage(self, request):

@@ -57,14 +57,14 @@ export const CoordinatorDashboard = () => {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[
-            { label: 'Total Students', value: reports.progress?.total_students || 0, color: 'blue' },
-            { label: 'Concept Stage', value: reports.progress?.stages?.CONCEPT || 0, color: 'yellow' },
-            { label: 'Proposal Stage', value: reports.progress?.stages?.PROPOSAL || 0, color: 'orange' },
-            { label: 'Completed', value: reports.progress?.stages?.COMPLETED || 0, color: 'green' },
+            { label: 'Total Students', value: reports.progress?.total_students || 0, valueClass: 'text-blue-600' },
+            { label: 'Concept Stage', value: reports.progress?.stages?.CONCEPT || 0, valueClass: 'text-yellow-600' },
+            { label: 'Proposal Stage', value: reports.progress?.stages?.PROPOSAL || 0, valueClass: 'text-orange-600' },
+            { label: 'Completed', value: reports.progress?.stages?.COMPLETED || 0, valueClass: 'text-green-600' },
           ].map((stat, idx) => (
             <div key={idx} className={`${cardBg} p-6 rounded-lg border ${borderColor}`}>
               <p className={textColor}>{stat.label}</p>
-              <p className={`text-3xl font-bold mt-2 text-${stat.color}-600`}>{stat.value}</p>
+              <p className={`text-3xl font-bold mt-2 ${stat.valueClass}`}>{stat.value}</p>
             </div>
           ))}
         </div>

@@ -148,17 +148,3 @@ export const Header = ({ onToggleSidebar }) => {
     </header>
   )
 }
-          <button className="relative">
-            <span className="text-gray-600">🔔</span>
-            {unreadCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {unreadCount}
-              </span>
-            )}
-          </button>
-          <button className="text-gray-600">👤</button>
-        </div>
-      </div>
-    </header>
-  )
-}

@@ -116,28 +116,3 @@ export const LoginPage = () => {
     </div>
   )
 }
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="input-field"
-              placeholder="Enter your password"
-              required
-            />
-          </div>
-          
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full"
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
-        
-        <p className="text-center text-gray-600 mt-6 text-sm">
-          Don't have an account? <a href="/register" className="text-blue-600 hover:underline">Register</a>
-        </p>
-      </div>
-    </div>
-  )
-}

@@ -123,14 +123,14 @@ export const LandingPage = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               {[
-                { role: 'Student', email: 'student@test.com', pass: 'student123', color: 'blue' },
-                { role: 'Student', email: 'student@example.com', pass: 'password123', color: 'blue' },
-                { role: 'Supervisor', email: 'supervisor@test.com', pass: 'supervisor123', color: 'green' },
-                { role: 'Coordinator', email: 'coordinator@test.com', pass: 'coordinator123', color: 'purple' },
-                { role: 'Admin', email: 'admin@pst.com', pass: 'admin123', color: 'red' },
+                { role: 'Student', email: 'student@test.com', pass: 'student123', badgeClass: 'bg-blue-100 text-blue-800' },
+                { role: 'Student', email: 'student@example.com', pass: 'password123', badgeClass: 'bg-blue-100 text-blue-800' },
+                { role: 'Supervisor', email: 'supervisor@test.com', pass: 'supervisor123', badgeClass: 'bg-green-100 text-green-800' },
+                { role: 'Coordinator', email: 'coordinator@test.com', pass: 'coordinator123', badgeClass: 'bg-purple-100 text-purple-800' },
+                { role: 'Admin', email: 'admin@pst.com', pass: 'admin123', badgeClass: 'bg-red-100 text-red-800' },
               ].map((account, idx) => (
                 <div key={idx} className={`${cardBg} p-4 rounded-lg border ${borderColor}`}>
-                  <p className={`text-sm font-semibold bg-${account.color}-100 text-${account.color}-800 w-fit px-2 py-1 rounded mb-2`}>{account.role}</p>
+                  <p className={`text-sm font-semibold ${account.badgeClass} w-fit px-2 py-1 rounded mb-2`}>{account.role}</p>
                   <p className={`text-sm font-mono ${secondaryText} break-all mb-1`}>{account.email}</p>
                   <p className={`text-sm font-mono ${secondaryText}`}>{account.pass}</p>
                 </div>
@@ -161,67 +161,6 @@ export const LandingPage = () => {
           <p className={`text-sm ${secondaryText} mt-2`}>Jaramogi Oginga Odinga University of Science and Technology</p>
         </div>
       </footer>
-    </div>
-  )
-}
-
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 hover:bg-white/20 transition">
-            <h3 className="text-2xl mb-2">📊 Track Progress</h3>
-            <p className="text-sm opacity-90">Monitor your research submission stages in real-time</p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 hover:bg-white/20 transition">
-            <h3 className="text-2xl mb-2">📤 Upload Documents</h3>
-            <p className="text-sm opacity-90">Submit PDF, Word, PowerPoint presentations easily</p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 hover:bg-white/20 transition">
-            <h3 className="text-2xl mb-2">📅 Plan Activities</h3>
-            <p className="text-sm opacity-90">Organize and track research activities with calendar</p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 hover:bg-white/20 transition">
-            <h3 className="text-2xl mb-2">📈 Get Insights</h3>
-            <p className="text-sm opacity-90">Access detailed reports and analytics for your work</p>
-          </div>
-        </div>
-
-        {/* CTA Button */}
-        <button
-          onClick={() => navigate('/login')}
-          className="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-100 transition transform hover:scale-105 mb-8"
-        >
-          Login to Get Started
-        </button>
-
-        {/* Test Accounts Info */}
-        <div className="bg-black/20 backdrop-blur-md rounded-lg p-6 text-left max-w-2xl mx-auto">
-          <h3 className="text-xl font-bold mb-4 text-center">🧪 Demo Accounts</h3>
-          <div className="space-y-3 text-sm">
-            <div>
-              <p className="font-semibold">👤 Student</p>
-              <p className="opacity-90">Email: <code>student@test.com</code> | Password: <code>student123</code></p>
-            </div>
-            <div>
-              <p className="font-semibold">👨‍🏫 Supervisor</p>
-              <p className="opacity-90">Email: <code>supervisor@test.com</code> | Password: <code>supervisor123</code></p>
-            </div>
-            <div>
-              <p className="font-semibold">📋 Coordinator</p>
-              <p className="opacity-90">Email: <code>coordinator@test.com</code> | Password: <code>coordinator123</code></p>
-            </div>
-            <div>
-              <p className="font-semibold">🔑 Admin</p>
-              <p className="opacity-90">Email: <code>admin@pst.com</code> | Password: <code>admin123</code></p>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-12 text-sm opacity-75">
-          <p>Version 1.0 • Assessment & Postgraduate Studies Unit</p>
-          <p className="mt-2">For support, contact: pst-support@university.ac.ke</p>
-        </div>
-      </div>
     </div>
   )
 }

@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from django.utils import timezone
 from .models import Complaint
 from .serializers import ComplaintSerializer
@@ -25,6 +26,8 @@ class ComplaintViewSet(viewsets.ModelViewSet):
 
     def create(self, request):
         """Submit a new complaint"""
+        if request.user.role != 'STUDENT':
+            raise PermissionDenied('Only students can submit complaints.')
         try:
             student = Student.objects.get(user=request.user)
             content = request.data.get('content')
@@ -55,6 +58,8 @@ class ComplaintViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def respond(self, request, pk=None):
         """Respond to a complaint"""
+        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+            raise PermissionDenied('Only coordinators and admins can respond to complaints.')
         complaint = self.get_object()
         
         if complaint.status == 'RESOLVED':

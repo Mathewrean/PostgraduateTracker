@@ -2,6 +2,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 from .models import AuditLog
 from .serializers import AuditLogSerializer
 
@@ -19,9 +20,11 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, methods=['get'])
     def user_logs(self, request):
+        if request.user.role not in ['ADMIN', 'COORDINATOR']:
+            raise PermissionDenied('Only coordinators and admins can access audit logs.')
         user_id = request.query_params.get('user_id')
         if user_id:
-            logs = AuditLog.objects.filter(user_id=user_id)
+            logs = self.get_queryset().filter(user_id=user_id)
             serializer = self.get_serializer(logs, many=True)
             return Response(serializer.data)
         return Response({'error': 'user_id is required'}, status=400)

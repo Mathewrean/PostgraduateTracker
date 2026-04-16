@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User
@@ -16,6 +17,42 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, RoleBasedPermission]
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.role in ['ADMIN', 'COORDINATOR']:
+            return User.objects.all()
+        if user.role == 'SUPERVISOR':
+            return User.objects.filter(id=user.id) | User.objects.filter(student_profile__assigned_supervisor=user)
+        return User.objects.filter(id=user.id)
+
+    def _require_admin_or_coordinator(self):
+        if self.request.user.role not in ['ADMIN', 'COORDINATOR']:
+            raise PermissionDenied('You are not allowed to manage users.')
+
+    def list(self, request, *args, **kwargs):
+        self._require_admin_or_coordinator()
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        self._require_admin_or_coordinator()
+        return super().retrieve(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        self._require_admin_or_coordinator()
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        self._require_admin_or_coordinator()
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        self._require_admin_or_coordinator()
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        self._require_admin_or_coordinator()
+        return super().destroy(request, *args, **kwargs)
+
     def get_serializer_class(self):
         if self.action == 'register':
             return UserRegistrationSerializer
@@ -28,7 +65,12 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def register(self, request):
         """Register a new user"""
-        serializer = self.get_serializer(data=request.data)
+        data = request.data.copy()
+        requested_role = data.get('role', 'STUDENT')
+        if requested_role in ['SUPERVISOR', 'COORDINATOR', 'ADMIN']:
+            data['role'] = 'STUDENT'
+
+        serializer = self.get_serializer(data=data)
         if serializer.is_valid():
             user = serializer.save()
             refresh = RefreshToken.for_user(user)
@@ -88,5 +130,5 @@ class UserViewSet(viewsets.ModelViewSet):
             token = RefreshToken(refresh_token)
             token.blacklist()
             return Response({'success': True}, status=status.HTTP_205_RESET_CONTENT)
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            return Response({'error': 'Invalid or expired refresh token'}, status=status.HTTP_400_BAD_REQUEST)
