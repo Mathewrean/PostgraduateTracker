@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { authService } from '../../services'
 import { useAuthStore, useUIStore } from '../../context/store'
 import toast from 'react-hot-toast'
@@ -84,8 +84,18 @@ export const LoginPage = () => {
           </div>
         </form>
 
+        {/* Registration Link */}
+        <div className={`mt-6 p-4 rounded-lg ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-blue-50 border-blue-200'} border text-center`}>
+          <p className={isDark ? 'text-gray-300' : 'text-gray-700'}>
+            Don't have an account?{' '}
+            <Link to="/register" className="text-blue-600 hover:text-blue-700 font-semibold">
+              Create one here
+            </Link>
+          </p>
+        </div>
+
         {/* Test Credentials */}
-        <div className={`mt-8 p-4 rounded-lg ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} border`}>
+        <div className={`mt-6 p-4 rounded-lg ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} border`}>
           <p className="font-semibold mb-3 text-sm">Demo Credentials:</p>
           <div className="space-y-2 text-sm">
             <div>

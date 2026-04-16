@@ -49,12 +49,20 @@ export const LandingPage = () => {
                 <p className={`text-lg ${secondaryText} mb-8`}>
                   Manage your academic journey with confidence. Track submissions, communicate with supervisors, and stay on top of every milestone.
                 </p>
-                <button
-                  onClick={() => navigate('/login')}
-                  className={`${accentColor} text-white px-8 py-3 rounded-lg text-lg font-semibold transition-colors duration-200`}
-                >
-                  Get Started
-                </button>
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => navigate('/login')}
+                    className={`${accentColor} text-white px-8 py-3 rounded-lg text-lg font-semibold transition-colors duration-200`}
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    onClick={() => navigate('/register')}
+                    className={`border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3 rounded-lg text-lg font-semibold transition-colors duration-200`}
+                  >
+                    Register
+                  </button>
+                </div>
               </div>
               <div className={`p-8 rounded-lg ${cardBg} border ${borderColor}`}>
                 <div className="space-y-4">

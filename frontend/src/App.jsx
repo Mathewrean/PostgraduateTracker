@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './context/store'
 import { LoginPage } from './pages/auth/LoginPage'
+import { RegisterPage } from './pages/auth/RegisterPage'
 import { StudentDashboard } from './pages/student/StudentDashboardNew'
 import { CoordinatorDashboard } from './pages/coordinator/CoordinatorDashboard'
 import { LandingPage } from './pages/LandingPage'
@@ -33,6 +34,7 @@ export const App = () => {
         {/* Public Routes */}
         <Route path="/" element={token ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
         <Route path="/login" element={token ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+        <Route path="/register" element={token ? <Navigate to="/dashboard" replace /> : <RegisterPage />} />
         
         {/* Protected Routes */}
         <Route
