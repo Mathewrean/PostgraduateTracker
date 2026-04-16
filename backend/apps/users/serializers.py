@@ -8,8 +8,8 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['date_joined', 'last_login']
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
-    password_confirm = serializers.CharField(write_only=True, min_length=8)
+    password = serializers.CharField(write_only=True, min_length=8, help_text="Minimum 8 characters")
+    password_confirm = serializers.CharField(write_only=True, min_length=8, help_text="Must match password")
 
     class Meta:
         model = User

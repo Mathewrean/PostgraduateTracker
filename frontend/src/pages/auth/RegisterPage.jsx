@@ -149,11 +149,15 @@ export const RegisterPage = () => {
                 type="tel"
                 name="phone"
                 value={formData.phone}
-                onChange={handleChange}
+                onChange={(e) => setFormData(prev => ({...prev, phone: e.target.value.slice(0, 20)}))}
                 className={`w-full px-4 py-2 rounded-lg border ${inputBg} focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors text-sm`}
-                placeholder="+254 7XX XXX XXX"
+                placeholder="+254 701 618 286 (max 20 chars)"
+                maxLength="20"
                 required
               />
+              <p className={`text-xs mt-1 ${formData.phone.length > 15 ? 'text-orange-500' : 'text-gray-500'}`}>
+                {formData.phone.length}/20 characters
+              </p>
             </div>
 
             {/* First Name */}
@@ -193,8 +197,9 @@ export const RegisterPage = () => {
                 className={`w-full px-4 py-2 rounded-lg border ${inputBg} focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors text-sm`}
                 placeholder="Enter secure password"
                 required
-              />
-            </div>
+              />              <p className={`text-xs mt-1 ${formData.password.length < 8 ? 'text-red-500' : 'text-green-500'}`}>
+                {formData.password.length < 8 ? `${8 - formData.password.length} more characters needed` : '✅ Password length OK'}
+              </p>            </div>
 
             {/* Confirm Password */}
             <div>
@@ -208,6 +213,9 @@ export const RegisterPage = () => {
                 placeholder="Confirm password"
                 required
               />
+              <p className={`text-xs mt-1 ${formData.password !== formData.password_confirm && formData.password_confirm ? 'text-red-500' : 'text-green-500'}`}>
+                {formData.password !== formData.password_confirm && formData.password_confirm ? '❌ Passwords do not match' : '✅ Passwords match'}
+              </p>
             </div>
 
             {/* Submit Button */}

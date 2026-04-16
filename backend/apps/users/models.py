@@ -34,7 +34,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(unique=True)
     admission_number = models.CharField(max_length=50, unique=True)
-    phone = models.CharField(max_length=15)
+    phone = models.CharField(max_length=20)  # Allow formatted numbers like +254 701 618 286
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='STUDENT')

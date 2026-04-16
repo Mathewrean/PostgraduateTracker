@@ -1,10 +1,9 @@
 # Postgraduate Submissions Tracker (PST)
 
-A comprehensive full-stack application for managing postgraduate research submissions, tracking stages, managing documents, and coordinating between students, supervisors, and coordinators.
+**Full-stack web application for managing postgraduate student submissions and academic progress tracking.**
 
-**Institution**: Jaramogi Oginga Odinga University of Science and Technology (JAOCST)
-**School**: School of Sciences and Technology
-**Department**: Department of Computer Science and Information Technology
+📍 **Institution**: Jaramogi Oginga Odinga University of Science and Technology (JAOCST)  
+✅ **Status**: Production Ready | **Version**: 2.1.0 | **Updated**: April 16, 2026
 
 ---
 
