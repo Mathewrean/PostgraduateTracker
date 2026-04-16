@@ -1,150 +1,71 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useCurrentUser } from '../hooks/useAuth'
-import { useUIStore, useAuthStore } from '../context/store'
+import { HeaderComponent } from './Header'
+import { NavbarComponent } from './Navbar'
+import { useUIStore } from '../context/store'
 
-export const Layout = ({ children }) => {
+/**
+ * Modern Layout Component
+ * Features:
+ * - Responsive design with Tailwind CSS Grid
+ * - Dark/Light mode support
+ * - Dynamic Header with project title and stage
+ * - Navigation bar with smooth transitions
+ * - Content area
+ * - Footer
+ */
+export const Layout = ({ children, title = 'PST Application', stage = null, user = null }) => {
   const isDark = useUIStore((state) => state.isDark)
-  const sidebarOpen = useUIStore((state) => state.sidebarOpen)
-  const toggleSidebar = useUIStore((state) => state.toggleSidebar)
-
-  const bgColor = isDark ? 'bg-gray-900' : 'bg-white'
-  const borderColor = isDark ? 'border-gray-800' : 'border-gray-200'
-  const textColor = isDark ? 'text-white' : 'text-gray-900'
-  const sidebarBg = isDark ? 'bg-gray-800' : 'bg-white'
 
   return (
-    <div className={`flex h-screen ${bgColor} ${textColor}`}>
-      <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
-      <main className="flex-1 overflow-auto flex flex-col">
-        <Header onToggleSidebar={toggleSidebar} />
-        <div className="flex-1 overflow-auto p-6">
+    <div className={`min-h-screen transition-colors duration-300 ${
+      isDark ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'
+    }`}>
+      {/* Header */}
+      <HeaderComponent title={title} stage={stage} user={user} />
+
+      {/* Navigation */}
+      <NavbarComponent />
+
+      {/* Main Content Area */}
+      <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} min-h-[calc(100vh-140px)]`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {children}
         </div>
       </main>
-    </div>
-  )
-}
 
-export const Sidebar = ({ isOpen }) => {
-  const { user } = useCurrentUser()
-  const isDark = useUIStore((state) => state.isDark)
-  const navigate = useNavigate()
-  const logout = useAuthStore((state) => state.logout)
+      {/* Footer */}
+      <footer className={`border-t ${
+        isDark ? 'border-gray-800 bg-gray-900' : 'border-gray-200 bg-white'
+      } mt-12`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <h4 className={`font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>About PST</h4>
+              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                Postgraduate Submissions Tracker for Jaramogi Oginga Odinga University of Science and Technology
+              </p>
+            </div>
+            <div>
+              <h4 className={`font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>Quick Links</h4>
+              <ul className={`text-sm space-y-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                <li><a href="#" className="hover:text-blue-600">Dashboard</a></li>
+                <li><a href="#" className="hover:text-blue-600">Documents</a></li>
+                <li><a href="#" className="hover:text-blue-600">Reports</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className={`font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>Support</h4>
+              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                For assistance, contact the admin team or visit the documentation.
+              </p>
+            </div>
+          </div>
 
-  const bgColor = isDark ? 'bg-gray-800' : 'bg-white'
-  const borderColor = isDark ? 'border-gray-700' : 'border-gray-200'
-  const hoverBg = isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-50'
-
-  if (!user) return null
-  
-  const menuItems = {
-    STUDENT: [
-      { label: 'Dashboard', path: '/dashboard' },
-      { label: 'My Profile', path: '/profile' },
-      { label: 'Current Stage', path: '/stage' },
-      { label: 'Activities', path: '/activities' },
-      { label: 'Documents', path: '/documents' },
-    ],
-    SUPERVISOR: [
-      { label: 'Dashboard', path: '/dashboard' },
-      { label: 'My Students', path: '/students' },
-      { label: 'Approvals', path: '/approvals' },
-    ],
-    COORDINATOR: [
-      { label: 'Dashboard', path: '/dashboard' },
-      { label: 'All Students', path: '/students' },
-      { label: 'Reports', path: '/reports' },
-      { label: 'Complaints', path: '/complaints' },
-    ],
-    ADMIN: [
-      { label: 'Dashboard', path: '/dashboard' },
-      { label: 'Users', path: '/users' },
-      { label: 'System Settings', path: '/settings' },
-    ],
-  }
-  
-  const items = menuItems[user.role] || []
-  
-  return (
-    <aside className={`${isOpen ? 'w-64' : 'w-0'} ${bgColor} border-r ${borderColor} transition-all duration-300 overflow-hidden`}>
-      <div className="p-6 border-b border-gray-700">
-        <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mb-2">
-          <span className="text-white font-bold">PST</span>
-        </div>
-        <h2 className="text-lg font-bold">PST</h2>
-        <p className="text-sm opacity-75">{user.role}</p>
-      </div>
-      
-      <nav className="p-4 space-y-1">
-        {items.map((item) => (
-          <button
-            key={item.path}
-            onClick={() => navigate(item.path)}
-            className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${hoverBg}`}
-          >
-            {item.label}
-          </button>
-        ))}
-      </nav>
-
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
-        <button
-          onClick={() => {
-            logout()
-            navigate('/login')
-          }}
-          className={`w-full px-4 py-2 rounded-lg transition-colors ${hoverBg}`}
-        >
-          Logout
-        </button>
-      </div>
-    </aside>
-  )
-}
-
-export const Header = ({ onToggleSidebar }) => {
-  const { user } = useCurrentUser()
-  const unreadCount = useUIStore((state) => state.unreadCount)
-  const isDark = useUIStore((state) => state.isDark)
-  const toggleTheme = useUIStore((state) => state.toggleTheme)
-  const borderColor = isDark ? 'border-gray-800' : 'border-gray-200'
-
-  return (
-    <header className={`border-b ${borderColor} transition-colors duration-200`}>
-      <div className="flex items-center justify-between px-6 py-4">
-        <button
-          onClick={onToggleSidebar}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
-        >
-          Menu
-        </button>
-
-        <h2 className="flex-1 text-lg font-semibold px-4">Dashboard</h2>
-
-        <div className="flex items-center gap-4">
-          <button className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
-            Notifications
-            {unreadCount > 0 && (
-              <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {unreadCount}
-              </span>
-            )}
-          </button>
-
-          <button
-            onClick={toggleTheme}
-            className={`p-2 rounded-lg transition-colors ${isDark ? 'bg-gray-800 text-yellow-400' : 'bg-gray-100 text-gray-700'}`}
-          >
-            {isDark ? 'Light' : 'Dark'}
-          </button>
-
-          <div className="text-sm">
-            <p className="font-semibold">{user?.first_name || 'User'}</p>
-            <p className="text-xs opacity-75">{user?.role}</p>
+          <div className={`border-t pt-8 text-center ${isDark ? 'border-gray-800 text-gray-500' : 'border-gray-200 text-gray-600'} text-sm`}>
+            <p>&copy; 2026 PST - Jaramogi Oginga Odinga University of Science and Technology. All rights reserved.</p>
           </div>
         </div>
-      </div>
-    </header>
+      </footer>
+    </div>
   )
 }
