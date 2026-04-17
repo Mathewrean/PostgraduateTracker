@@ -114,4 +114,10 @@ export const reportService = {
   
   getStageTransitionReport: () =>
     api.get('/reports/stage_transition_report/'),
+  
+  export: (type, params = {}) =>
+    api.get('/reports/export/', {
+      params: { type, ...params },
+      responseType: 'blob'
+    }),
 }

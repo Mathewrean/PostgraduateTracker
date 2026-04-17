@@ -197,6 +197,22 @@ CELERY_TIMEZONE = 'UTC'
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
+# Celery Beat Schedule
+CELERY_BEAT_SCHEDULE = {
+    'check-overdue-complaints': {
+        'task': 'pst_project.tasks.check_complaint_escalation',
+        'schedule': 86400.0,  # Run daily (every 24 hours)
+    },
+    'check-thesis-timer': {
+        'task': 'pst_project.tasks.check_thesis_submission_timer',
+        'schedule': 86400.0,  # Run daily (every 24 hours)
+    },
+    'send-activity-reminders': {
+        'task': 'pst_project.tasks.send_activity_reminders',
+        'schedule': 86400.0,  # Run daily (every 24 hours)
+    },
+}
+
 # Email Configuration
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
@@ -219,6 +235,9 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_SECURITY_POLICY = {
         'default-src': ("'self'",),

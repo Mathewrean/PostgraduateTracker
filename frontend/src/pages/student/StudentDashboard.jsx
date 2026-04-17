@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Layout } from '../../components/Layout'
-import { stageService, activityService, documentService } from '../../services'
+import { stageService, activityService, documentService, studentService } from '../../services'
 import { useCurrentUser } from '../../hooks/useAuth'
 import { useUIStore } from '../../context/store'
 
@@ -10,6 +10,7 @@ export const StudentDashboard = () => {
   const [stage, setStage] = useState(null)
   const [activities, setActivities] = useState([])
   const [documents, setDocuments] = useState([])
+  const [studentProfile, setStudentProfile] = useState(null)
   const [loading, setLoading] = useState(true)
 
   const cardBg = isDark ? 'bg-gray-800' : 'bg-white'
@@ -19,15 +20,17 @@ export const StudentDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [stageRes, activitiesRes, docsRes] = await Promise.all([
+        const [stageRes, activitiesRes, docsRes, profileRes] = await Promise.all([
           stageService.getCurrentStage(),
           activityService.getAll(),
-          documentService.getAll()
+          documentService.getAll(),
+          studentService.getProfile()
         ])
         
         setStage(stageRes.data)
         setActivities(activitiesRes.data)
         setDocuments(docsRes.data)
+        setStudentProfile(profileRes.data)
       } catch (error) {
         console.error('Failed to fetch data:', error)
       } finally {
@@ -51,8 +54,17 @@ export const StudentDashboard = () => {
       <div className="space-y-6">
         {/* Welcome Section */}
         <div>
-          <h1 className="text-3xl font-bold mb-2">Welcome, {user?.first_name}</h1>
-          <p className={textColor}>Manage your postgraduate submissions and progress</p>
+          {studentProfile?.project_title ? (
+            <>
+              <h1 className="text-3xl font-bold mb-2">{studentProfile.project_title}</h1>
+              <p className={textColor}>Student: {user?.first_name} {user?.last_name}</p>
+            </>
+          ) : (
+            <>
+              <h1 className="text-3xl font-bold mb-2">Welcome, {user?.first_name}</h1>
+              <p className={textColor}>Manage your postgraduate submissions and progress</p>
+            </>
+          )}
         </div>
 
         {/* Key Stats Grid */}

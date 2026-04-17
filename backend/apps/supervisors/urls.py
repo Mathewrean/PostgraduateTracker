@@ -1,4 +1,10 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import SupervisorViewSet
 
-urlpatterns = []
+router = DefaultRouter()
+router.register(r'', SupervisorViewSet, basename='supervisor')
 
+urlpatterns = [
+    path('', include(router.urls)),
+]

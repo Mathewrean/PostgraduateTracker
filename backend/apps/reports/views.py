@@ -186,3 +186,52 @@ class ReportViewSet(viewsets.ViewSet):
         }
 
         return Response(report)
+
+    @action(detail=False, methods=['get'])
+    def export(self, request):
+        """Export report data as CSV or PDF"""
+        import csv
+        import io
+        from django.http import HttpResponse
+        
+        report_type = request.query_params.get('type', 'student_progress')
+        format_type = request.query_params.get('format', 'csv')
+        
+        # Get report data based on type
+        if report_type == 'student_progress':
+            data = self.student_progress(request).data
+        elif report_type == 'supervisor_report':
+            data = self.supervisor_report(request).data
+        elif report_type == 'complaint_report':
+            data = self.complaint_report(request).data
+        else:
+            return Response({'error': 'Invalid report type'}, status=400)
+        
+        if format_type == 'csv':
+            # Generate CSV
+            output = io.StringIO()
+            writer = csv.writer(output)
+            
+            # Write headers
+            if isinstance(data, list) and data:
+                writer.writerow(data[0].keys())
+                for row in data:
+                    writer.writerow(row.values())
+            elif isinstance(data, dict):
+                writer.writerow(['Key', 'Value'])
+                for key, value in data.items():
+                    writer.writerow([key, value])
+            
+            response = HttpResponse(output.getvalue(), content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename="{report_type}_report.csv"'
+            return response
+        
+        elif format_type == 'pdf':
+            # For PDF, return a simple text response (in production, use a PDF library)
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{report_type}_report.pdf"'
+            # In production, generate actual PDF content here
+            response.write(f"Report: {report_type}\n\n{data}".encode())
+            return response
+        
+        return Response({'error': 'Invalid format'}, status=400)
