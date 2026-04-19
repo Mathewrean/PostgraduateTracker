@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Student, Supervisor
+from .models import Student
 from apps.users.serializers import UserSerializer
 
 class StudentSerializer(serializers.ModelSerializer):
@@ -21,11 +21,3 @@ class StudentProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = ['project_title', 'preferred_supervisor', 'preferred_supervisor_other', 'profile_complete']
-
-class SupervisorSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-
-    class Meta:
-        model = Supervisor
-        fields = ['id', 'user', 'department', 'specialisation', 'created_at']
-        read_only_fields = ['created_at']

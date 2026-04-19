@@ -3,8 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
-from .models import Student, Supervisor
-from .serializers import StudentSerializer, StudentProfileSerializer, SupervisorSerializer
+from .models import Student
+from .serializers import StudentSerializer, StudentProfileSerializer
 from apps.users.permissions import IsStudent, IsSupervisor, IsCoordinator, IsAdmin
 
 class StudentViewSet(viewsets.ModelViewSet):
@@ -64,36 +64,3 @@ class StudentViewSet(viewsets.ModelViewSet):
                 profile.save()
                 return Response(StudentSerializer(profile).data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class SupervisorViewSet(viewsets.ModelViewSet):
-    queryset = Supervisor.objects.all()
-    serializer_class = SupervisorSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.role in ['COORDINATOR', 'ADMIN']:
-            return Supervisor.objects.all()
-        elif user.role == 'SUPERVISOR':
-            return Supervisor.objects.filter(user=user)
-        return Supervisor.objects.none()
-
-    def create(self, request, *args, **kwargs):
-        if request.user.role not in ['COORDINATOR', 'ADMIN']:
-            raise PermissionDenied('Only coordinators and admins can create supervisor records.')
-        return super().create(request, *args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        if request.user.role not in ['COORDINATOR', 'ADMIN']:
-            raise PermissionDenied('Only coordinators and admins can update supervisor records.')
-        return super().update(request, *args, **kwargs)
-
-    def partial_update(self, request, *args, **kwargs):
-        if request.user.role not in ['COORDINATOR', 'ADMIN']:
-            raise PermissionDenied('Only coordinators and admins can update supervisor records.')
-        return super().partial_update(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        if request.user.role not in ['COORDINATOR', 'ADMIN']:
-            raise PermissionDenied('Only coordinators and admins can delete supervisor records.')
-        return super().destroy(request, *args, **kwargs)
