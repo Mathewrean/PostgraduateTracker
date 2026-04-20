@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Notification, Meeting
+from .models import Notification
+from apps.activities.models import Meeting
 
 class NotificationSerializer(serializers.ModelSerializer):
     recipient_email = serializers.SerializerMethodField()
@@ -23,7 +24,7 @@ class MeetingSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at']
 
     def get_student_email(self, obj):
-        return obj.student.email
+        return obj.student.user.email
 
     def get_supervisor_email(self, obj):
         return obj.supervisor.email

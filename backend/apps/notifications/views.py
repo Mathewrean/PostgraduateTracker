@@ -4,9 +4,11 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from django.db.models import Q
-from .models import Notification, Meeting
+from .models import Notification
 from .serializers import NotificationSerializer, MeetingSerializer
 from apps.users.models import User
+from apps.activities.models import Meeting
+from apps.students.models import Student
 
 class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = NotificationSerializer
@@ -38,7 +40,7 @@ class MeetingViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Meeting.objects.filter(Q(student=user) | Q(supervisor=user))
+        return Meeting.objects.filter(Q(student__user=user) | Q(supervisor=user)).select_related('student__user', 'supervisor')
 
     def create(self, request, *args, **kwargs):
         supervisor_id = request.data.get('supervisor')
@@ -51,9 +53,13 @@ class MeetingViewSet(viewsets.ModelViewSet):
             supervisor = User.objects.get(id=supervisor_id, role='SUPERVISOR')
         except User.DoesNotExist:
             return Response({'error': 'Selected supervisor is invalid'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            student = Student.objects.get(user=request.user)
+        except Student.DoesNotExist:
+            return Response({'error': 'Student profile not found'}, status=status.HTTP_404_NOT_FOUND)
 
         meeting = Meeting.objects.create(
-            student=request.user,
+            student=student,
             supervisor=supervisor,
             scheduled_date=scheduled_date,
             notes=request.data.get('notes', '')

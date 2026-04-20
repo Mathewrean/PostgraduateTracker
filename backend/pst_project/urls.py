@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
 
 class APIRootView(APIView):
     def get(self, request):
@@ -27,6 +28,8 @@ class APIRootView(APIView):
         })
 
 class HealthCheckView(APIView):
+    permission_classes = [AllowAny]
+
     def get(self, request):
         return Response({'status': 'ok'})
 

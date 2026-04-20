@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
-from apps.students.models import Supervisor
+from .models import Supervisor
 from .serializers import SupervisorSerializer
 from apps.students.models import Student
 from apps.stages.models import Stage
