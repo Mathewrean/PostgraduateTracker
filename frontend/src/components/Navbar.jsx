@@ -16,10 +16,10 @@ export const NavbarComponent = () => {
   }
 
   const navItems = [
-    { label: 'Dashboard', path: '/dashboard', icon: '📊' },
-    { label: 'Documents', action: 'documents' , icon: '📄' },
-    { label: 'Activities', action: 'activities', icon: '✅' },
-    { label: 'Reports', action: 'reports', icon: '📈' },
+    { label: 'Dashboard', path: '/dashboard' },
+    { label: 'Documents', action: 'documents' },
+    { label: 'Activities', action: 'activities' },
+    { label: 'Reports', action: 'reports' },
   ]
 
   return (
@@ -42,7 +42,6 @@ export const NavbarComponent = () => {
                     : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
                 }`}
               >
-                <span>{item.icon}</span>
                 {item.label}
               </button>
             ))}
@@ -57,7 +56,7 @@ export const NavbarComponent = () => {
                 isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'
               }`}
             >
-              {menuOpen ? '✕' : '☰'}
+              {menuOpen ? 'Close' : 'Menu'}
             </button>
 
             {/* Logout Button */}
@@ -94,7 +93,6 @@ export const NavbarComponent = () => {
                     : 'hover:bg-gray-100 text-gray-700'
                 }`}
               >
-                <span className="mr-2">{item.icon}</span>
                 {item.label}
               </button>
             ))}

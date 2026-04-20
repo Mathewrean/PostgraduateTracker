@@ -50,7 +50,7 @@ export const Button = ({
       `}
       {...props}
     >
-      {loading ? '⏳ Loading...' : children}
+      {loading ? 'Loading...' : children}
     </button>
   )
 }

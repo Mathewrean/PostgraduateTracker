@@ -1,9 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+html {
+  font-family: 'Merriweather', Georgia, serif;
+}
+
 body {
   @apply bg-gray-50;
+  font-family: 'Merriweather', Georgia, serif;
 }
 
 .btn-primary {

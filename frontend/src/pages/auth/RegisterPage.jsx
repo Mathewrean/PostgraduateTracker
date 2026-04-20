@@ -101,7 +101,7 @@ export const RegisterPage = () => {
             onClick={toggleTheme}
             className={`p-2 rounded-lg ${isDark ? 'bg-gray-800 text-yellow-400' : 'bg-gray-100 text-gray-700'} transition-colors duration-200`}
           >
-            {isDark ? '☀️' : '🌙'}
+            {isDark ? 'Light' : 'Dark'}
           </button>
         </div>
 
@@ -197,9 +197,11 @@ export const RegisterPage = () => {
                 className={`w-full px-4 py-2 rounded-lg border ${inputBg} focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors text-sm`}
                 placeholder="Enter secure password"
                 required
-              />              <p className={`text-xs mt-1 ${formData.password.length < 8 ? 'text-red-500' : 'text-green-500'}`}>
-                {formData.password.length < 8 ? `${8 - formData.password.length} more characters needed` : '✅ Password length OK'}
-              </p>            </div>
+              />
+              <p className={`text-xs mt-1 ${formData.password.length < 8 ? 'text-red-500' : 'text-green-500'}`}>
+                {formData.password.length < 8 ? `${8 - formData.password.length} more characters needed` : 'Password length requirement met'}
+              </p>
+            </div>
 
             {/* Confirm Password */}
             <div>
@@ -214,7 +216,7 @@ export const RegisterPage = () => {
                 required
               />
               <p className={`text-xs mt-1 ${formData.password !== formData.password_confirm && formData.password_confirm ? 'text-red-500' : 'text-green-500'}`}>
-                {formData.password !== formData.password_confirm && formData.password_confirm ? '❌ Passwords do not match' : '✅ Passwords match'}
+                {formData.password !== formData.password_confirm && formData.password_confirm ? 'Passwords do not match' : 'Passwords match'}
               </p>
             </div>
 
@@ -224,7 +226,7 @@ export const RegisterPage = () => {
               disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-2.5 rounded-lg font-semibold transition-colors duration-200 mt-6"
             >
-              {loading ? '⏳ Creating Account...' : 'Create Account'}
+              {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </div>
 

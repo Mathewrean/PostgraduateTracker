@@ -2,12 +2,14 @@
 
 **Full-stack web application for managing postgraduate student submissions and academic progress tracking.**
 
-📍 **Institution**: Jaramogi Oginga Odinga University of Science and Technology (JAOCST)  
-✅ **Status**: Production Ready | **Version**: 2.1.0 | **Updated**: April 16, 2026
+**Institution**: Jaramogi Oginga Odinga University of Science and Technology (JAOCST)  
+**Status**: Active development | **Version**: 2.1.0 | **Updated**: April 20, 2026
 
 ---
 
 ## Table of Contents
+- [Quick Start](#quick-start)
+- [Demo Accounts](#demo-accounts)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Prerequisites](#prerequisites)
@@ -19,51 +21,95 @@
 
 ---
 
+## Quick Start
+
+From the project root, use two terminals.
+
+### 1. Start the backend
+```bash
+source .venv/bin/activate
+DEBUG=true .venv/bin/python backend/manage.py runserver 0.0.0.0:8000
+```
+
+### 2. Start the frontend
+```bash
+cd frontend
+npm run dev -- --host 0.0.0.0
+```
+
+### 3. Open the app
+- Frontend: `http://localhost:5173/`
+- Backend API: `http://localhost:8000/`
+- Health check: `http://localhost:8000/api/health/`
+- Django admin: `http://localhost:8000/admin/`
+
+### 4. Switch between users
+- Log out from the current session.
+- Sign in again with one of the demo accounts below.
+- The app currently supports student, supervisor, coordinator, and admin demo access.
+
+---
+
+## Demo Accounts
+
+These accounts are available in the local development database:
+
+- Student: `student@test.com` / `student123`
+- Student 2: `student@example.com` / `password123`
+- Supervisor: `supervisor@test.com` / `supervisor123`
+- Coordinator: `coordinator@test.com` / `coordinator123`
+- Admin: `admin@pst.com` / `admin123`
+
+Notes:
+- If you want to test another role, sign out first and then log in with that role's credentials.
+- Supervisor tooling is present in the backend, but the dedicated supervisor dashboard UI is still a placeholder.
+
+---
+
 ## Features
 
-✅ **User Management**
+**User Management**
 - Multi-role support (Student, Supervisor, Coordinator, Admin)
 - JWT-based authentication with SimpleJWT
 - Role-Based Access Control (RBAC)
 
-✅ **Stage Workflow**
+**Stage Workflow**
 - 3-stage progression: CONCEPT → PROPOSAL → THESIS
 - Mandatory document requirements per stage
 - Supervisor approval gating
 - 3-month timer per stage (with 90-day lock for thesis)
 
-✅ **Document Management**
+**Document Management**
 - Upload/verify documents (PDF, DOC, DOCX, PPTX)
 - File size validation (<10MB)
 - Document linking to stages
 - Minutes of presentation tracking
 
-✅ **Activities & Calendar**
-- Activity planning with calendar integration
+**Activities**
+- Activity planning and scheduling
 - Planned → Completed state tracking
 - Sequential completion enforcement
-- Integrated with FullCalendar
 
-✅ **Complaint System**
+**Complaint System**
 - Anonymous complaint submission
 - Automatic routing to coordinators/admins
 - 14-day escalation policy
 - Response tracking
 
-✅ **Notifications**
+**Notifications**
 - Dual-channel (Email + In-app)
 - Activity reminders
 - Document notifications
 - Stage transition alerts
 
-✅ **Reporting & Analytics**
+**Reporting & Analytics**
 - Student progress by stage
 - Supervisor activity metrics
 - Complaint statistics
 - Audit trail logging
 - Login history tracking
 
-✅ **Audit & Compliance**
+**Audit & Compliance**
 - Comprehensive audit logging
 - IP address tracking
 - Timestamp recording
@@ -85,7 +131,6 @@
 - Tailwind CSS for styling
 - Zustand for state management
 - Axios for HTTP requests
-- FullCalendar for calendar views
 
 **DevOps:**
 - Docker & Docker Compose
@@ -175,12 +220,6 @@ cd ../frontend
 npm install
 ```
 
-#### Configure API Endpoint
-Update `frontend/src/services/api.js`:
-```javascript
-const API_BASE_URL = 'http://localhost:8000/api';
-```
-
 ---
 
 ## Running the Application
@@ -189,23 +228,28 @@ const API_BASE_URL = 'http://localhost:8000/api';
 
 #### Start Backend Server
 ```bash
-cd backend
-python manage.py runserver
-# Server runs at http://localhost:8000
+source .venv/bin/activate
+DEBUG=true .venv/bin/python backend/manage.py runserver 0.0.0.0:8000
 ```
 
 #### Start Frontend Development Server
 In another terminal:
 ```bash
 cd frontend
-npm run dev
-# Frontend runs at http://localhost:5173
+npm run dev -- --host 0.0.0.0
 ```
 
 #### Access Application
 - **Frontend**: http://localhost:5173
 - **Admin Panel**: http://localhost:8000/admin
-- **API Documentation**: http://localhost:8000/api/schema/ (if drf-spectacular installed)
+- **Health Check**: http://localhost:8000/api/health/
+
+#### Monitor Live Logs
+If you are running the app through detached `tmux` sessions:
+```bash
+tmux capture-pane -pt pst_backend
+tmux capture-pane -pt pst_frontend
+```
 
 ### Option 2: Production with Docker
 

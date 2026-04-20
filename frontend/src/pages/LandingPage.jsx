@@ -33,7 +33,7 @@ export const LandingPage = () => {
             onClick={toggleTheme}
             className={`p-2 rounded-lg ${isDark ? 'bg-gray-800 text-yellow-400' : 'bg-gray-100 text-gray-700'} transition-colors duration-200`}
           >
-            {isDark ? '☀' : '🌙'}
+            {isDark ? 'Light' : 'Dark'}
           </button>
         </div>
       </header>
