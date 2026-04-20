@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { activityService } from '../services'
 
+const asList = (payload) => {
+  if (Array.isArray(payload)) {
+    return payload
+  }
+
+  if (Array.isArray(payload?.results)) {
+    return payload.results
+  }
+
+  return []
+}
+
 export const ActivityCalendar = ({ stageId, isDark = false }) => {
   const [activities, setActivities] = useState([])
   const [loading, setLoading] = useState(true)
@@ -12,9 +24,8 @@ export const ActivityCalendar = ({ stageId, isDark = false }) => {
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        const params = stageId ? { stage_id: stageId } : {}
-        const response = await activityService.getCalendar()
-        setActivities(response.data)
+        const response = await activityService.getCalendar(stageId)
+        setActivities(asList(response.data))
       } catch (error) {
         console.error('Failed to fetch activities:', error)
       } finally {

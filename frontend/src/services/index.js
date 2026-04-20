@@ -47,7 +47,9 @@ export const activityService = {
     api.get('/activities/'),
   
   getCalendar: (stageId) =>
-    api.get('/activities/calendar/', { params: { stage_id: stageId } }),
+    api.get('/activities/calendar/', {
+      params: stageId ? { stage_id: stageId } : {}
+    }),
   
   markDone: (activityId) =>
     api.post(`/activities/${activityId}/mark_done/`),

@@ -4,9 +4,14 @@ import { authService } from '../services'
 
 export const useCurrentUser = () => {
   const storedUser = useAuthStore((state) => state.user)
+  const token = useAuthStore((state) => state.token)
   const setStoredUser = useAuthStore((state) => state.setUser)
   const [user, setUser] = useState(storedUser)
   const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    setUser(storedUser)
+  }, [storedUser])
   
   useEffect(() => {
     const fetchUser = async () => {
@@ -22,12 +27,12 @@ export const useCurrentUser = () => {
       }
     }
     
-    if (useAuthStore.getState().token) {
+    if (token) {
       fetchUser()
     } else {
       setLoading(false)
     }
-  }, [setStoredUser, storedUser])
+  }, [setStoredUser, token])
   
   return { user, loading }
 }

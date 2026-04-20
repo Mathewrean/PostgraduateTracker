@@ -4,6 +4,18 @@ import { stageService, activityService, documentService, studentService } from '
 import { useCurrentUser } from '../../hooks/useAuth'
 import { useUIStore } from '../../context/store'
 
+const asList = (payload) => {
+  if (Array.isArray(payload)) {
+    return payload
+  }
+
+  if (Array.isArray(payload?.results)) {
+    return payload.results
+  }
+
+  return []
+}
+
 export const StudentDashboard = () => {
   const { user } = useCurrentUser()
   const isDark = useUIStore((state) => state.isDark)
@@ -28,8 +40,8 @@ export const StudentDashboard = () => {
         ])
         
         setStage(stageRes.data)
-        setActivities(activitiesRes.data)
-        setDocuments(docsRes.data)
+        setActivities(asList(activitiesRes.data))
+        setDocuments(asList(docsRes.data))
         setStudentProfile(profileRes.data)
       } catch (error) {
         console.error('Failed to fetch data:', error)
