@@ -45,8 +45,7 @@ class Document(models.Model):
         super().save(*args, **kwargs)
 
 class Minutes(models.Model):
-    # Changed from OneToOneField to ForeignKey with unique=True to match checklist requirement
-    stage = models.ForeignKey(Stage, on_delete=models.CASCADE, related_name='minutes', unique=True)
+    stage = models.OneToOneField(Stage, on_delete=models.CASCADE, related_name='minutes')
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='minutes')
     file = models.FileField(upload_to='minutes/%Y/%m/%d/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
