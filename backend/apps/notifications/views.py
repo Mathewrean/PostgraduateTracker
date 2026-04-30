@@ -45,7 +45,7 @@ class MeetingViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         supervisor_id = request.data.get('supervisor')
         scheduled_date = request.data.get('scheduled_date')
-        if request.user.role != 'STUDENT':
+        if request.user.role != 'student':
             raise PermissionDenied('Only students can request meetings.')
         if not supervisor_id or not scheduled_date:
             return Response({'error': 'supervisor and scheduled_date are required'}, status=status.HTTP_400_BAD_REQUEST)

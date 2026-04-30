@@ -41,7 +41,7 @@ class ComplaintViewSet(viewsets.ModelViewSet):
             from apps.notifications.models import Notification
             from apps.users.models import User
             
-            recipients = User.objects.filter(role__in=['COORDINATOR', 'ADMIN'])
+            recipients = User.objects.filter(role__in=['coordinator', 'dean', 'cod', 'director_bps'])
             for recipient in recipients:
                 Notification.objects.create(
                     recipient=recipient,

@@ -26,7 +26,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return User.objects.filter(id=user.id)
 
     def _require_admin_or_coordinator(self):
-        if self.request.user.role not in ['dean', 'coordinator']:
+        if self.request.user.role not in ['coordinator', 'dean', 'cod', 'director_bps']:
             raise PermissionDenied('You are not allowed to manage users.')
 
     def list(self, request, *args, **kwargs):

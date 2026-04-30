@@ -13,15 +13,15 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        # Only admins and coordinators can view audit logs
-        if user.role in ['dean', 'cod', 'director_bps']:
+        # Only Director BPS can view audit logs
+        if user.role == 'director_bps':
             return AuditLog.objects.all()
         return AuditLog.objects.none()
 
     @action(detail=False, methods=['get'])
     def user_logs(self, request):
-        if request.user.role not in ['dean', 'cod', 'director_bps', 'coordinator']:
-            raise PermissionDenied('Only coordinators and admins can access audit logs.')
+        if request.user.role != 'director_bps':
+            raise PermissionDenied('Only Director BPS can access audit logs.')
         user_id = request.query_params.get('user_id')
         if user_id:
             logs = self.get_queryset().filter(user_id=user_id)

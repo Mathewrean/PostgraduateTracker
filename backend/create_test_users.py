@@ -19,7 +19,7 @@ test_users = [
         'password': 'student123',
         'first_name': 'John',
         'last_name': 'Doe',
-        'role': 'STUDENT',
+        'role': 'student',
         'admission_number': 'STU001'
     },
     {
@@ -27,7 +27,7 @@ test_users = [
         'password': 'password123',
         'first_name': 'Jane',
         'last_name': 'Smith',
-        'role': 'STUDENT',
+        'role': 'student',
         'admission_number': 'STU002'
     },
     {
@@ -35,7 +35,7 @@ test_users = [
         'password': 'supervisor123',
         'first_name': 'Prof',
         'last_name': 'Supervisor',
-        'role': 'SUPERVISOR',
+        'role': 'supervisor',
         'admission_number': 'SUP001'
     },
     {
@@ -43,16 +43,32 @@ test_users = [
         'password': 'coordinator123',
         'first_name': 'Dr',
         'last_name': 'Coordinator',
-        'role': 'COORDINATOR',
+        'role': 'coordinator',
         'admission_number': 'COORD001'
     },
     {
-        'email': 'admin@pst.com',
-        'password': 'admin123',
-        'first_name': 'Admin',
+        'email': 'dean@test.com',
+        'password': 'dean123',
+        'first_name': 'Dean',
+        'last_name': 'Faculty',
+        'role': 'dean',
+        'admission_number': 'DEAN001'
+    },
+    {
+        'email': 'cod@test.com',
+        'password': 'cod123',
+        'first_name': 'COD',
         'last_name': 'User',
-        'role': 'ADMIN',
-        'admission_number': 'ADMIN0001'
+        'role': 'cod',
+        'admission_number': 'COD001'
+    },
+    {
+        'email': 'director@test.com',
+        'password': 'director123',
+        'first_name': 'Director',
+        'last_name': 'BPS',
+        'role': 'director_bps',
+        'admission_number': 'DIR001'
     },
 ]
 
@@ -75,7 +91,7 @@ for user_data in test_users:
             user.save()
             
             # If student, create student profile
-            if user_data['role'] == 'STUDENT':
+            if user_data['role'] == 'student':
                 Student.objects.get_or_create(
                     user=user,
                     defaults={
@@ -87,7 +103,7 @@ for user_data in test_users:
             print(f"✅ Created {user_data['role']}: {user_data['email']}")
         else:
             # If exists but doesn't have a student profile and is student role, create it
-            if user_data['role'] == 'STUDENT' and not hasattr(user, 'student_profile'):
+            if user_data['role'] == 'student' and not hasattr(user, 'student_profile'):
                 try:
                     Student.objects.create(
                         user=user,

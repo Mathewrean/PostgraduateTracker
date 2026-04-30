@@ -82,7 +82,7 @@ def check_complaint_escalation():
         
         # Send escalation notification
         from apps.users.models import User
-        escalation_recipients = User.objects.filter(role__in=['COORDINATOR', 'ADMIN'])
+        escalation_recipients = User.objects.filter(role__in=['coordinator', 'dean', 'cod', 'director_bps'])
         for recipient in escalation_recipients:
             Notification.objects.create(
                 recipient=recipient,

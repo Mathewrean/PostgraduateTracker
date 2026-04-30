@@ -39,7 +39,7 @@ class AuthenticationTests(APITestCase):
             'phone': '+254712345678',
             'first_name': 'Test',
             'last_name': 'User',
-            'role': 'STUDENT',
+            'role': 'student',,
             'password': 'testpass123',
             'password_confirm': 'testpass123'
         }
@@ -106,7 +106,7 @@ class StudentTests(APITestCase):
             admission_number='STU001',
             phone='+254712345681',
             password='testpass123',
-            role='STUDENT'
+            role='student'
         )
         self.student = Student.objects.create(user=self.student_user)
         self.client.force_authenticate(user=self.student_user)
@@ -143,14 +143,14 @@ class StageWorkflowTests(APITestCase):
             admission_number='STG001',
             phone='+254712345682',
             password='testpass123',
-            role='STUDENT'
+            role='student'
         )
         self.supervisor_user = User.objects.create_user(
             email='supervisor@test.com',
             admission_number='SUP001',
             phone='+254712345683',
             password='testpass123',
-            role='SUPERVISOR'
+            role='supervisor'
         )
         self.student = Student.objects.create(
             user=self.student_user,
@@ -188,7 +188,7 @@ class ActivityTests(APITestCase):
             admission_number='ACT001',
             phone='+254712345684',
             password='testpass123',
-            role='STUDENT'
+            role='student'
         )
         self.student = Student.objects.create(user=self.student_user)
         self.stage = Stage.objects.create(
@@ -253,7 +253,7 @@ class DocumentTests(APITestCase):
             admission_number='DOC001',
             phone='+254712345685',
             password='testpass123',
-            role='STUDENT'
+            role='student'
         )
         self.student = Student.objects.create(user=self.student_user)
         self.stage = Stage.objects.create(
@@ -279,7 +279,7 @@ class ComplaintTests(APITestCase):
             admission_number='CMP001',
             phone='+254712345686',
             password='testpass123',
-            role='STUDENT'
+            role='student'
         )
         self.student = Student.objects.create(user=self.student_user)
         self.coordinator_user = User.objects.create_user(
@@ -287,7 +287,7 @@ class ComplaintTests(APITestCase):
             admission_number='CRD001',
             phone='+254712345687',
             password='testpass123',
-            role='COORDINATOR'
+            role='coordinator'
         )
         self.client.force_authenticate(user=self.student_user)
     
@@ -358,14 +358,14 @@ class RBACTests(APITestCase):
             admission_number='RBAC01',
             phone='+254712345689',
             password='testpass123',
-            role='STUDENT'
+            role='student'
         )
         self.coordinator = User.objects.create_user(
             email='rbac_coordinator@test.com',
             admission_number='RBAC02',
             phone='+254712345690',
             password='testpass123',
-            role='COORDINATOR'
+            role='coordinator'
         )
     
     def test_student_cannot_access_reports(self):
@@ -393,7 +393,7 @@ class ReportTests(APITestCase):
             admission_number='REP001',
             phone='+254712345691',
             password='testpass123',
-            role='COORDINATOR'
+            role='coordinator'
         )
         self.client.force_authenticate(user=self.coordinator)
     

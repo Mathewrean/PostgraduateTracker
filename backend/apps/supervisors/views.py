@@ -27,7 +27,7 @@ class SupervisorViewSet(viewsets.ViewSet):
         """Get all students assigned to this supervisor"""
         if request.user.role == 'SUPERVISOR':
             students = Student.objects.filter(assigned_supervisor=request.user).select_related('user', 'assigned_supervisor')
-        elif request.user.role in ['COORDINATOR', 'ADMIN']:
+        elif request.user.role in ['coordinator', 'dean', 'cod', 'director_bps']:
             students = Student.objects.all().select_related('user', 'assigned_supervisor')
         else:
             raise PermissionDenied('Only supervisors, coordinators, and admins can view students.')
@@ -45,7 +45,7 @@ class SupervisorViewSet(viewsets.ViewSet):
                 student__assigned_supervisor=request.user,
                 status='ACTIVE'
             ).select_related('student__user', 'approved_by')
-        elif request.user.role in ['COORDINATOR', 'ADMIN']:
+        elif request.user.role in ['coordinator', 'dean', 'cod', 'director_bps']:
             stages = Stage.objects.filter(status='ACTIVE').select_related('student__user', 'approved_by')
         else:
             raise PermissionDenied('Only supervisors, coordinators, and admins can view approvals.')
