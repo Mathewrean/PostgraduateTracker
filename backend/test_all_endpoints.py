@@ -20,7 +20,8 @@ from rest_framework import status
 from django.urls import reverse
 
 from apps.users.models import User
-from apps.students.models import Student, Supervisor
+from apps.students.models import Student
+from apps.supervisors.models import Supervisor
 from apps.stages.models import Stage
 from apps.activities.models import Activity
 from apps.documents.models import Document, Minutes
