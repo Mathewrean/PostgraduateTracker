@@ -40,6 +40,19 @@ class DocumentViewSet(viewsets.ModelViewSet):
             return Response({
                 'error': f'File size exceeds maximum allowed size of {settings.MAX_FILE_SIZE / (1024*1024):.1f}MB'
             }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # MIME type validation
+        allowed_mime_types = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+        ]
+        if file.content_type not in allowed_mime_types:
+            return Response({
+                'error': 'Invalid file type. Only PDF, DOC, DOCX, PPTX allowed.'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             stage = Stage.objects.get(id=stage_id)
@@ -65,6 +78,16 @@ class DocumentViewSet(viewsets.ModelViewSet):
             # If this is a THESIS stage, check if all required docs are now uploaded
             if stage.stage_type == 'THESIS':
                 stage.check_thesis_submission_complete()
+            
+            # Send notification to assigned supervisor
+            if stage.student.assigned_supervisor:
+                from apps.notifications.models import Notification
+                Notification.objects.create(
+                    recipient=stage.student.assigned_supervisor,
+                    message=f'New document uploaded by {student.user.email}: {doc_type}',
+                    notification_type='DOCUMENT_UPLOAD',
+                    link=f'/api/documents/documents/{document.id}/'
+                )
             
             serializer = self.get_serializer(document)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -114,6 +137,15 @@ class MinutesViewSet(viewsets.ModelViewSet):
         minutes.approved_by = request.user
         minutes.approved_at = timezone.now()
         minutes.save()
+        
+        # Notify student
+        from apps.notifications.models import Notification
+        Notification.objects.create(
+            recipient=minutes.student.user,
+            message='Your minutes of presentation have been approved',
+            notification_type='MINUTES_APPROVAL',
+            link=f'/api/stages/{minutes.stage.id}/'
+        )
         
         serializer = self.get_serializer(minutes)
         return Response(serializer.data)

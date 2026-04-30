@@ -15,12 +15,37 @@ export const NavbarComponent = () => {
     navigate('/login')
   }
 
-  const navItems = [
-    { label: 'Dashboard', path: '/dashboard' },
-    { label: 'Documents', action: 'documents' },
-    { label: 'Activities', action: 'activities' },
-    { label: 'Reports', action: 'reports' },
-  ]
+  const getUserNavItems = () => {
+    const role = user?.role
+    const base = [{ label: 'Dashboard', path: '/dashboard' }]
+    if (role === 'student') {
+      return base.concat([
+        { label: 'Documents', path: '/documents' },
+        { label: 'Activities', path: '/activities' },
+        { label: 'Notifications', path: '/notifications' },
+        { label: 'Messages', path: '/messages' },
+        { label: 'Profile', path: '/profile' }
+      ])
+    } else if (role === 'supervisor') {
+      return base.concat([
+        { label: 'My Students', path: '/supervisor/students' },
+        { label: 'Pending Approvals', path: '/supervisor/approvals' },
+        { label: 'Notifications', path: '/notifications' }
+      ])
+    } else if (['coordinator', 'dean', 'cod', 'director_bps'].includes(role)) {
+      return base.concat([
+        { label: 'All Students', path: '/coordinator/students' },
+        { label: 'Assign Supervisors', path: '/coordinator/assign' },
+        { label: 'Complaints', path: '/coordinator/complaints' },
+        { label: 'Reports', path: '/coordinator/reports' },
+        { label: 'Notifications', path: '/notifications' },
+        ...(role === 'director_bps' ? [{ label: 'Audit Logs', path: '/admin/audit' }, { label: 'User Activity', path: '/admin/activity' }] : [])
+      ])
+    }
+    return base
+  }
+
+  const navItems = getUserNavItems()
 
   return (
     <nav

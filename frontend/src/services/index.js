@@ -26,6 +26,9 @@ export const studentService = {
   
   getAll: () =>
     api.get('/students/'),
+  
+  update: (id, data) =>
+    api.patch(`/students/${id}/`, data),
 }
 
 export const stageService = {

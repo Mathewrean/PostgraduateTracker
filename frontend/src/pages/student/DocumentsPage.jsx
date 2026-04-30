@@ -1,0 +1,164 @@
+import React, { useState, useEffect } from 'react'
+import { Layout } from '../../components/Layout'
+import { documentService } from '../../services'
+import { useAuthStore } from '../../context/store'
+
+export const DocumentsPage = () => {
+  const user = useAuthStore((state) => state.user)
+  const [documents, setDocuments] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [stageId, setStageId] = useState('')
+  const [docType, setDocType] = useState('')
+  const [message, setMessage] = useState({ type: '', text: '' })
+
+  useEffect(() => {
+    fetchDocuments()
+  }, [])
+
+  const fetchDocuments = async () => {
+    try {
+      const response = await documentService.getAll()
+      const data = Array.isArray(response.data) ? response.data : response.data.results || []
+      setDocuments(data)
+    } catch (error) {
+      console.error('Failed to fetch documents:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleFileChange = (e) => {
+    setSelectedFile(e.target.files[0])
+  }
+
+  const handleUpload = async (e) => {
+    e.preventDefault()
+    if (!selectedFile || !stageId || !docType) {
+      setMessage({ type: 'error', text: 'Please select file, stage, and document type' })
+      return
+    }
+    setUploading(true)
+    setMessage({ type: '', text: '' })
+    try {
+      const formData = new FormData()
+      formData.append('file', selectedFile)
+      formData.append('stage', stageId)
+      formData.append('doc_type', docType)
+      await documentService.upload(formData)
+      setMessage({ type: 'success', text: 'Document uploaded successfully' })
+      setSelectedFile(null)
+      setStageId('')
+      setDocType('')
+      fetchDocuments()
+    } catch (error) {
+      setMessage({ type: 'error', text: error.response?.data?.error || 'Upload failed' })
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  if (loading) return (
+    <Layout title="Documents">
+      <div className="flex justify-center items-center h-64">
+        <p>Loading documents...</p>
+      </div>
+    </Layout>
+  )
+
+  return (
+    <Layout title="Documents">
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">My Documents</h1>
+
+        {message.text && (
+          <div className={`p-4 rounded ${message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            {message.text}
+          </div>
+        )}
+
+        {/* Upload Form */}
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">Upload Document</h2>
+          <form onSubmit={handleUpload} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Stage ID</label>
+              <input
+                type="number"
+                value={stageId}
+                onChange={(e) => setStageId(e.target.value)}
+                required
+                className="w-full border rounded p-2"
+                placeholder="Current stage ID"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Document Type</label>
+              <select
+                value={docType}
+                onChange={(e) => setDocType(e.target.value)}
+                required
+                className="w-full border rounded p-2"
+              >
+                <option value="">Select type...</option>
+                <option value="MINUTES">Minutes of Presentation</option>
+                <option value="TRANSCRIPT">Academic Transcript</option>
+                <option value="FEE_STATEMENT">Fee Statement</option>
+                <option value="PROPOSAL">Proposal Document</option>
+                <option value="THESIS">Thesis Document</option>
+                <option value="INTENT_TO_SUBMIT">Intent to Submit</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">File (PDF, DOC, DOCX, PPTX; max 10MB)</label>
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx,.pptx"
+                onChange={handleFileChange}
+                required
+                className="w-full border rounded p-2"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={uploading}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded disabled:opacity-50"
+            >
+              {uploading ? 'Uploading...' : 'Upload'}
+            </button>
+          </form>
+        </div>
+
+        {/* Documents List */}
+        <div className="grid gap-4">
+          <h2 className="text-2xl font-semibold">Uploaded Documents</h2>
+          {documents.length === 0 ? (
+            <p>No documents uploaded yet.</p>
+          ) : (
+            documents.map((doc) => (
+              <div key={doc.id} className="p-4 bg-white rounded shadow flex justify-between items-center">
+                <div>
+                  <p className="font-medium">{doc.doc_type.replace('_', ' ')}</p>
+                  <p className="text-sm text-gray-500">
+                    Uploaded: {new Date(doc.uploaded_at).toLocaleDateString()} • {doc.file_size ? (doc.file_size / 1024).toFixed(1) : 0} KB
+                  </p>
+                  {doc.is_verified && <span className="inline-block mt-1 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Verified</span>}
+                </div>
+                <a
+                  href={doc.file}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  Download
+                </a>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </Layout>
+  )
+}

@@ -97,21 +97,6 @@ class StageViewSet(viewsets.ModelViewSet):
                 'error': 'All planned activities must be marked as completed'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # For THESIS stage: check if the three-month waiting period has elapsed
-        if stage.stage_type == 'THESIS':
-            # If three_month_unlock_date is set and hasn't passed, reject
-            if stage.three_month_unlock_date:
-                if timezone.now() < stage.three_month_unlock_date:
-                    return Response({
-                        'error': 'Thesis approval is locked until 3-month waiting period elapses',
-                        'unlock_date': stage.three_month_unlock_date
-                    }, status=status.HTTP_403_FORBIDDEN)
-            else:
-                # No unlock date set - this shouldn't happen if documents were uploaded correctly
-                return Response({
-                    'error': 'Thesis waiting period not yet started. Ensure all documents uploaded.'
-                }, status=status.HTTP_400_BAD_REQUEST)
-        
         # Approve stage
         stage.status = 'COMPLETED'
         stage.approved_by = request.user
@@ -119,14 +104,16 @@ class StageViewSet(viewsets.ModelViewSet):
         stage.completed_at = timezone.now()
         stage.save()
         
-        # For THESIS stage: set the 3-month timer AFTER approval
-        if stage.stage_type == 'THESIS':
-            from datetime import timedelta
-            stage.three_month_unlock_date = timezone.now() + timedelta(days=90)
-            # Keep status as COMPLETED; the unlock task will change it to ACTIVE when timer expires
-            stage.save()
+        # Notify student
+        from apps.notifications.models import Notification
+        Notification.objects.create(
+            recipient=stage.student.user,
+            message=f'Your {stage.get_stage_type_display()} stage has been approved by supervisor',
+            notification_type='SUPERVISOR_APPROVAL',
+            link=f'/api/stages/{stage.id}/'
+        )
         
-        # Move to next stage (create next stage if not final)
+        # Create next stage if applicable (not for THESIS which is final)
         stage_progression = {'CONCEPT': 'PROPOSAL', 'PROPOSAL': 'THESIS', 'THESIS': 'COMPLETED'}
         next_stage_type = stage_progression.get(stage.stage_type)
         

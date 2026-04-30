@@ -47,6 +47,16 @@ class ActivityViewSet(viewsets.ModelViewSet):
                 description=data.get('description', ''),
                 planned_date=data.get('planned_date')
             )
+            
+            # Send notification to student
+            from apps.notifications.models import Notification
+            Notification.objects.create(
+                recipient=stage.student.user,
+                message=f'New activity assigned by {request.user.email}: {activity.title}',
+                notification_type='ACTIVITY_REMINDER',
+                link=f'/api/activities/{activity.id}/'
+            )
+            
             serializer = self.get_serializer(activity)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Stage.DoesNotExist:
