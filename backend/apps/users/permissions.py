@@ -2,19 +2,19 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 class IsStudent(BasePermission):
     def has_permission(self, request, view):
-        return request.user and request.user.role == 'STUDENT'
+        return request.user and request.user.role == 'student'
 
 class IsSupervisor(BasePermission):
     def has_permission(self, request, view):
-        return request.user and request.user.role == 'SUPERVISOR'
+        return request.user and request.user.role == 'supervisor'
 
 class IsCoordinator(BasePermission):
     def has_permission(self, request, view):
-        return request.user and request.user.role == 'COORDINATOR'
+        return request.user and request.user.role == 'coordinator'
 
 class IsAdmin(BasePermission):
     def has_permission(self, request, view):
-        return request.user and request.user.role == 'ADMIN'
+        return request.user and request.user.role == 'dean'
 
 class IsAssignedSupervisor(BasePermission):
     """
@@ -39,15 +39,15 @@ class RoleBasedPermission(BasePermission):
             return False
         
         # Coordinators and Admins can access everything
-        if user.role in ['COORDINATOR', 'ADMIN']:
+        if user.role in ['coordinator', 'dean', 'cod', 'director_bps']:
             return True
         
         # Students can only access their own data
-        if user.role == 'STUDENT':
+        if user.role == 'student':
             return True
         
         # Supervisors can access student data they supervise
-        if user.role == 'SUPERVISOR':
+        if user.role == 'supervisor':
             return True
         
         return False

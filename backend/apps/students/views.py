@@ -13,31 +13,31 @@ class StudentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'STUDENT':
+        if user.role == 'student':
             return Student.objects.filter(user=user).select_related('user', 'assigned_supervisor')
-        elif user.role in ['COORDINATOR', 'ADMIN']:
+        elif user.role in ['coordinator', 'dean', 'cod', 'director_bps']:
             return Student.objects.all().select_related('user', 'assigned_supervisor')
-        elif user.role == 'SUPERVISOR':
+        elif user.role == 'supervisor':
             return Student.objects.filter(assigned_supervisor=user).select_related('user', 'assigned_supervisor')
         return Student.objects.none()
 
     def create(self, request, *args, **kwargs):
-        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+        if request.user.role not in ['coordinator', 'dean', 'cod', 'director_bps']:
             raise PermissionDenied('Only coordinators and admins can create student records.')
         return super().create(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
-        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+        if request.user.role not in ['coordinator', 'dean', 'cod', 'director_bps']:
             raise PermissionDenied('Use the profile endpoint for student updates.')
         return super().update(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
-        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+        if request.user.role not in ['coordinator', 'dean', 'cod', 'director_bps']:
             raise PermissionDenied('Use the profile endpoint for student updates.')
         return super().partial_update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+        if request.user.role not in ['coordinator', 'dean', 'cod', 'director_bps']:
             raise PermissionDenied('Only coordinators and admins can delete student records.')
         return super().destroy(request, *args, **kwargs)
 

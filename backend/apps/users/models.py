@@ -20,16 +20,18 @@ class UserManager(BaseUserManager):
     def create_superuser(self, email, admission_number, phone, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('role', 'ADMIN')
+        extra_fields.setdefault('role', 'dean')
         return self.create_user(email, admission_number, phone, password, **extra_fields)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
     ROLE_CHOICES = (
-        ('STUDENT', 'Student'),
-        ('SUPERVISOR', 'Supervisor'),
-        ('COORDINATOR', 'Coordinator'),
-        ('ADMIN', 'Admin'),
+        ('student', 'Student'),
+        ('supervisor', 'Supervisor'),
+        ('coordinator', 'Coordinator'),
+        ('dean', 'Dean'),
+        ('cod', 'COD'),
+        ('director_bps', 'Director BPS'),
     )
 
     email = models.EmailField(unique=True)

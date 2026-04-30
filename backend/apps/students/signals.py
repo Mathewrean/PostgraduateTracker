@@ -5,10 +5,10 @@ from .models import Student, Supervisor
 
 @receiver(post_save, sender=User)
 def create_student_profile(sender, instance, created, **kwargs):
-    if created and instance.role == 'STUDENT':
+    if created and instance.role == 'student':
         Student.objects.get_or_create(user=instance)
 
 @receiver(post_save, sender=User)
 def create_supervisor_profile(sender, instance, created, **kwargs):
-    if created and instance.role == 'SUPERVISOR':
+    if created and instance.role == 'supervisor':
         Supervisor.objects.get_or_create(user=instance)

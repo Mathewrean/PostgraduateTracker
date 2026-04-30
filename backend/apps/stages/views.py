@@ -14,35 +14,35 @@ class StageViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'STUDENT':
+        if user.role == 'student':
             try:
                 student = Student.objects.get(user=user)
                 return Stage.objects.filter(student=student).select_related('student__user', 'approved_by', 'student__assigned_supervisor')
             except Student.DoesNotExist:
                 return Stage.objects.none()
-        elif user.role in ['COORDINATOR', 'ADMIN']:
+        elif user.role in ['coordinator', 'dean', 'cod', 'director_bps']:
             return Stage.objects.all().select_related('student__user', 'approved_by', 'student__assigned_supervisor')
-        elif user.role == 'SUPERVISOR':
+        elif user.role == 'supervisor':
             return Stage.objects.filter(student__assigned_supervisor=user).select_related('student__user', 'approved_by', 'student__assigned_supervisor')
         return Stage.objects.none()
 
     def create(self, request, *args, **kwargs):
-        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+        if request.user.role not in ['coordinator', 'dean', 'cod', 'director_bps']:
             raise PermissionDenied('Only coordinators and admins can create stages.')
         return super().create(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
-        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+        if request.user.role not in ['coordinator', 'dean', 'cod', 'director_bps']:
             raise PermissionDenied('Only coordinators and admins can update stages.')
         return super().update(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
-        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+        if request.user.role not in ['coordinator', 'dean', 'cod', 'director_bps']:
             raise PermissionDenied('Only coordinators and admins can update stages.')
         return super().partial_update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+        if request.user.role not in ['coordinator', 'dean', 'cod', 'director_bps']:
             raise PermissionDenied('Only coordinators and admins can delete stages.')
         return super().destroy(request, *args, **kwargs)
 
@@ -66,11 +66,14 @@ class StageViewSet(viewsets.ModelViewSet):
         if request.user != stage.student.assigned_supervisor:
             return Response({'error': 'Only assigned supervisor can approve'}, status=status.HTTP_403_FORBIDDEN)
         
-        # Check all requirements
+        # Check if the stage is in ACTIVE status (only ACTIVE stages can be approved)
+        if stage.status != 'ACTIVE':
+            return Response({'error': 'Only active stages can be approved'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check stage type and gate requirements
         from apps.documents.models import Document
         from apps.activities.models import Activity
         
-        # Check mandatory documents
         mandatory_docs = {
             'CONCEPT': ['MINUTES', 'TRANSCRIPT', 'FEE_STATEMENT'],
             'PROPOSAL': ['MINUTES', 'FEE_STATEMENT', 'PROPOSAL'],
@@ -94,6 +97,21 @@ class StageViewSet(viewsets.ModelViewSet):
                 'error': 'All planned activities must be marked as completed'
             }, status=status.HTTP_400_BAD_REQUEST)
         
+        # For THESIS stage: check if the three-month waiting period has elapsed
+        if stage.stage_type == 'THESIS':
+            # If three_month_unlock_date is set and hasn't passed, reject
+            if stage.three_month_unlock_date:
+                if timezone.now() < stage.three_month_unlock_date:
+                    return Response({
+                        'error': 'Thesis approval is locked until 3-month waiting period elapses',
+                        'unlock_date': stage.three_month_unlock_date
+                    }, status=status.HTTP_403_FORBIDDEN)
+            else:
+                # No unlock date set - this shouldn't happen if documents were uploaded correctly
+                return Response({
+                    'error': 'Thesis waiting period not yet started. Ensure all documents uploaded.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
         # Approve stage
         stage.status = 'COMPLETED'
         stage.approved_by = request.user
@@ -101,18 +119,18 @@ class StageViewSet(viewsets.ModelViewSet):
         stage.completed_at = timezone.now()
         stage.save()
         
-        # Move to next stage
+        # For THESIS stage: set the 3-month timer AFTER approval
+        if stage.stage_type == 'THESIS':
+            from datetime import timedelta
+            stage.three_month_unlock_date = timezone.now() + timedelta(days=90)
+            # Keep status as COMPLETED; the unlock task will change it to ACTIVE when timer expires
+            stage.save()
+        
+        # Move to next stage (create next stage if not final)
         stage_progression = {'CONCEPT': 'PROPOSAL', 'PROPOSAL': 'THESIS', 'THESIS': 'COMPLETED'}
         next_stage_type = stage_progression.get(stage.stage_type)
         
         if next_stage_type and next_stage_type != 'COMPLETED':
-            if stage.stage_type == 'THESIS':
-                # Set 3-month unlock date
-                from datetime import timedelta
-                stage.three_month_unlock_date = timezone.now() + timedelta(days=90)
-                stage.status = 'IN_PROGRESS'
-                stage.save()
-            else:
-                Stage.objects.create(student=stage.student, stage_type=next_stage_type)
+            Stage.objects.create(student=stage.student, stage_type=next_stage_type)
         
         return Response(StageSerializer(stage).data)

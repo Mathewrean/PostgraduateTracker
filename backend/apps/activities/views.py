@@ -15,15 +15,15 @@ class ActivityViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'STUDENT':
+        if user.role == 'student':
             try:
                 student = Student.objects.get(user=user)
                 return Activity.objects.filter(stage__student=student).select_related('stage__student__user', 'created_by', 'marked_done_by')
             except Student.DoesNotExist:
                 return Activity.objects.none()
-        elif user.role in ['COORDINATOR', 'ADMIN']:
+        elif user.role in ['coordinator', 'dean', 'cod', 'director_bps']:
             return Activity.objects.all().select_related('stage__student__user', 'created_by', 'marked_done_by')
-        elif user.role == 'SUPERVISOR':
+        elif user.role == 'supervisor':
             return Activity.objects.filter(stage__student__assigned_supervisor=user).select_related('stage__student__user', 'created_by', 'marked_done_by')
         return Activity.objects.none()
 
@@ -35,9 +35,9 @@ class ActivityViewSet(viewsets.ModelViewSet):
             stage = Stage.objects.get(id=stage_id)
             if stage.status != 'ACTIVE':
                 return Response({'error': 'Can only add activities to active stages'}, status=status.HTTP_400_BAD_REQUEST)
-            if request.user.role == 'STUDENT' and stage.student.user != request.user:
+            if request.user.role == 'student' and stage.student.user != request.user:
                 raise PermissionDenied('You can only add activities to your own stage.')
-            if request.user.role == 'SUPERVISOR' and stage.student.assigned_supervisor != request.user:
+            if request.user.role == 'supervisor' and stage.student.assigned_supervisor != request.user:
                 raise PermissionDenied('You can only add activities to students assigned to you.')
             
             activity = Activity.objects.create(
@@ -55,9 +55,9 @@ class ActivityViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def mark_done(self, request, pk=None):
         activity = self.get_object()
-        if request.user.role == 'SUPERVISOR' and activity.stage.student.assigned_supervisor != request.user:
+        if request.user.role == 'supervisor' and activity.stage.student.assigned_supervisor != request.user:
             raise PermissionDenied('Only the assigned supervisor can mark this activity complete.')
-        if request.user.role == 'STUDENT' and activity.stage.student.user != request.user:
+        if request.user.role == 'student' and activity.stage.student.user != request.user:
             raise PermissionDenied('You can only mark your own activities complete.')
         
         if activity.status == 'COMPLETED':

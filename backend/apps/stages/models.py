@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils import timezone
+from datetime import timedelta
 from apps.users.models import User
 from apps.students.models import Student
 
@@ -36,3 +38,25 @@ class Stage(models.Model):
 
     def __str__(self):
         return f"{self.student.user.email} - {self.stage_type}"
+    
+    def check_thesis_submission_complete(self):
+        """If this is a THESIS stage and all required documents are uploaded, set IN_PROGRESS and start timer"""
+        if self.stage_type != 'THESIS':
+            return False
+        
+        from apps.documents.models import Document
+        required_doc_types = {'THESIS', 'INTENT_TO_SUBMIT', 'FEE_STATEMENT'}
+        
+        uploaded_docs = set(
+            Document.objects.filter(stage=self, doc_type__in=required_doc_types)
+            .values_list('doc_type', flat=True)
+        )
+        
+        if required_docs.issubset(uploaded_docs) and self.status != 'IN_PROGRESS':
+            self.status = 'IN_PROGRESS'
+            self.thesis_submission_date = timezone.now()
+            self.three_month_unlock_date = timezone.now() + timedelta(days=90)
+            self.save()
+            return True
+        
+        return False

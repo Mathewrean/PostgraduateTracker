@@ -32,7 +32,7 @@ def check_thesis_submission_timer():
     """Check if 3-month thesis timer has elapsed"""
     now = timezone.now()
     
-    # Find stages that are in progress with expired timer
+    # Find stages that are IN_PROGRESS with expired timer
     expired_stages = Stage.objects.filter(
         stage_type='THESIS',
         status='IN_PROGRESS',
@@ -40,6 +40,10 @@ def check_thesis_submission_timer():
     )
     
     for stage in expired_stages:
+        # Change status to ACTIVE so supervisor can approve
+        stage.status = 'ACTIVE'
+        stage.save()
+        
         # Send notification to supervisor
         if stage.student.assigned_supervisor:
             Notification.objects.create(

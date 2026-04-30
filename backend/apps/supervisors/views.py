@@ -18,7 +18,7 @@ class SupervisorViewSet(viewsets.ViewSet):
         
         class IsSupervisorOrAdmin(BasePermission):
             def has_permission(self, request, view):
-                return request.user and request.user.role in ['SUPERVISOR', 'COORDINATOR', 'ADMIN']
+                return request.user and request.user.role in ['supervisor', 'coordinator', 'dean', 'cod', 'director_bps']
         
         return [IsSupervisorOrAdmin()]
 

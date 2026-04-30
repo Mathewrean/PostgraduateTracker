@@ -16,15 +16,15 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'STUDENT':
+        if user.role == 'student':
             try:
                 student = Student.objects.get(user=user)
                 return Document.objects.filter(student=student).select_related('student__user', 'stage', 'verified_by')
             except Student.DoesNotExist:
                 return Document.objects.none()
-        elif user.role in ['COORDINATOR', 'ADMIN']:
+        elif user.role in ['coordinator', 'dean', 'cod', 'director_bps']:
             return Document.objects.all().select_related('student__user', 'stage', 'verified_by')
-        elif user.role == 'SUPERVISOR':
+        elif user.role == 'supervisor':
             return Document.objects.filter(stage__student__assigned_supervisor=user).select_related('student__user', 'stage', 'verified_by')
         return Document.objects.none()
 
@@ -44,9 +44,9 @@ class DocumentViewSet(viewsets.ModelViewSet):
         try:
             stage = Stage.objects.get(id=stage_id)
             student = stage.student
-            if request.user.role == 'STUDENT' and student.user != request.user:
+            if request.user.role == 'student' and student.user != request.user:
                 raise PermissionDenied('You can only upload documents for your own stage.')
-            if request.user.role == 'SUPERVISOR' and student.assigned_supervisor != request.user:
+            if request.user.role == 'supervisor' and student.assigned_supervisor != request.user:
                 raise PermissionDenied('You can only upload documents for assigned students.')
             
             # Check if document already exists
@@ -62,6 +62,10 @@ class DocumentViewSet(viewsets.ModelViewSet):
                 file=file
             )
             
+            # If this is a THESIS stage, check if all required docs are now uploaded
+            if stage.stage_type == 'THESIS':
+                stage.check_thesis_submission_complete()
+            
             serializer = self.get_serializer(document)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Stage.DoesNotExist:
@@ -70,7 +74,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def verify(self, request, pk=None):
         document = self.get_object()
-        if request.user.role not in ['COORDINATOR', 'ADMIN'] and document.student.assigned_supervisor != request.user:
+        if request.user.role not in ['coordinator', 'dean', 'cod', 'director_bps'] and document.student.assigned_supervisor != request.user:
             raise PermissionDenied('Only the assigned supervisor, coordinator, or admin can verify this document.')
         
         document.is_verified = True
@@ -87,15 +91,15 @@ class MinutesViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'STUDENT':
+        if user.role == 'student':
             try:
                 student = Student.objects.get(user=user)
                 return Minutes.objects.filter(student=student)
             except Student.DoesNotExist:
                 return Minutes.objects.none()
-        elif user.role in ['COORDINATOR', 'ADMIN']:
+        elif user.role in ['coordinator', 'dean', 'cod', 'director_bps']:
             return Minutes.objects.all()
-        elif user.role == 'SUPERVISOR':
+        elif user.role == 'supervisor':
             return Minutes.objects.filter(stage__student__assigned_supervisor=user)
         return Minutes.objects.none()
 

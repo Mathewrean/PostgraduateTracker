@@ -14,19 +14,19 @@ class ComplaintViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'STUDENT':
+        if user.role == 'student':
             try:
                 student = Student.objects.get(user=user)
                 return Complaint.objects.filter(student=student)
             except Student.DoesNotExist:
                 return Complaint.objects.none()
-        elif user.role in ['COORDINATOR', 'ADMIN']:
+        elif user.role in ['coordinator', 'dean', 'cod', 'director_bps']:
             return Complaint.objects.all()
         return Complaint.objects.none()
 
     def create(self, request):
         """Submit a new complaint"""
-        if request.user.role != 'STUDENT':
+        if request.user.role != 'student':
             raise PermissionDenied('Only students can submit complaints.')
         try:
             student = Student.objects.get(user=request.user)
@@ -58,7 +58,7 @@ class ComplaintViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def respond(self, request, pk=None):
         """Respond to a complaint"""
-        if request.user.role not in ['COORDINATOR', 'ADMIN']:
+        if request.user.role not in ['coordinator', 'dean', 'cod', 'director_bps']:
             raise PermissionDenied('Only coordinators and admins can respond to complaints.')
         complaint = self.get_object()
         

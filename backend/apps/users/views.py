@@ -19,14 +19,14 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role in ['ADMIN', 'COORDINATOR']:
+        if user.role in ['coordinator', 'admin']:
             return User.objects.all()
-        if user.role == 'SUPERVISOR':
+        if user.role == 'supervisor':
             return User.objects.filter(id=user.id) | User.objects.filter(student_profile__assigned_supervisor=user)
         return User.objects.filter(id=user.id)
 
     def _require_admin_or_coordinator(self):
-        if self.request.user.role not in ['ADMIN', 'COORDINATOR']:
+        if self.request.user.role not in ['dean', 'coordinator']:
             raise PermissionDenied('You are not allowed to manage users.')
 
     def list(self, request, *args, **kwargs):
@@ -66,9 +66,9 @@ class UserViewSet(viewsets.ModelViewSet):
     def register(self, request):
         """Register a new user"""
         data = request.data.copy()
-        requested_role = data.get('role', 'STUDENT')
-        if requested_role in ['SUPERVISOR', 'COORDINATOR', 'ADMIN']:
-            data['role'] = 'STUDENT'
+        requested_role = data.get('role', 'student')
+        if requested_role in ['supervisor', 'coordinator', 'dean', 'cod', 'director_bps']:
+            data['role'] = 'student'
 
         serializer = self.get_serializer(data=data)
         if serializer.is_valid():

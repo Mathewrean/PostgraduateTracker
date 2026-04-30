@@ -23,7 +23,7 @@ class ReportViewSet(viewsets.ViewSet):
         
         class IsCoordinatorOrAdmin(BasePermission):
             def has_permission(self, request, view):
-                return request.user and request.user.role in ['COORDINATOR', 'ADMIN']
+                return request.user and request.user.role in ['coordinator', 'dean', 'cod', 'director_bps']
         
         return [IsCoordinatorOrAdmin()]
 
