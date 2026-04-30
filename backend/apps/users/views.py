@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import User
+from .models import User, normalize_role_value
 from .serializers import UserSerializer, UserRegistrationSerializer, UserDetailSerializer, UserProfileUpdateSerializer
 from .permissions import RoleBasedPermission
 import logging
@@ -19,14 +19,14 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role in ['coordinator', 'admin']:
+        if user.role_key in ['coordinator', 'dean', 'cod', 'director_bps']:
             return User.objects.all()
-        if user.role == 'supervisor':
+        if user.role_key == 'supervisor':
             return User.objects.filter(id=user.id) | User.objects.filter(student_profile__assigned_supervisor=user)
         return User.objects.filter(id=user.id)
 
     def _require_admin_or_coordinator(self):
-        if self.request.user.role not in ['coordinator', 'dean', 'cod', 'director_bps']:
+        if self.request.user.role_key not in ['coordinator', 'dean', 'cod', 'director_bps']:
             raise PermissionDenied('You are not allowed to manage users.')
 
     def list(self, request, *args, **kwargs):
@@ -66,9 +66,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def register(self, request):
         """Register a new user"""
         data = request.data.copy()
-        requested_role = data.get('role', 'student')
-        if requested_role in ['supervisor', 'coordinator', 'dean', 'cod', 'director_bps']:
-            data['role'] = 'student'
+        data['role'] = normalize_role_value(data.get('role', 'student'))
 
         serializer = self.get_serializer(data=data)
         if serializer.is_valid():
@@ -94,7 +92,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def me(self, request):
         """Get current user details"""
-        serializer = self.get_serializer(request.user)
+        serializer = UserSerializer(request.user, context={'request': request})
         return Response(serializer.data)
 
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
@@ -113,7 +111,7 @@ class UserViewSet(viewsets.ModelViewSet):
             refresh = RefreshToken.for_user(user)
             user.update_last_login(request.client_ip if hasattr(request, 'client_ip') else None)
             return Response({
-                'user': UserSerializer(user).data,
+                'user': UserSerializer(user, context={'request': request}).data,
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
             })

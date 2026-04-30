@@ -2,11 +2,38 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils import timezone
 
+
+ROLE_NORMALIZATION_MAP = {
+    'student': 'student',
+    'supervisor': 'supervisor',
+    'coordinator': 'coordinator',
+    'dean': 'dean',
+    'cod': 'cod',
+    'director_bps': 'director_bps',
+    'director bps': 'director_bps',
+    'STUDENT': 'student',
+    'SUPERVISOR': 'supervisor',
+    'COORDINATOR': 'coordinator',
+    'DEAN': 'dean',
+    'COD': 'cod',
+    'DIRECTOR_BPS': 'director_bps',
+    'DIRECTOR BPS': 'director_bps',
+}
+
+
+def normalize_role_value(value):
+    if value is None:
+        return 'student'
+    cleaned = str(value).strip()
+    return ROLE_NORMALIZATION_MAP.get(cleaned, ROLE_NORMALIZATION_MAP.get(cleaned.lower(), 'student'))
+
+
 class UserManager(BaseUserManager):
     def create_user(self, email, admission_number, phone, password=None, **extra_fields):
         if not email:
             raise ValueError('Email is required')
         email = self.normalize_email(email)
+        extra_fields['role'] = normalize_role_value(extra_fields.get('role', 'student'))
         user = self.model(
             email=email,
             admission_number=admission_number,
@@ -39,7 +66,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone = models.CharField(max_length=20)  # Allow formatted numbers like +254 701 618 286
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='STUDENT')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student')
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
@@ -66,7 +93,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}".strip()
 
+    @property
+    def role_key(self):
+        return normalize_role_value(self.role)
+
     def update_last_login(self, ip_address=None):
         self.last_login = timezone.now()
         self.last_login_ip = ip_address
         self.save(update_fields=['last_login', 'last_login_ip'])
+
+    def save(self, *args, **kwargs):
+        self.role = normalize_role_value(self.role)
+        super().save(*args, **kwargs)

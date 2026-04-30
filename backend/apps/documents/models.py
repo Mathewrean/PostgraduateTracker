@@ -21,7 +21,7 @@ class Document(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='documents')
     doc_type = models.CharField(max_length=50, choices=DOC_TYPE_CHOICES, default='OTHER')
     file = models.FileField(upload_to='documents/%Y/%m/%d/', validators=[
-        FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx', 'pptx'])
+        FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx'])
     ])
     uploaded_at = models.DateTimeField(auto_now_add=True)
     file_size = models.BigIntegerField(null=True, blank=True)
@@ -44,10 +44,16 @@ class Document(models.Model):
             self.file_size = self.file.size
         super().save(*args, **kwargs)
 
+    @property
+    def file_name(self):
+        return os.path.basename(self.file.name) if self.file else ''
+
 class Minutes(models.Model):
     stage = models.OneToOneField(Stage, on_delete=models.CASCADE, related_name='minutes')
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='minutes')
-    file = models.FileField(upload_to='minutes/%Y/%m/%d/')
+    file = models.FileField(upload_to='minutes/%Y/%m/%d/', validators=[
+        FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx'])
+    ])
     uploaded_at = models.DateTimeField(auto_now_add=True)
     is_approved = models.BooleanField(default=False)
     approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_minutes')
@@ -59,3 +65,7 @@ class Minutes(models.Model):
 
     def __str__(self):
         return f"Minutes - {self.student.user.email}"
+
+    @property
+    def file_name(self):
+        return os.path.basename(self.file.name) if self.file else ''

@@ -3,14 +3,14 @@ from django.core.exceptions import ValidationError
 from apps.users.models import User
 
 SUPERVISOR_CHOICES = [
-    ('Dr. Michael Kipchoge', 'Dr. Michael Kipchoge'),
-    ('Prof. Jane Njeri', 'Prof. Jane Njeri'),
-    ('Dr. James Omondi', 'Dr. James Omondi'),
-    ('Dr. Sarah Mwangi', 'Dr. Sarah Mwangi'),
-    ('Prof. David Kiplagat', 'Prof. David Kiplagat'),
-    ('Dr. Grace Kariuki', 'Dr. Grace Kariuki'),
-    ('Dr. Robert Kimani', 'Dr. Robert Kimani'),
-    ('Dr. Alice Ochieng', 'Dr. Alice Ochieng'),
+    ('Professor Okello (Dean)', 'Professor Okello (Dean)'),
+    ('Dr. Prisca Magotu (COD)', 'Dr. Prisca Magotu (COD)'),
+    ('Prof. Miner Titus', 'Prof. Miner Titus'),
+    ('Dr. Joseph Nyakinda', 'Dr. Joseph Nyakinda'),
+    ('Dr. Willy Kangojo (Coordinator)', 'Dr. Willy Kangojo (Coordinator)'),
+    ('Dr. Julius Owino', 'Dr. Julius Owino'),
+    ('Dr. Francis Akwenda Odhiambo', 'Dr. Francis Akwenda Odhiambo'),
+    ('Director BPS', 'Director BPS'),
     ('OTHER', 'Other (Please specify)'),
 ]
 
@@ -40,3 +40,9 @@ class Student(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.current_stage}"
+
+    @property
+    def preferred_supervisor_display_name(self):
+        if self.preferred_supervisor == 'OTHER':
+            return self.preferred_supervisor_other
+        return self.preferred_supervisor
