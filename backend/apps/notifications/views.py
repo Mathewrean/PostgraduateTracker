@@ -24,6 +24,10 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
         notification.save()
         return Response(self.get_serializer(notification).data)
 
+    @action(detail=True, methods=['post'], url_path='read')
+    def read(self, request, pk=None):
+        return self.mark_as_read(request, pk=pk)
+
     @action(detail=False, methods=['post'])
     def mark_all_as_read(self, request):
         Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
@@ -45,12 +49,12 @@ class MeetingViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         supervisor_id = request.data.get('supervisor')
         scheduled_date = request.data.get('scheduled_date')
-        if request.user.role != 'student':
+        if request.user.role_key != 'student':
             raise PermissionDenied('Only students can request meetings.')
         if not supervisor_id or not scheduled_date:
             return Response({'error': 'supervisor and scheduled_date are required'}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            supervisor = User.objects.get(id=supervisor_id, role='SUPERVISOR')
+            supervisor = User.objects.get(id=supervisor_id, role='supervisor')
         except User.DoesNotExist:
             return Response({'error': 'Selected supervisor is invalid'}, status=status.HTTP_400_BAD_REQUEST)
         try:

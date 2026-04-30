@@ -12,7 +12,23 @@ class ComplaintSerializer(serializers.ModelSerializer):
         read_only_fields = ['submitted_at', 'responded_at', 'is_overdue']
 
     def get_student_email(self, obj):
+        request = self.context.get('request')
+        if request and request.user.role_key == 'student':
+            return None
         return obj.student.user.email
 
     def get_responded_by_email(self, obj):
+        request = self.context.get('request')
+        if request and request.user.role_key == 'student':
+            return None
         return obj.responded_by.email if obj.responded_by else None
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        if request and request.user.role_key == 'student':
+            data.pop('student', None)
+            data.pop('student_email', None)
+            data.pop('responded_by', None)
+            data.pop('responded_by_email', None)
+        return data
