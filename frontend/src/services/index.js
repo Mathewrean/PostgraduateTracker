@@ -121,7 +121,10 @@ export const reportService = {
     api.get('/reports/supervisors/'),
   
   getLoginHistory: () =>
-    api.get('/reports/users/'),
+    api.get('/reports/login_history/'),
+
+  getUserReport: (params = {}) =>
+    api.get('/reports/users/', { params }),
   
   getComplaintReport: () =>
     api.get('/reports/complaints/'),

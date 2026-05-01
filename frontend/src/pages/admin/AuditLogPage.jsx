@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Layout } from '../../components/Layout'
-import { reportService } from '../../services'
+import { auditService } from '../../services'
 
 export const AuditLogPage = () => {
   const [logs, setLogs] = useState([])
@@ -12,8 +12,7 @@ export const AuditLogPage = () => {
 
   const fetchLogs = async () => {
     try {
-      // Use activity_log endpoint from reports (since audit endpoint restricted)
-      const response = await reportService.activityLog('all')
+      const response = await auditService.getLogs()
       const data = Array.isArray(response.data) ? response.data : response.data.results || []
       setLogs(data)
     } catch (error) {

@@ -7,7 +7,7 @@ export const ReportsPage = ({ isDark = false }) => {
   const [dateTo, setDateTo] = useState('')
   const [loading, setLoading] = useState(false)
   const [reportData, setReportData] = useState(null)
-  const [reportType, setReportType] = useState('student_progress')
+  const [reportType, setReportType] = useState('students')
   const [error, setError] = useState('')
 
   const bgColor = isDark ? 'bg-gray-800' : 'bg-white'
@@ -21,17 +21,17 @@ export const ReportsPage = ({ isDark = false }) => {
     try {
       let response
       switch (reportType) {
-        case 'student_progress':
+        case 'students':
           response = await reportService.getStudentProgress()
           break
-        case 'supervisor_report':
+        case 'supervisors':
           response = await reportService.getSupervisorReport()
           break
-        case 'complaint_report':
+        case 'complaints':
           response = await reportService.getComplaintReport()
           break
-        case 'activity_log':
-          response = await reportService.getActivityLog()
+        case 'users':
+          response = await reportService.getUserReport()
           break
         case 'stage_transition':
           response = await reportService.getStageTransitionReport()
@@ -93,10 +93,10 @@ export const ReportsPage = ({ isDark = false }) => {
                 onChange={(e) => setReportType(e.target.value)}
                 className={`w-full px-3 py-2 border rounded-md ${isDark ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
               >
-                <option value="student_progress">Student Progress</option>
-                <option value="supervisor_report">Supervisor Activity</option>
-                <option value="complaint_report">Complaint Statistics</option>
-                <option value="activity_log">Activity Log</option>
+                <option value="students">Student Progress</option>
+                <option value="users">User Activity</option>
+                <option value="supervisors">Supervisor Activity</option>
+                <option value="complaints">Complaint Statistics</option>
                 <option value="stage_transition">Stage Transitions</option>
               </select>
             </div>
