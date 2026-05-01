@@ -16,8 +16,9 @@ class NotificationSerializer(serializers.ModelSerializer):
             'notification_type',
             'is_read',
             'created_at',
+            'updated_at',
             'link']
-        read_only_fields = ['created_at']
+        read_only_fields = ['created_at', 'updated_at']
 
     def get_recipient_email(self, obj):
         return obj.recipient.email
@@ -38,8 +39,9 @@ class MeetingSerializer(serializers.ModelSerializer):
             'scheduled_date',
             'status',
             'notes',
-            'created_at']
-        read_only_fields = ['created_at']
+            'created_at',
+            'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
 
     def get_student_email(self, obj):
         return obj.student.user.email

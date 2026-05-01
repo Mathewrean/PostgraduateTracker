@@ -42,6 +42,7 @@ class Document(models.Model):
         blank=True,
         related_name='verified_documents')
     verified_at = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'documents'
@@ -84,6 +85,7 @@ class Minutes(models.Model):
         blank=True,
         related_name='approved_minutes')
     approved_at = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'minutes'

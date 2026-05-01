@@ -112,6 +112,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(blank=True, null=True)
     last_login_ip = models.GenericIPAddressField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     objects = UserManager()
 

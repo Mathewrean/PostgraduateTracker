@@ -24,6 +24,7 @@ class Notification(models.Model):
         max_length=50, choices=NOTIFICATION_TYPES)
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     link = models.CharField(max_length=500, blank=True)
 
     class Meta:

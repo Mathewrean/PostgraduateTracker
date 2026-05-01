@@ -6,6 +6,7 @@ from rest_framework.exceptions import PermissionDenied
 from .models import Student
 from .serializers import StudentSerializer, StudentProfileSerializer
 from apps.stages.models import Stage
+from apps.users.models import User
 
 
 class StudentViewSet(viewsets.ModelViewSet):
@@ -78,8 +79,20 @@ class StudentViewSet(viewsets.ModelViewSet):
         if request.method == 'GET':
             try:
                 student = Student.objects.get(user=request.user)
-                serializer = StudentSerializer(student)
-                return Response(serializer.data)
+                serializer = StudentSerializer(student, context={'request': request})
+                data = serializer.data
+                data['preferred_supervisor_options'] = [
+                    {
+                        'id': candidate.id,
+                        'full_name': candidate.get_full_name() or candidate.email,
+                        'email': candidate.email,
+                        'role': candidate.role_key,
+                    }
+                    for candidate in User.objects.filter(
+                        role__in=['supervisor', 'coordinator', 'dean', 'cod', 'director_bps']
+                    ).order_by('first_name', 'last_name', 'email')
+                ]
+                return Response(data)
             except Student.DoesNotExist:
                 return Response(
                     {'error': 'Student profile not found'}, status=status.HTTP_404_NOT_FOUND)

@@ -72,6 +72,7 @@ class Meeting(models.Model):
         default='PENDING')
     notes = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'meetings'
@@ -82,6 +83,4 @@ class Meeting(models.Model):
         ]
 
     def __str__(self):
-        return f"Meeting with {
-            self.student.user.email} on {
-            self.scheduled_date.strftime('%Y-%m-%d %H:%M')}"
+        return f"Meeting with {self.student.user.email} on {self.scheduled_date.strftime('%Y-%m-%d %H:%M')}"

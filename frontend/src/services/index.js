@@ -24,8 +24,11 @@ export const studentService = {
   updateProfile: (data) =>
     api.patch('/students/profile/', data),
   
-  getAll: () =>
-    api.get('/students/'),
+  getAll: (params = {}) =>
+    api.get('/students/', { params }),
+
+  getById: (id) =>
+    api.get(`/students/${id}/`),
   
   update: (id, data) =>
     api.patch(`/students/${id}/`, data),
@@ -40,8 +43,8 @@ export const stageService = {
   getCurrentStage: () =>
     api.get('/stages/current_stage/'),
   
-  getAll: () =>
-    api.get('/stages/'),
+  getAll: (params = {}) =>
+    api.get('/stages/', { params }),
 
   getById: (stageId) =>
     api.get(`/stages/${stageId}/`),
@@ -54,8 +57,8 @@ export const activityService = {
   create: (data) =>
     api.post('/activities/', data),
   
-  getAll: () =>
-    api.get('/activities/'),
+  getAll: (params = {}) =>
+    api.get('/activities/', { params }),
   
   getCalendar: (stageId) =>
     api.get('/activities/calendar/', {
@@ -72,11 +75,14 @@ export const documentService = {
       headers: { 'Content-Type': 'multipart/form-data' }
     }),
   
-  getAll: () =>
-    api.get('/documents/'),
+  getAll: (params = {}) =>
+    api.get('/documents/', { params }),
   
   verify: (docId) =>
     api.post(`/documents/${docId}/verify/`),
+
+  download: (docId) =>
+    api.get(`/documents/${docId}/download/`, { responseType: 'blob' }),
 }
 
 export const minutesService = {
@@ -86,6 +92,8 @@ export const minutesService = {
     }),
   approve: (minutesId) =>
     api.post(`/minutes/${minutesId}/approve/`),
+  download: (minutesId) =>
+    api.get(`/minutes/${minutesId}/download/`, { responseType: 'blob' }),
 }
 
 export const complaintService = {
@@ -114,23 +122,23 @@ export const notificationService = {
 }
 
 export const reportService = {
-  getStudentProgress: (range = 'all') =>
-    api.get('/reports/students/', { params: { range } }),
+  getStudentProgress: (params = {}) =>
+    api.get('/reports/students/', { params }),
   
-  getSupervisorReport: () =>
-    api.get('/reports/supervisors/'),
+  getSupervisorReport: (params = {}) =>
+    api.get('/reports/supervisors/', { params }),
   
-  getLoginHistory: () =>
-    api.get('/reports/login_history/'),
+  getLoginHistory: (params = {}) =>
+    api.get('/reports/login_history/', { params }),
 
   getUserReport: (params = {}) =>
     api.get('/reports/users/', { params }),
   
-  getComplaintReport: () =>
-    api.get('/reports/complaints/'),
+  getComplaintReport: (params = {}) =>
+    api.get('/reports/complaints/', { params }),
   
-  getActivityLog: (range = 'week') =>
-    api.get('/reports/activity_log/', { params: { range } }),
+  getActivityLog: (params = {}) =>
+    api.get('/reports/activity_log/', { params }),
   
   getStageTransitionReport: () =>
     api.get('/reports/stage_transition_report/'),

@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from apps.users.models import User
 
 
@@ -9,8 +10,13 @@ class Student(models.Model):
         related_name='student_profile')
     project_title = models.CharField(max_length=255, blank=True)
     preferred_supervisor = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True, limit_choices_to={
-            'role': 'supervisor'}, related_name='preferred_by')
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        limit_choices_to=Q(
+            role__in=['supervisor', 'coordinator', 'dean', 'cod', 'director_bps']),
+        related_name='preferred_by')
     preferred_supervisor_other = models.CharField(
         max_length=255,
         blank=True,

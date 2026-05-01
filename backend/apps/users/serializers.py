@@ -8,6 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
     profile_complete = serializers.SerializerMethodField()
     preferred_supervisor = serializers.SerializerMethodField()
     preferred_supervisor_other = serializers.SerializerMethodField()
+    preferred_supervisor_name = serializers.SerializerMethodField()
     assigned_supervisor_id = serializers.SerializerMethodField()
     assigned_supervisor_name = serializers.SerializerMethodField()
     assigned_supervisor_email = serializers.SerializerMethodField()
@@ -29,12 +30,14 @@ class UserSerializer(serializers.ModelSerializer):
             'project_title',
             'profile_complete',
             'preferred_supervisor',
+            'preferred_supervisor_name',
             'preferred_supervisor_other',
             'assigned_supervisor_id',
             'assigned_supervisor_name',
             'assigned_supervisor_email',
+            'updated_at',
         ]
-        read_only_fields = ['date_joined', 'last_login']
+        read_only_fields = ['date_joined', 'last_login', 'updated_at']
 
     def _get_student_profile(self, obj):
         return getattr(obj, 'student_profile', None)
@@ -60,6 +63,12 @@ class UserSerializer(serializers.ModelSerializer):
     def get_preferred_supervisor_other(self, obj):
         student = self._get_student_profile(obj)
         return student.preferred_supervisor_other if student else ''
+
+    def get_preferred_supervisor_name(self, obj):
+        student = self._get_student_profile(obj)
+        if student and student.preferred_supervisor:
+            return student.preferred_supervisor.get_full_name() or student.preferred_supervisor.email
+        return None
 
     def get_assigned_supervisor_id(self, obj):
         student = self._get_student_profile(obj)
@@ -141,8 +150,11 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
     project_title = serializers.CharField(required=False, allow_blank=True)
-    preferred_supervisor = serializers.CharField(
-        required=False, allow_blank=True)
+    preferred_supervisor = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.filter(
+            role__in=['supervisor', 'coordinator', 'dean', 'cod', 'director_bps']),
+        required=False,
+        allow_null=True)
     preferred_supervisor_other = serializers.CharField(
         required=False, allow_blank=True)
 
@@ -173,8 +185,12 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
                 student.project_title = project_title
             if preferred_supervisor is not None:
                 student.preferred_supervisor = preferred_supervisor
+                if preferred_supervisor:
+                    student.preferred_supervisor_other = ''
             if preferred_supervisor_other is not None:
-                student.preferred_supervisor_other = preferred_supervisor_other
+                student.preferred_supervisor_other = preferred_supervisor_other.strip()
+                if student.preferred_supervisor_other:
+                    student.preferred_supervisor = None
             student.profile_complete = bool(student.project_title and (
                 student.preferred_supervisor or student.preferred_supervisor_other))
             student.save()

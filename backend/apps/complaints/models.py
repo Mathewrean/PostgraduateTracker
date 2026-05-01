@@ -30,6 +30,7 @@ class Complaint(models.Model):
         blank=True,
         related_name='responded_complaints')
     is_overdue = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'complaints'

@@ -20,8 +20,9 @@ class ActivitySerializer(serializers.ModelSerializer):
             'status',
             'marked_done_by',
             'marked_done_by_email',
-            'created_at']
-        read_only_fields = ['completed_date', 'marked_done_by', 'created_at']
+            'created_at',
+            'updated_at']
+        read_only_fields = ['completed_date', 'marked_done_by', 'created_at', 'updated_at']
 
     def get_created_by_email(self, obj):
         return obj.created_by.email if obj.created_by else None

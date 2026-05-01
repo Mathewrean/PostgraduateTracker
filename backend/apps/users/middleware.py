@@ -23,24 +23,19 @@ class AuditLoggingMiddleware(MiddlewareMixin):
         return ip
 
     def process_response(self, request, response):
-        if hasattr(
-                request,
-                'user') and request.user and request.user.is_authenticated:
-            # Log API endpoints
+        if hasattr(request, 'user') and request.user and request.user.is_authenticated:
             if request.path.startswith('/api/'):
                 try:
                     AuditLog.objects.create(
                         user=request.user,
-                        action=f'{
-                            request.method} {
-                            request.path}',
-                        description=f'{
-                            request.method} request to {
-                            request.path}',
+                        action=f'{request.method} {request.path}',
+                        description=f'{request.method} request to {request.path}',
                         ip_address=request.client_ip,
                         extra_data={
                             'method': request.method,
-                            'path': request.path})
+                            'path': request.path,
+                            'status_code': response.status_code,
+                        })
                 except Exception as e:
                     logger.error(f'Error creating audit log: {str(e)}')
 
