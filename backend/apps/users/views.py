@@ -21,10 +21,16 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.role_key in ['coordinator', 'dean', 'cod', 'director_bps']:
-            return User.objects.all()
-        if user.role_key == 'supervisor':
-            return User.objects.filter(id=user.id) | User.objects.filter(student_profile__assigned_supervisor=user)
-        return User.objects.filter(id=user.id)
+            queryset = User.objects.all()
+        elif user.role_key == 'supervisor':
+            queryset = User.objects.filter(id=user.id) | User.objects.filter(student_profile__assigned_supervisor=user)
+        else:
+            queryset = User.objects.filter(id=user.id)
+
+        role_filter = self.request.query_params.get('role')
+        if role_filter:
+            queryset = queryset.filter(role=normalize_role_value(role_filter))
+        return queryset
 
     def _require_admin_or_coordinator(self):
         if self.request.user.role_key not in ['coordinator', 'dean', 'cod', 'director_bps']:

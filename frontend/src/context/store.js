@@ -1,8 +1,9 @@
 import { create } from 'zustand'
+import { getCookie, clearCookie } from '../services/api'
 
 export const useAuthStore = create((set) => ({
   user: null,
-  token: null,
+  token: getCookie('pst_access_token'),
   initialized: false,
   loading: false,
   error: null,
@@ -18,6 +19,8 @@ export const useAuthStore = create((set) => ({
   setInitialized: (initialized) => set({ initialized }),
   
   logout: () => {
+    clearCookie('pst_access_token')
+    clearCookie('pst_refresh_token')
     set({ user: null, token: null, initialized: true })
   }
 }))
