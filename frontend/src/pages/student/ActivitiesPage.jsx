@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import { Layout } from '../../components/Layout'
-import { activityService } from '../../services'
+import { ActivityCalendar } from '../../components/ActivityCalendar'
+import { activityService, stageService } from '../../services'
 import { useAuthStore } from '../../context/store'
 
 export const ActivitiesPage = () => {
   const user = useAuthStore((state) => state.user)
   const [activities, setActivities] = useState([])
   const [loading, setLoading] = useState(true)
+  const [currentStage, setCurrentStage] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [newActivity, setNewActivity] = useState({
-    stage: '',
     title: '',
     description: '',
     planned_date: ''
@@ -22,7 +23,11 @@ export const ActivitiesPage = () => {
 
   const fetchActivities = async () => {
     try {
-      const response = await activityService.getAll()
+      const [stageResponse, response] = await Promise.all([
+        stageService.getCurrentStage(),
+        activityService.getAll()
+      ])
+      setCurrentStage(stageResponse.data)
       const data = Array.isArray(response.data) ? response.data : response.data.results || []
       setActivities(data)
     } catch (error) {
@@ -40,10 +45,10 @@ export const ActivitiesPage = () => {
     e.preventDefault()
     setMessage({ type: '', text: '' })
     try {
-      await activityService.create(newActivity)
+      await activityService.create({ ...newActivity, stage: currentStage?.id })
       setMessage({ type: 'success', text: 'Activity created successfully' })
       setShowForm(false)
-      setNewActivity({ stage: '', title: '', description: '', planned_date: '' })
+      setNewActivity({ title: '', description: '', planned_date: '' })
       fetchActivities()
     } catch (error) {
       setMessage({ type: 'error', text: error.response?.data?.error || 'Failed to create activity' })
@@ -89,6 +94,9 @@ export const ActivitiesPage = () => {
         {showForm && (
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">New Activity</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Current stage: {currentStage?.stage_type || user?.current_stage || 'Concept'}
+            </p>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Title</label>
@@ -126,6 +134,10 @@ export const ActivitiesPage = () => {
               </button>
             </form>
           </div>
+        )}
+
+        {currentStage?.id && (
+          <ActivityCalendar stageId={currentStage.id} />
         )}
 
         <div className="grid gap-4">
