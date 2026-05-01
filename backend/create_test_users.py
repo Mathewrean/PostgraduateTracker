@@ -96,11 +96,13 @@ for user_data in test_users:
             user.save()
 
         if user_data['role'] == 'student':
+            # Find a supervisor user to assign as preferred supervisor
+            supervisor_user = User.objects.filter(role='supervisor').first()
             student_profile, student_created = Student.objects.get_or_create(
                 user=user,
                 defaults={
                     'project_title': f"Research Project by {user_data['first_name']}",
-                    'preferred_supervisor': 'Dr. Willy Kangojo (Coordinator)',
+                    'preferred_supervisor': supervisor_user,
                     'profile_complete': True,
                 }
             )

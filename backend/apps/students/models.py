@@ -2,23 +2,11 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from apps.users.models import User
 
-SUPERVISOR_CHOICES = [
-    ('Professor Okello (Dean)', 'Professor Okello (Dean)'),
-    ('Dr. Prisca Magotu (COD)', 'Dr. Prisca Magotu (COD)'),
-    ('Prof. Miner Titus', 'Prof. Miner Titus'),
-    ('Dr. Joseph Nyakinda', 'Dr. Joseph Nyakinda'),
-    ('Dr. Willy Kangojo (Coordinator)', 'Dr. Willy Kangojo (Coordinator)'),
-    ('Dr. Julius Owino', 'Dr. Julius Owino'),
-    ('Dr. Francis Akwenda Odhiambo', 'Dr. Francis Akwenda Odhiambo'),
-    ('Director BPS', 'Director BPS'),
-    ('OTHER', 'Other (Please specify)'),
-]
-
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
     project_title = models.CharField(max_length=255, blank=True)
-    preferred_supervisor = models.CharField(max_length=255, choices=SUPERVISOR_CHOICES, blank=True)
-    preferred_supervisor_other = models.CharField(max_length=255, blank=True, help_text='If no supervisor is selected or for custom entry')
+    preferred_supervisor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, limit_choices_to={'role': 'supervisor'}, related_name='preferred_by')
+    preferred_supervisor_other = models.CharField(max_length=255, blank=True, help_text='If no supervisor is selected from the list or for custom entry')
     
     assigned_supervisor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='students_assigned')
     current_stage = models.CharField(max_length=20, default='CONCEPT', choices=[
@@ -43,6 +31,8 @@ class Student(models.Model):
 
     @property
     def preferred_supervisor_display_name(self):
-        if self.preferred_supervisor == 'OTHER':
+        if self.preferred_supervisor:
+            return self.preferred_supervisor.get_full_name() or self.preferred_supervisor.email
+        elif self.preferred_supervisor_other:
             return self.preferred_supervisor_other
-        return self.preferred_supervisor
+        return None

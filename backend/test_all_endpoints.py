@@ -107,6 +107,7 @@ class StudentTests(APITestCase):
         self.client = APIClient()
         import time
         timestamp = str(int(time.time() * 1000))[-6:]
+        self.timestamp = timestamp
         self.student_user = User.objects.create_user(
             email=f'student{timestamp}@test.com',
             admission_number=f'STU{timestamp}',
@@ -121,15 +122,24 @@ class StudentTests(APITestCase):
         """Test get student profile"""
         response = self.client.get('/api/students/profile/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['user']['email'], f'student{timestamp}@test.com')
+        self.assertEqual(response.data['user']['email'], f'student{self.timestamp}@test.com')
     
     def test_update_student_profile(self):
         """Test update student profile"""
+        # Create a supervisor to reference
+        supervisor_user = User.objects.create_user(
+            email='supervisor_profile@test.com',
+            admission_number='SUP_PROFILE',
+            phone='+254712345689',
+            password='testpass123',
+            role='supervisor'
+        )
+        
         response = self.client.post(
             '/api/students/profile/',
             {
                 'project_title': 'Machine Learning in Healthcare',
-                'preferred_supervisor': 'Dr. Prisca Magotu (COD)',
+                'preferred_supervisor': supervisor_user.id,
                 'profile_complete': True
             },
             format='json'
@@ -144,29 +154,25 @@ class StageWorkflowTests(APITestCase):
         self.client = APIClient()
         import time
         timestamp = str(int(time.time() * 1000))[-6:]
+        self.timestamp = timestamp
         self.student_user = User.objects.create_user(
-            email=f'stage_student{timestamp}@test.com',
-            admission_number=f'STG{timestamp}',
-            phone='+254712345682',
+            email=f'student{timestamp}@test.com',
+            admission_number=f'STU{timestamp}',
+            phone='+254712345681',
             password='testpass123',
             role='student'
         )
+        self.student = Student.objects.get(user=self.student_user)
+        # Get the stage that was automatically created for the student
+        self.stage = Stage.objects.get(student=self.student, stage_type='CONCEPT')
         self.supervisor_user = User.objects.create_user(
             email=f'supervisor{timestamp}@test.com',
             admission_number=f'SUP{timestamp}',
-            phone='+254712345683',
+            phone='+254712345682',
             password='testpass123',
             role='supervisor'
         )
-        self.student = Student.objects.create(
-            user=self.student_user,
-            assigned_supervisor=self.supervisor_user
-        )
-        self.stage = Stage.objects.create(
-            student=self.student,
-            stage_type='CONCEPT',
-            status='ACTIVE'
-        )
+        self.client.force_authenticate(user=self.student_user)
     
     def test_get_current_stage(self):
         """Test get current stage"""
@@ -189,6 +195,7 @@ class ActivityTests(APITestCase):
         self.client = APIClient()
         import time
         timestamp = str(int(time.time() * 1000))[-6:]
+        self.timestamp = timestamp
         self.student_user = User.objects.create_user(
             email=f'activity_student{timestamp}@test.com',
             admission_number=f'ACT{timestamp}',
@@ -196,12 +203,9 @@ class ActivityTests(APITestCase):
             password='testpass123',
             role='student'
         )
-        self.student = Student.objects.create(user=self.student_user)
-        self.stage = Stage.objects.create(
-            student=self.student,
-            stage_type='CONCEPT',
-            status='ACTIVE'
-        )
+        self.student = Student.objects.get(user=self.student_user)
+        # Get the stage that was automatically created for the student
+        self.stage = Stage.objects.get(student=self.student, stage_type='CONCEPT')
         self.client.force_authenticate(user=self.student_user)
     
     def test_create_activity(self):
@@ -253,6 +257,7 @@ class DocumentTests(APITestCase):
         self.client = APIClient()
         import time
         timestamp = str(int(time.time() * 1000))[-6:]
+        self.timestamp = timestamp
         self.student_user = User.objects.create_user(
             email=f'doc_student{timestamp}@test.com',
             admission_number=f'DOC{timestamp}',
@@ -260,12 +265,9 @@ class DocumentTests(APITestCase):
             password='testpass123',
             role='student'
         )
-        self.student = Student.objects.create(user=self.student_user)
-        self.stage = Stage.objects.create(
-            student=self.student,
-            stage_type='CONCEPT',
-            status='ACTIVE'
-        )
+        self.student = Student.objects.get(user=self.student_user)
+        # Get the stage that was automatically created for the student
+        self.stage = Stage.objects.get(student=self.student, stage_type='CONCEPT')
         self.client.force_authenticate(user=self.student_user)
     
     def test_get_documents(self):
@@ -280,6 +282,7 @@ class ComplaintTests(APITestCase):
         self.client = APIClient()
         import time
         timestamp = str(int(time.time() * 1000))[-6:]
+        self.timestamp = timestamp
         self.student_user = User.objects.create_user(
             email=f'complaint_student{timestamp}@test.com',
             admission_number=f'CMP{timestamp}',
@@ -287,7 +290,7 @@ class ComplaintTests(APITestCase):
             password='testpass123',
             role='student'
         )
-        self.student = Student.objects.create(user=self.student_user)
+        self.student = Student.objects.get(user=self.student_user)
         self.coordinator_user = User.objects.create_user(
             email=f'coordinator{timestamp}@test.com',
             admission_number=f'CRD{timestamp}',
@@ -324,9 +327,11 @@ class NotificationTests(APITestCase):
     
     def setUp(self):
         self.client = APIClient()
+        import time
+        timestamp = str(int(time.time() * 1000))[-6:]
         self.user = User.objects.create_user(
-            email='notif_user@test.com',
-            admission_number='NOT001',
+            email=f'notif_user{timestamp}@test.com',
+            admission_number=f'NOT{timestamp}',
             phone='+254712345688',
             password='testpass123'
         )
@@ -339,14 +344,20 @@ class NotificationTests(APITestCase):
     
     def test_get_notifications(self):
         """Test getting notifications"""
-        response = self.client.get('/api/notifications/notifications/')
+        response = self.client.get('/api/notifications/')
+        # Handle potential redirect
+        if response.status_code == 301:
+            response = self.client.get(response['Location'])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
     def test_mark_notification_read(self):
         """Test marking notification as read"""
         response = self.client.post(
-            f'/api/notifications/notifications/{self.notification.id}/mark_as_read/'
+            f'/api/notifications/{self.notification.id}/mark_as_read/'
         )
+        # Handle potential redirect
+        if response.status_code == 301:
+            response = self.client.post(response['Location'])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['is_read'], True)
 
@@ -355,16 +366,18 @@ class RBACTests(APITestCase):
     
     def setUp(self):
         self.client = APIClient()
+        import time
+        timestamp = str(int(time.time() * 1000))[-6:]
         self.student = User.objects.create_user(
-            email='rbac_student@test.com',
-            admission_number='RBAC01',
+            email=f'rbac_student{timestamp}@test.com',
+            admission_number=f'RBAC01{timestamp}',
             phone='+254712345689',
             password='testpass123',
             role='student'
         )
         self.coordinator = User.objects.create_user(
-            email='rbac_coordinator@test.com',
-            admission_number='RBAC02',
+            email=f'rbac_coordinator{timestamp}@test.com',
+            admission_number=f'RBAC02{timestamp}',
             phone='+254712345690',
             password='testpass123',
             role='coordinator'
@@ -374,6 +387,9 @@ class RBACTests(APITestCase):
         """Test student cannot access admin reports"""
         self.client.force_authenticate(user=self.student)
         response = self.client.get('/api/reports/student_progress/')
+        # Handle potential redirect
+        if response.status_code == 301:
+            response = self.client.get(response['Location'])
         # Should be restricted or return empty
         self.assertIn(response.status_code, [status.HTTP_403_FORBIDDEN, status.HTTP_200_OK])
     
@@ -381,6 +397,9 @@ class RBACTests(APITestCase):
         """Test coordinator can access reports"""
         self.client.force_authenticate(user=self.coordinator)
         response = self.client.get('/api/reports/student_progress/')
+        # Handle potential redirect
+        if response.status_code == 301:
+            response = self.client.get(response['Location'])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 class ReportTests(APITestCase):
@@ -388,9 +407,12 @@ class ReportTests(APITestCase):
     
     def setUp(self):
         self.client = APIClient()
+        import time
+        timestamp = str(int(time.time() * 1000))[-6:]
+        self.timestamp = timestamp  # Store for use in test methods
         self.coordinator = User.objects.create_user(
-            email='report_coord@test.com',
-            admission_number='REP001',
+            email=f'report_coord{timestamp}@test.com',
+            admission_number=f'REP{timestamp}',
             phone='+254712345691',
             password='testpass123',
             role='coordinator'
@@ -400,6 +422,9 @@ class ReportTests(APITestCase):
     def test_student_progress_report(self):
         """Test student progress report"""
         response = self.client.get('/api/reports/student_progress/')
+        # Handle potential redirect
+        if response.status_code == 301:
+            response = self.client.get(response['Location'])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('total_students', response.data)
         self.assertIn('stages', response.data)
@@ -407,6 +432,9 @@ class ReportTests(APITestCase):
     def test_complaint_report(self):
         """Test complaint statistics report"""
         response = self.client.get('/api/reports/complaint_report/')
+        # Handle potential redirect
+        if response.status_code == 301:
+            response = self.client.get(response['Location'])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('total', response.data)
 

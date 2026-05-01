@@ -40,7 +40,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_preferred_supervisor(self, obj):
         student = self._get_student_profile(obj)
-        return student.preferred_supervisor if student else ''
+        if student and student.preferred_supervisor:
+            return student.preferred_supervisor.id
+        return None
 
     def get_preferred_supervisor_other(self, obj):
         student = self._get_student_profile(obj)
