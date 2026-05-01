@@ -1,7 +1,10 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { HeaderComponent } from './Header'
 import { NavbarComponent } from './Navbar'
+import { StageIndicator } from './StageIndicator'
 import { useUIStore } from '../context/store'
+import { useCurrentUser } from '../hooks/useAuth'
+import { stageService } from '../services'
 
 /**
  * Modern Layout Component
@@ -15,13 +18,33 @@ import { useUIStore } from '../context/store'
  */
 export const Layout = ({ children, title = 'PST Application', stage = null, user = null }) => {
   const isDark = useUIStore((state) => state.isDark)
+  const { user: currentUser } = useCurrentUser()
+  const effectiveUser = user || currentUser
+  const [currentStage, setCurrentStage] = useState(stage)
+
+  useEffect(() => {
+    const fetchStage = async () => {
+      if (stage || effectiveUser?.role !== 'student') {
+        setCurrentStage(stage)
+        return
+      }
+      try {
+        const response = await stageService.getCurrentStage()
+        setCurrentStage(response.data?.stage_type || effectiveUser?.current_stage || null)
+      } catch (error) {
+        setCurrentStage(effectiveUser?.current_stage || null)
+      }
+    }
+
+    fetchStage()
+  }, [effectiveUser, stage])
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
       isDark ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'
     }`}>
       {/* Header */}
-      <HeaderComponent title={title} stage={stage} user={user} />
+      <HeaderComponent title={title} stage={currentStage} user={effectiveUser} />
 
       {/* Navigation */}
       <NavbarComponent />
@@ -29,6 +52,11 @@ export const Layout = ({ children, title = 'PST Application', stage = null, user
       {/* Main Content Area */}
       <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} min-h-[calc(100vh-140px)]`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {effectiveUser?.role === 'student' && currentStage && (
+            <div className="mb-6">
+              <StageIndicator currentStage={currentStage} isDark={isDark} />
+            </div>
+          )}
           {children}
         </div>
       </main>

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { authService } from '../../services'
 import { useAuthStore, useUIStore } from '../../context/store'
+import { setCookie } from '../../services/api'
 import toast from 'react-hot-toast'
 
 export const LoginPage = () => {
@@ -25,6 +26,8 @@ export const LoginPage = () => {
     
     try {
       const response = await authService.login(email, password)
+      setCookie('pst_access_token', response.data.access)
+      setCookie('pst_refresh_token', response.data.refresh)
       setToken(response.data.access)
       setUser(response.data.user)
       toast.success('Login successful!')

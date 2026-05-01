@@ -2,19 +2,19 @@ import api from './api'
 
 export const authService = {
   login: (email, password) =>
-    api.post('/users/login/', { email, password }),
+    api.post('/auth/login/', { email, password }),
   
   register: (data) =>
     api.post('/users/register/', data),
   
   logout: (refreshToken) =>
-    api.post('/users/logout/', { refresh: refreshToken }),
+    api.post('/auth/logout/', { refresh: refreshToken }),
   
   getCurrentUser: () =>
-    api.get('/users/me/'),
+    api.get('/auth/profile/'),
   
   updateProfile: (data) =>
-    api.post('/users/update_profile/', data),
+    api.patch('/auth/profile/', data),
 }
 
 export const studentService = {
@@ -22,7 +22,7 @@ export const studentService = {
     api.get('/students/profile/'),
   
   updateProfile: (data) =>
-    api.post('/students/profile/', data),
+    api.patch('/students/profile/', data),
   
   getAll: () =>
     api.get('/students/'),
@@ -31,12 +31,20 @@ export const studentService = {
     api.patch(`/students/${id}/`, data),
 }
 
+export const userService = {
+  getAll: (params = {}) =>
+    api.get('/users/', { params }),
+}
+
 export const stageService = {
   getCurrentStage: () =>
     api.get('/stages/current_stage/'),
   
   getAll: () =>
     api.get('/stages/'),
+
+  getById: (stageId) =>
+    api.get(`/stages/${stageId}/`),
   
   approve: (stageId) =>
     api.post(`/stages/${stageId}/approve/`),
@@ -55,25 +63,29 @@ export const activityService = {
     }),
   
   markDone: (activityId) =>
-    api.post(`/activities/${activityId}/mark_done/`),
+    api.post(`/activities/${activityId}/complete/`),
 }
 
 export const documentService = {
-  upload: (data) => {
-    const formData = new FormData()
-    formData.append('file', data.file)
-    formData.append('stage', data.stage)
-    formData.append('doc_type', data.doc_type)
-    return api.post('/documents/documents/', formData, {
+  upload: (data) =>
+    api.post('/documents/', data, {
       headers: { 'Content-Type': 'multipart/form-data' }
-    })
-  },
+    }),
   
   getAll: () =>
-    api.get('/documents/documents/'),
+    api.get('/documents/'),
   
   verify: (docId) =>
-    api.post(`/documents/documents/${docId}/verify/`),
+    api.post(`/documents/${docId}/verify/`),
+}
+
+export const minutesService = {
+  upload: (data) =>
+    api.post('/minutes/', data, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+  approve: (minutesId) =>
+    api.post(`/minutes/${minutesId}/approve/`),
 }
 
 export const complaintService = {
@@ -89,30 +101,30 @@ export const complaintService = {
 
 export const notificationService = {
   getAll: () =>
-    api.get('/notifications/notifications/'),
+    api.get('/notifications/'),
   
   markAsRead: (notificationId) =>
-    api.post(`/notifications/notifications/${notificationId}/mark_as_read/`),
+    api.post(`/notifications/${notificationId}/read/`),
   
   markAllAsRead: () =>
-    api.post('/notifications/notifications/mark_all_as_read/'),
+    api.post('/notifications/mark_all_as_read/'),
   
   getUnreadCount: () =>
-    api.get('/notifications/notifications/unread_count/'),
+    api.get('/notifications/unread_count/'),
 }
 
 export const reportService = {
   getStudentProgress: (range = 'all') =>
-    api.get('/reports/student_progress/', { params: { range } }),
+    api.get('/reports/students/', { params: { range } }),
   
   getSupervisorReport: () =>
-    api.get('/reports/supervisor_report/'),
+    api.get('/reports/supervisors/'),
   
   getLoginHistory: () =>
-    api.get('/reports/login_history/'),
+    api.get('/reports/users/'),
   
   getComplaintReport: () =>
-    api.get('/reports/complaint_report/'),
+    api.get('/reports/complaints/'),
   
   getActivityLog: (range = 'week') =>
     api.get('/reports/activity_log/', { params: { range } }),
@@ -125,4 +137,23 @@ export const reportService = {
       params: { type, ...params },
       responseType: 'blob'
     }),
+}
+
+export const supervisorService = {
+  getStudents: () =>
+    api.get('/supervisor/students/'),
+  getApprovals: () =>
+    api.get('/supervisor/approvals/'),
+}
+
+export const auditService = {
+  getLogs: () =>
+    api.get('/logs/'),
+}
+
+export const meetingService = {
+  create: (data) =>
+    api.post('/meetings/', data),
+  getAll: () =>
+    api.get('/meetings/'),
 }

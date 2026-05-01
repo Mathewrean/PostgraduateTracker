@@ -29,6 +29,7 @@ import { CoordinatorDashboard } from './pages/coordinator/CoordinatorDashboard'
 import { AllStudentsPage } from './pages/coordinator/AllStudentsPage'
 import { AssignSupervisorsPage } from './pages/coordinator/AssignSupervisorsPage'
 import { ComplaintsPage as CoordinatorComplaintsPage } from './pages/coordinator/ComplaintsPage'
+import { ReportsPage } from './pages/coordinator/ReportsPage'
 
 // Admin Pages
 import { AuditLogPage } from './pages/admin/AuditLogPage'
@@ -56,6 +57,13 @@ function PrivateRoute({ children, allowedRoles }) {
   }
 
   return children
+}
+
+function StudentHomeRoute({ user }) {
+  if (user?.profile_complete === false) {
+    return <Navigate to="/profile" replace />
+  }
+  return <StudentDashboard />
 }
 
 export const App = () => {
@@ -104,7 +112,7 @@ export const App = () => {
             path="/dashboard"
             element={
               <PrivateRoute allowedRoles={['student', 'supervisor', 'coordinator', 'dean', 'cod', 'director_bps']}>
-                {user?.role === 'student' ? <StudentDashboard /> : 
+                {user?.role === 'student' ? <StudentHomeRoute user={user} /> : 
                  user?.role === 'supervisor' ? <SupervisorDashboard /> :
                  ['coordinator', 'dean', 'cod', 'director_bps'].includes(user?.role) ? <CoordinatorDashboard /> :
                  <Navigate to="/unauthorized" replace />}
@@ -126,10 +134,11 @@ export const App = () => {
           <Route path="/coordinator/students" element={<PrivateRoute allowedRoles={['coordinator', 'dean', 'cod', 'director_bps']}><AllStudentsPage /></PrivateRoute>} />
           <Route path="/coordinator/assign" element={<PrivateRoute allowedRoles={['coordinator', 'dean', 'cod', 'director_bps']}><AssignSupervisorsPage /></PrivateRoute>} />
           <Route path="/coordinator/complaints" element={<PrivateRoute allowedRoles={['coordinator', 'dean', 'cod', 'director_bps']}><CoordinatorComplaintsPage /></PrivateRoute>} />
+          <Route path="/coordinator/reports" element={<PrivateRoute allowedRoles={['coordinator', 'dean', 'cod', 'director_bps']}><ReportsPage /></PrivateRoute>} />
 
           {/* Admin Routes */}
-          <Route path="/admin/audit" element={<PrivateRoute allowedRoles={['director_bps']}><AuditLogPage /></PrivateRoute>} />
-          <Route path="/admin/activity" element={<PrivateRoute allowedRoles={['director_bps']}><UserActivityPage /></PrivateRoute>} />
+          <Route path="/admin/audit" element={<PrivateRoute allowedRoles={['dean', 'cod', 'director_bps']}><AuditLogPage /></PrivateRoute>} />
+          <Route path="/admin/activity" element={<PrivateRoute allowedRoles={['dean', 'cod', 'director_bps']}><UserActivityPage /></PrivateRoute>} />
 
           {/* Catch all */}
           <Route path="*" element={<Navigate to={token ? "/dashboard" : "/"} replace />} />

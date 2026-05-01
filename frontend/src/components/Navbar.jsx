@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../context/store'
 import { useUIStore } from '../context/store'
+import { authService } from '../services'
+import { getCookie } from '../services/api'
 
 export const NavbarComponent = () => {
   const navigate = useNavigate()
@@ -10,7 +12,15 @@ export const NavbarComponent = () => {
   const [menuOpen, setMenuOpen] = useState(false)
   const logout = useAuthStore((state) => state.logout)
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const refreshToken = getCookie('pst_refresh_token')
+    if (refreshToken) {
+      try {
+        await authService.logout(refreshToken)
+      } catch (error) {
+        // Continue with local logout even if the refresh token is already invalid.
+      }
+    }
     logout()
     navigate('/login')
   }
