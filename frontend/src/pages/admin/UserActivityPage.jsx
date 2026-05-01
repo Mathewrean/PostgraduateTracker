@@ -49,7 +49,11 @@ export const UserActivityPage = () => {
                   <tr key={idx} className="border-b">
                     <td className="p-3">{entry.user}</td>
                     <td className="p-3">{entry.ip_address || 'N/A'}</td>
-                    <td className="p-3">{new Date(entry.timestamp).toLocaleString()}</td>
+                    <td className="p-3">
+                      {entry.last_login_timestamp
+                        ? new Date(entry.last_login_timestamp).toLocaleString()
+                        : `${entry.date || ''} ${entry.time || ''}`.trim() || 'N/A'}
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -64,7 +64,7 @@ export const NavbarComponent = () => {
         { label: 'Complaints', path: '/coordinator/complaints' },
         { label: 'Reports', path: '/coordinator/reports' },
         { label: 'Notifications', path: '/notifications' },
-        ...(role === 'director_bps' ? [{ label: 'Audit Logs', path: '/admin/audit' }, { label: 'User Activity', path: '/admin/activity' }] : [])
+        ...(['dean', 'cod', 'director_bps'].includes(role) ? [{ label: 'Audit Logs', path: '/admin/audit' }, { label: 'User Activity', path: '/admin/activity' }] : [])
       ])
     }
     return base

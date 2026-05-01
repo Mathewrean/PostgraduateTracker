@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Layout } from '../../components/Layout'
-import { stageService } from '../../services'
+import { stageService, supervisorService } from '../../services'
 
 export const PendingApprovalsPage = () => {
   const [stages, setStages] = useState([])
@@ -13,9 +13,8 @@ export const PendingApprovalsPage = () => {
 
   const fetchApprovals = async () => {
     try {
-      const response = await stageService.getAll()
+      const response = await supervisorService.getApprovals()
       const data = Array.isArray(response.data) ? response.data : response.data.results || []
-      // Filter for ACTIVE stages only
       setStages(data.filter(s => s.status === 'ACTIVE'))
     } catch (error) {
       console.error('Failed to fetch stages:', error)

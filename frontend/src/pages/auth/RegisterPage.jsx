@@ -13,7 +13,7 @@ export const RegisterPage = () => {
     last_name: '',
     password: '',
     password_confirm: '',
-    role: 'STUDENT'
+    role: 'student'
   })
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
@@ -184,6 +184,24 @@ export const RegisterPage = () => {
                 className={`w-full px-4 py-2 rounded-lg border ${inputBg} focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors text-sm`}
                 placeholder="Doe"
               />
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className={`block ${labelColor} font-medium mb-2 text-sm`}>Role *</label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className={`w-full px-4 py-2 rounded-lg border ${inputBg} focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors text-sm`}
+              >
+                <option value="student">Student</option>
+                <option value="supervisor">Supervisor</option>
+                <option value="coordinator">Coordinator</option>
+                <option value="dean">Dean</option>
+                <option value="cod">COD</option>
+                <option value="director_bps">Director BPS</option>
+              </select>
             </div>
 
             {/* Password */}

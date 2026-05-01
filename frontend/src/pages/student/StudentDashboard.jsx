@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Layout } from '../../components/Layout'
+import { Link } from 'react-router-dom'
+import { ActivityCalendar } from '../../components/ActivityCalendar'
 import { stageService, activityService, documentService, studentService } from '../../services'
 import { useCurrentUser } from '../../hooks/useAuth'
 import { useUIStore } from '../../context/store'
@@ -97,6 +99,16 @@ export const StudentDashboard = () => {
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className={`${cardBg} p-6 rounded-lg border ${borderColor}`}>
+            <h3 className="text-xl font-bold mb-4">Quick Actions</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <Link to="/documents" className={`p-4 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>Upload Documents</Link>
+              <Link to="/activities" className={`p-4 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>Manage Activities</Link>
+              <Link to="/notifications" className={`p-4 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>View Notifications</Link>
+              <Link to="/messages" className={`p-4 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>Submit Complaint</Link>
+            </div>
+          </div>
+
           {/* Activities Section */}
           <div className={`${cardBg} p-6 rounded-lg border ${borderColor}`}>
             <h3 className="text-xl font-bold mb-4">Recent Activities</h3>
@@ -125,6 +137,10 @@ export const StudentDashboard = () => {
             </div>
           </div>
         </div>
+
+        {stage?.id && (
+          <ActivityCalendar stageId={stage.id} isDark={isDark} />
+        )}
 
         {/* Stage Progress Info */}
         {stage && (
