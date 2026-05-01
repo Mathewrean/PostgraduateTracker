@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
-from apps.users.views import UserViewSet
+from apps.users.views import UserViewSet, AuthLoginView, AuthLogoutView, AuthProfileView
 from apps.notifications.views import MeetingViewSet
 from apps.audit.views import AuditLogViewSet
 from apps.documents.views import MinutesViewSet
@@ -46,9 +46,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/auth/login/', UserViewSet.as_view({'post': 'login'}), name='auth-login'),
-    path('api/auth/logout/', UserViewSet.as_view({'post': 'logout'}), name='auth-logout'),
-    path('api/auth/profile/', UserViewSet.as_view({'get': 'me', 'patch': 'update_profile'}), name='auth-profile'),
+    path('api/auth/login/', AuthLoginView.as_view(), name='auth-login'),
+    path('api/auth/logout/', AuthLogoutView.as_view(), name='auth-logout'),
+    path('api/auth/profile/', AuthProfileView.as_view(), name='auth-profile'),
     path('api/health/', HealthCheckView.as_view(), name='health-check'),
     path('api/users/', include('apps.users.urls')),
     path('api/students/', include('apps.students.urls')),

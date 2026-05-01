@@ -19,7 +19,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 from rest_framework import status
 from apps.users.models import User
-from apps.students.models import Student, Supervisor
+from apps.students.models import Student
+from apps.supervisors.models import Supervisor
 from apps.stages.models import Stage
 from apps.activities.models import Activity
 from apps.documents.models import Document, Minutes
@@ -72,7 +73,7 @@ class TestSuite:
                 defaults={
                     'admission_number': 'STU001',
                     'phone': '+254700000001',
-                    'role': 'STUDENT'
+                    'role': 'student'
                 }
             )
             if created:
@@ -88,7 +89,7 @@ class TestSuite:
                 defaults={
                     'admission_number': 'SUP001',
                     'phone': '+254700000002',
-                    'role': 'SUPERVISOR'
+                    'role': 'supervisor'
                 }
             )
             if created:
@@ -104,7 +105,7 @@ class TestSuite:
                 defaults={
                     'admission_number': 'CRD001',
                     'phone': '+254700000003',
-                    'role': 'COORDINATOR'
+                    'role': 'coordinator'
                 }
             )
             if created:

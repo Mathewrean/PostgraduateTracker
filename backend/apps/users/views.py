@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth import authenticate
@@ -149,3 +150,64 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({'success': True}, status=status.HTTP_205_RESET_CONTENT)
         except Exception:
             return Response({'error': 'Invalid or expired refresh token'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AuthLoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        if not email or not password:
+            return Response({'error': 'Email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = authenticate(request, email=email, password=password)
+        if not user:
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        refresh = RefreshToken.for_user(user)
+        user.update_last_login(request.client_ip if hasattr(request, 'client_ip') else None)
+        log_audit_event(
+            user=user,
+            action='LOGIN',
+            description='User logged into the PST platform.',
+            ip_address=getattr(request, 'client_ip', None),
+        )
+        return Response({
+            'user': UserSerializer(user, context={'request': request}).data,
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        })
+
+
+class AuthLogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data.get('refresh')
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            log_audit_event(
+                user=request.user,
+                action='LOGOUT',
+                description='User logged out of the PST platform.',
+                ip_address=getattr(request, 'client_ip', None),
+            )
+            return Response({'success': True}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception:
+            return Response({'error': 'Invalid or expired refresh token'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AuthProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response(UserSerializer(request.user, context={'request': request}).data)
+
+    def patch(self, request):
+        serializer = UserProfileUpdateSerializer(request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(UserSerializer(request.user, context={'request': request}).data)

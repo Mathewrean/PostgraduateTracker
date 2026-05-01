@@ -39,7 +39,7 @@ class AuthenticationTests(APITestCase):
             'phone': '+254712345678',
             'first_name': 'Test',
             'last_name': 'User',
-            'role': 'student',,
+            'role': 'student',
             'password': 'testpass123',
             'password_confirm': 'testpass123'
         }
@@ -90,7 +90,7 @@ class AuthenticationTests(APITestCase):
         )
         
         self.client.force_authenticate(user=user)
-        response = self.client.get('/api/users/me/')
+        response = self.client.get('/api/auth/profile/')
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['email'], 'current@test.com')
@@ -108,7 +108,7 @@ class StudentTests(APITestCase):
             password='testpass123',
             role='student'
         )
-        self.student = Student.objects.create(user=self.student_user)
+        self.student = Student.objects.get(user=self.student_user)
         self.client.force_authenticate(user=self.student_user)
     
     def test_get_student_profile(self):
@@ -265,7 +265,7 @@ class DocumentTests(APITestCase):
     
     def test_get_documents(self):
         """Test getting documents"""
-        response = self.client.get('/api/documents/documents/')
+        response = self.client.get('/api/documents/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         print("✓ Get Documents: PASS")
 

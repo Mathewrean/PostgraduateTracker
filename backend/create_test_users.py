@@ -87,33 +87,28 @@ for user_data in test_users:
         )
         
         if created:
-            user.set_password(user_data['password'])
-            user.save()
-            
-            # If student, create student profile
-            if user_data['role'] == 'student':
-                Student.objects.get_or_create(
-                    user=user,
-                    defaults={
-                        'project_title': f"Research Project by {user_data['first_name']}",
-                        'preferred_supervisor': 'Dr. Willy Kangojo (Coordinator)',
-                    }
-                )
-            
             print(f"✅ Created {user_data['role']}: {user_data['email']}")
         else:
-            # If exists but doesn't have a student profile and is student role, create it
-            if user_data['role'] == 'student' and not hasattr(user, 'student_profile'):
-                try:
-                    Student.objects.create(
-                        user=user,
-                        project_title=f"Research Project by {user_data['first_name']}",
-                        preferred_supervisor='Dr. Willy Kangojo (Coordinator)',
-                    )
-                    print(f"✅ Added student profile: {user_data['email']}")
-                except:
-                    pass
             print(f"⏭️  Already exists: {user_data['email']}")
+
+        user.first_name = user_data['first_name']
+        user.last_name = user_data['last_name']
+        user.role = user_data['role']
+        user.phone = '+254700000000'
+        user.set_password(user_data['password'])
+        user.save()
+
+        if user_data['role'] == 'student':
+            student_profile, student_created = Student.objects.get_or_create(
+                user=user,
+                defaults={
+                    'project_title': f"Research Project by {user_data['first_name']}",
+                    'preferred_supervisor': 'Dr. Willy Kangojo (Coordinator)',
+                    'profile_complete': True,
+                }
+            )
+            if student_created:
+                print(f"✅ Added student profile: {user_data['email']}")
             
     except Exception as e:
         print(f"❌ Error creating {user_data['email']}: {str(e)}")
