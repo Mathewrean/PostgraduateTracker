@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import User
-from apps.students.models import Student
+
 
 class UserSerializer(serializers.ModelSerializer):
     current_stage = serializers.SerializerMethodField()
@@ -15,11 +15,24 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id', 'email', 'admission_number', 'phone', 'first_name', 'last_name',
-            'role', 'is_active', 'date_joined', 'last_login', 'current_stage',
-            'project_title', 'profile_complete', 'preferred_supervisor',
-            'preferred_supervisor_other', 'assigned_supervisor_id',
-            'assigned_supervisor_name', 'assigned_supervisor_email',
+            'id',
+            'email',
+            'admission_number',
+            'phone',
+            'first_name',
+            'last_name',
+            'role',
+            'is_active',
+            'date_joined',
+            'last_login',
+            'current_stage',
+            'project_title',
+            'profile_complete',
+            'preferred_supervisor',
+            'preferred_supervisor_other',
+            'assigned_supervisor_id',
+            'assigned_supervisor_name',
+            'assigned_supervisor_email',
         ]
         read_only_fields = ['date_joined', 'last_login']
 
@@ -55,7 +68,8 @@ class UserSerializer(serializers.ModelSerializer):
     def get_assigned_supervisor_name(self, obj):
         student = self._get_student_profile(obj)
         if student and student.assigned_supervisor:
-            return student.assigned_supervisor.get_full_name() or student.assigned_supervisor.email
+            return student.assigned_supervisor.get_full_name(
+            ) or student.assigned_supervisor.email
         return None
 
     def get_assigned_supervisor_email(self, obj):
@@ -64,13 +78,26 @@ class UserSerializer(serializers.ModelSerializer):
             return student.assigned_supervisor.email
         return None
 
+
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8, help_text="Minimum 8 characters")
-    password_confirm = serializers.CharField(write_only=True, min_length=8, help_text="Must match password")
+    password = serializers.CharField(
+        write_only=True,
+        min_length=8,
+        help_text="Minimum 8 characters")
+    password_confirm = serializers.CharField(
+        write_only=True, min_length=8, help_text="Must match password")
 
     class Meta:
         model = User
-        fields = ['email', 'admission_number', 'phone', 'first_name', 'last_name', 'role', 'password', 'password_confirm']
+        fields = [
+            'email',
+            'admission_number',
+            'phone',
+            'first_name',
+            'last_name',
+            'role',
+            'password',
+            'password_confirm']
         extra_kwargs = {
             'email': {'required': True},
             'admission_number': {'required': True},
@@ -82,7 +109,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if attrs['password'] != attrs.pop('password_confirm'):
-            raise serializers.ValidationError({'password': 'Passwords do not match'})
+            raise serializers.ValidationError(
+                {'password': 'Passwords do not match'})
         return attrs
 
     def create(self, validated_data):
@@ -92,25 +120,48 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         validated_data.setdefault('role', 'student')
         return User.objects.create_user(**validated_data)
 
+
 class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'admission_number', 'phone', 'first_name', 'last_name', 'role', 'is_active', 'date_joined', 'last_login', 'last_login_ip']
+        fields = [
+            'id',
+            'email',
+            'admission_number',
+            'phone',
+            'first_name',
+            'last_name',
+            'role',
+            'is_active',
+            'date_joined',
+            'last_login',
+            'last_login_ip']
         read_only_fields = ['date_joined', 'last_login', 'last_login_ip']
+
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
     project_title = serializers.CharField(required=False, allow_blank=True)
-    preferred_supervisor = serializers.CharField(required=False, allow_blank=True)
-    preferred_supervisor_other = serializers.CharField(required=False, allow_blank=True)
+    preferred_supervisor = serializers.CharField(
+        required=False, allow_blank=True)
+    preferred_supervisor_other = serializers.CharField(
+        required=False, allow_blank=True)
 
     class Meta:
         model = User
-        fields = ['email', 'first_name', 'last_name', 'phone', 'project_title', 'preferred_supervisor', 'preferred_supervisor_other']
+        fields = [
+            'email',
+            'first_name',
+            'last_name',
+            'phone',
+            'project_title',
+            'preferred_supervisor',
+            'preferred_supervisor_other']
 
     def update(self, instance, validated_data):
         project_title = validated_data.pop('project_title', None)
         preferred_supervisor = validated_data.pop('preferred_supervisor', None)
-        preferred_supervisor_other = validated_data.pop('preferred_supervisor_other', None)
+        preferred_supervisor_other = validated_data.pop(
+            'preferred_supervisor_other', None)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -124,11 +175,8 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
                 student.preferred_supervisor = preferred_supervisor
             if preferred_supervisor_other is not None:
                 student.preferred_supervisor_other = preferred_supervisor_other
-            student.profile_complete = bool(
-                student.project_title and (
-                    student.preferred_supervisor or student.preferred_supervisor_other
-                )
-            )
+            student.profile_complete = bool(student.project_title and (
+                student.preferred_supervisor or student.preferred_supervisor_other))
             student.save()
 
         return instance

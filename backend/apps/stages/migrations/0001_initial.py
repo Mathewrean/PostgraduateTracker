@@ -14,14 +14,54 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Stage',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('stage_type', models.CharField(choices=[('CONCEPT', 'Concept'), ('PROPOSAL', 'Proposal'), ('THESIS', 'Thesis Submission')], max_length=20)),
-                ('status', models.CharField(choices=[('ACTIVE', 'Active'), ('COMPLETED', 'Completed'), ('IN_PROGRESS', 'In Progress'), ('LOCKED', 'Locked')], default='ACTIVE', max_length=20)),
-                ('started_at', models.DateTimeField(auto_now_add=True)),
-                ('completed_at', models.DateTimeField(blank=True, null=True)),
-                ('approval_date', models.DateTimeField(blank=True, null=True)),
-                ('thesis_submission_date', models.DateTimeField(blank=True, null=True)),
-                ('three_month_unlock_date', models.DateTimeField(blank=True, null=True)),
+                ('id',
+                 models.BigAutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('stage_type',
+                 models.CharField(
+                     choices=[
+                         ('CONCEPT',
+                          'Concept'),
+                         ('PROPOSAL',
+                          'Proposal'),
+                         ('THESIS',
+                          'Thesis Submission')],
+                     max_length=20)),
+                ('status',
+                 models.CharField(
+                     choices=[
+                         ('ACTIVE',
+                          'Active'),
+                         ('COMPLETED',
+                          'Completed'),
+                         ('IN_PROGRESS',
+                          'In Progress'),
+                         ('LOCKED',
+                          'Locked')],
+                     default='ACTIVE',
+                     max_length=20)),
+                ('started_at',
+                 models.DateTimeField(
+                     auto_now_add=True)),
+                ('completed_at',
+                 models.DateTimeField(
+                     blank=True,
+                     null=True)),
+                ('approval_date',
+                 models.DateTimeField(
+                     blank=True,
+                     null=True)),
+                ('thesis_submission_date',
+                 models.DateTimeField(
+                     blank=True,
+                     null=True)),
+                ('three_month_unlock_date',
+                 models.DateTimeField(
+                     blank=True,
+                     null=True)),
             ],
             options={
                 'db_table': 'stages',

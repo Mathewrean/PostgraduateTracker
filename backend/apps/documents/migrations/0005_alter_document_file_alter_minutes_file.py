@@ -14,11 +14,25 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='document',
             name='file',
-            field=models.FileField(upload_to='documents/%Y/%m/%d/', validators=[django.core.validators.FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx'])]),
+            field=models.FileField(
+                upload_to='documents/%Y/%m/%d/',
+                validators=[
+                    django.core.validators.FileExtensionValidator(
+                        allowed_extensions=[
+                            'pdf',
+                            'doc',
+                            'docx'])]),
         ),
         migrations.AlterField(
             model_name='minutes',
             name='file',
-            field=models.FileField(upload_to='minutes/%Y/%m/%d/', validators=[django.core.validators.FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx'])]),
+            field=models.FileField(
+                upload_to='minutes/%Y/%m/%d/',
+                validators=[
+                    django.core.validators.FileExtensionValidator(
+                        allowed_extensions=[
+                            'pdf',
+                            'doc',
+                            'docx'])]),
         ),
     ]

@@ -18,14 +18,24 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='auditlog',
             name='user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddIndex(
             model_name='auditlog',
-            index=models.Index(fields=['user', 'timestamp'], name='audit_logs_user_id_88267f_idx'),
+            index=models.Index(
+                fields=[
+                    'user',
+                    'timestamp'],
+                name='audit_logs_user_id_88267f_idx'),
         ),
         migrations.AddIndex(
             model_name='auditlog',
-            index=models.Index(fields=['timestamp'], name='audit_logs_timesta_423be6_idx'),
+            index=models.Index(
+                fields=['timestamp'],
+                name='audit_logs_timesta_423be6_idx'),
         ),
     ]

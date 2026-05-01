@@ -5,7 +5,6 @@ from rest_framework.test import APITestCase
 from apps.activities.models import Activity
 from apps.audit.models import AuditLog
 from apps.complaints.models import Complaint
-from apps.documents.models import Minutes
 from apps.stages.models import Stage
 from apps.students.models import Student
 from apps.users.models import User
@@ -68,16 +67,20 @@ class ContractAuditTests(APITestCase):
         self.student.save()
         self.student_user.refresh_from_db()
 
-        self.concept_stage = Stage.objects.get(student=self.student, stage_type='CONCEPT')
+        self.concept_stage = Stage.objects.get(
+            student=self.student, stage_type='CONCEPT')
 
     def _authenticate(self, user):
         self.client.force_authenticate(user=user)
 
     def _pdf_upload(self, name='sample.pdf'):
-        return SimpleUploadedFile(name, b'%PDF-1.4\n1 0 obj\n<<>>\nendobj\n', content_type='application/pdf')
+        return SimpleUploadedFile(name,
+                                  b'%PDF-1.4\n1 0 obj\n<<>>\nendobj\n',
+                                  content_type='application/pdf')
 
     def _invalid_upload(self, name='fake.pdf'):
-        return SimpleUploadedFile(name, b'not-a-pdf', content_type='application/pdf')
+        return SimpleUploadedFile(
+            name, b'not-a-pdf', content_type='application/pdf')
 
     def test_auth_profile_endpoint_returns_student_payload(self):
         self._authenticate(self.student_user)
@@ -108,16 +111,18 @@ class ContractAuditTests(APITestCase):
 
     def test_stage_approval_is_blocked_until_minutes_are_approved(self):
         self._authenticate(self.student_user)
-        self.client.post(
-            '/api/documents/',
-            {'stage': self.concept_stage.id, 'doc_type': 'TRANSCRIPT', 'file': self._pdf_upload('transcript.pdf')},
-            format='multipart',
-        )
-        self.client.post(
-            '/api/documents/',
-            {'stage': self.concept_stage.id, 'doc_type': 'FEE_STATEMENT', 'file': self._pdf_upload('fees.pdf')},
-            format='multipart',
-        )
+        self.client.post('/api/documents/',
+                         {'stage': self.concept_stage.id,
+                          'doc_type': 'TRANSCRIPT',
+                          'file': self._pdf_upload('transcript.pdf')},
+                         format='multipart',
+                         )
+        self.client.post('/api/documents/',
+                         {'stage': self.concept_stage.id,
+                          'doc_type': 'FEE_STATEMENT',
+                          'file': self._pdf_upload('fees.pdf')},
+                         format='multipart',
+                         )
         self.client.post(
             '/api/minutes/',
             {'stage': self.concept_stage.id, 'file': self._pdf_upload('minutes.pdf')},
@@ -133,11 +138,13 @@ class ContractAuditTests(APITestCase):
         )
 
         self._authenticate(self.supervisor_user)
-        response = self.client.post(f'/api/stages/{self.concept_stage.id}/approve/')
+        response = self.client.post(
+            f'/api/stages/{self.concept_stage.id}/approve/')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('minutes', response.data)
 
-    def test_stage_approval_returns_missing_documents_and_incomplete_activities(self):
+    def test_stage_approval_returns_missing_documents_and_incomplete_activities(
+            self):
         Activity.objects.create(
             stage=self.concept_stage,
             created_by=self.student_user,
@@ -146,13 +153,15 @@ class ContractAuditTests(APITestCase):
             status='PLANNED',
         )
         self._authenticate(self.supervisor_user)
-        response = self.client.post(f'/api/stages/{self.concept_stage.id}/approve/')
+        response = self.client.post(
+            f'/api/stages/{self.concept_stage.id}/approve/')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('missing_document_types', response.data)
 
     def test_complaint_submission_notifies_admin_chain(self):
         self._authenticate(self.student_user)
-        response = self.client.post('/api/complaints/', {'content': 'Need help with feedback delay.'}, format='json')
+        response = self.client.post(
+            '/api/complaints/', {'content': 'Need help with feedback delay.'}, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertNotIn('recipient', response.data)
         self.assertEqual(Complaint.objects.count(), 1)

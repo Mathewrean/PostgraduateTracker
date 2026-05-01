@@ -2,38 +2,32 @@
 Comprehensive API Test Suite for PST
 Tests all endpoints and functionality
 """
+from apps.notifications.models import Notification
+from apps.complaints.models import Complaint
+from apps.activities.models import Activity
+from apps.stages.models import Stage
+from apps.students.models import Student
+from apps.users.models import User
+from rest_framework import status
+from rest_framework.test import APIClient, APITestCase
+import django
 import os
 import sys
-import json
 import unittest
 
 # Setup Django FIRST before any imports
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pst_project.settings')
 
-import django
 django.setup()
 
-from django.test import TestCase, Client
-from django.contrib.auth import get_user_model
-from rest_framework.test import APIClient, APITestCase
-from rest_framework import status
-from django.urls import reverse
-
-from apps.users.models import User
-from apps.students.models import Student
-from apps.supervisors.models import Supervisor
-from apps.stages.models import Stage
-from apps.activities.models import Activity
-from apps.documents.models import Document, Minutes
-from apps.complaints.models import Complaint
-from apps.notifications.models import Notification
 
 class AuthenticationTests(APITestCase):
     """Test authentication endpoints"""
-    
+
     def setUp(self):
         self.client = APIClient()
-        # Use unique email/admission number to avoid conflicts with create_test_users.py
+        # Use unique email/admission number to avoid conflicts with
+        # create_test_users.py
         import time
         timestamp = str(int(time.time() * 1000))[-6:]
         self.user_data = {
@@ -46,7 +40,7 @@ class AuthenticationTests(APITestCase):
             'password': 'testpass123',
             'password_confirm': 'testpass123'
         }
-    
+
     def test_user_registration(self):
         """Test user registration endpoint"""
         response = self.client.post(
@@ -57,8 +51,10 @@ class AuthenticationTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIn('access', response.data)
         self.assertIn('refresh', response.data)
-        self.assertEqual(response.data['user']['email'], self.user_data['email'])
-    
+        self.assertEqual(
+            response.data['user']['email'],
+            self.user_data['email'])
+
     def test_jwt_token_obtain(self):
         """Test JWT token endpoint"""
         # First create a user with unique data
@@ -70,7 +66,7 @@ class AuthenticationTests(APITestCase):
             phone='+254712345679',
             password='testpass123'
         )
-        
+
         response = self.client.post(
             '/api/auth/token/',
             {
@@ -81,7 +77,7 @@ class AuthenticationTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('access', response.data)
-    
+
     def test_get_current_user(self):
         """Test get current user endpoint"""
         # Create and login user with unique data
@@ -93,16 +89,19 @@ class AuthenticationTests(APITestCase):
             phone='+254712345680',
             password='testpass123'
         )
-        
+
         self.client.force_authenticate(user=user)
         response = self.client.get('/api/auth/profile/')
-        
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['email'], f'current{timestamp}@test.com')
+        self.assertEqual(
+            response.data['email'],
+            f'current{timestamp}@test.com')
+
 
 class StudentTests(APITestCase):
     """Test student endpoints"""
-    
+
     def setUp(self):
         self.client = APIClient()
         import time
@@ -117,13 +116,15 @@ class StudentTests(APITestCase):
         )
         self.student = Student.objects.get(user=self.student_user)
         self.client.force_authenticate(user=self.student_user)
-    
+
     def test_get_student_profile(self):
         """Test get student profile"""
         response = self.client.get('/api/students/profile/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['user']['email'], f'student{self.timestamp}@test.com')
-    
+        self.assertEqual(
+            response.data['user']['email'], f'student{
+                self.timestamp}@test.com')
+
     def test_update_student_profile(self):
         """Test update student profile"""
         # Create a supervisor to reference
@@ -134,7 +135,7 @@ class StudentTests(APITestCase):
             password='testpass123',
             role='supervisor'
         )
-        
+
         response = self.client.post(
             '/api/students/profile/',
             {
@@ -147,9 +148,10 @@ class StudentTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('project_title', response.data)
 
+
 class StageWorkflowTests(APITestCase):
     """Test stage-gated workflow"""
-    
+
     def setUp(self):
         self.client = APIClient()
         import time
@@ -164,7 +166,8 @@ class StageWorkflowTests(APITestCase):
         )
         self.student = Student.objects.get(user=self.student_user)
         # Get the stage that was automatically created for the student
-        self.stage = Stage.objects.get(student=self.student, stage_type='CONCEPT')
+        self.stage = Stage.objects.get(
+            student=self.student, stage_type='CONCEPT')
         self.supervisor_user = User.objects.create_user(
             email=f'supervisor{timestamp}@test.com',
             admission_number=f'SUP{timestamp}',
@@ -173,14 +176,14 @@ class StageWorkflowTests(APITestCase):
             role='supervisor'
         )
         self.client.force_authenticate(user=self.student_user)
-    
+
     def test_get_current_stage(self):
         """Test get current stage"""
         self.client.force_authenticate(user=self.student_user)
         response = self.client.get('/api/stages/current_stage/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['stage_type'], 'CONCEPT')
-    
+
     def test_stage_progression(self):
         """Test stage workflow progression"""
         self.client.force_authenticate(user=self.student_user)
@@ -188,9 +191,10 @@ class StageWorkflowTests(APITestCase):
         response = self.client.get('/api/stages/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+
 class ActivityTests(APITestCase):
     """Test activity endpoints"""
-    
+
     def setUp(self):
         self.client = APIClient()
         import time
@@ -205,9 +209,10 @@ class ActivityTests(APITestCase):
         )
         self.student = Student.objects.get(user=self.student_user)
         # Get the stage that was automatically created for the student
-        self.stage = Stage.objects.get(student=self.student, stage_type='CONCEPT')
+        self.stage = Stage.objects.get(
+            student=self.student, stage_type='CONCEPT')
         self.client.force_authenticate(user=self.student_user)
-    
+
     def test_create_activity(self):
         """Test creating an activity"""
         response = self.client.post(
@@ -222,7 +227,7 @@ class ActivityTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['title'], 'Literature Review')
-    
+
     def test_get_activities(self):
         """Test getting all activities"""
         activity = Activity.objects.create(
@@ -234,7 +239,7 @@ class ActivityTests(APITestCase):
         response = self.client.get('/api/activities/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreater(len(response.data), 0)
-    
+
     def test_mark_activity_done(self):
         """Test marking activity as completed"""
         activity = Activity.objects.create(
@@ -250,9 +255,10 @@ class ActivityTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['status'], 'COMPLETED')
 
+
 class DocumentTests(APITestCase):
     """Test document upload endpoints"""
-    
+
     def setUp(self):
         self.client = APIClient()
         import time
@@ -267,17 +273,19 @@ class DocumentTests(APITestCase):
         )
         self.student = Student.objects.get(user=self.student_user)
         # Get the stage that was automatically created for the student
-        self.stage = Stage.objects.get(student=self.student, stage_type='CONCEPT')
+        self.stage = Stage.objects.get(
+            student=self.student, stage_type='CONCEPT')
         self.client.force_authenticate(user=self.student_user)
-    
+
     def test_get_documents(self):
         """Test getting documents"""
         response = self.client.get('/api/documents/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+
 class ComplaintTests(APITestCase):
     """Test complaint endpoints"""
-    
+
     def setUp(self):
         self.client = APIClient()
         import time
@@ -299,7 +307,7 @@ class ComplaintTests(APITestCase):
             role='coordinator'
         )
         self.client.force_authenticate(user=self.student_user)
-    
+
     def test_submit_complaint(self):
         """Test submitting a complaint"""
         response = self.client.post(
@@ -311,7 +319,7 @@ class ComplaintTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['status'], 'SUBMITTED')
-    
+
     def test_get_complaints(self):
         """Test getting complaints"""
         complaint = Complaint.objects.create(
@@ -322,9 +330,10 @@ class ComplaintTests(APITestCase):
         response = self.client.get('/api/complaints/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+
 class NotificationTests(APITestCase):
     """Test notification endpoints"""
-    
+
     def setUp(self):
         self.client = APIClient()
         import time
@@ -341,7 +350,7 @@ class NotificationTests(APITestCase):
             notification_type='ACTIVITY_REMINDER'
         )
         self.client.force_authenticate(user=self.user)
-    
+
     def test_get_notifications(self):
         """Test getting notifications"""
         response = self.client.get('/api/notifications/')
@@ -349,7 +358,7 @@ class NotificationTests(APITestCase):
         if response.status_code == 301:
             response = self.client.get(response['Location'])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-    
+
     def test_mark_notification_read(self):
         """Test marking notification as read"""
         response = self.client.post(
@@ -361,9 +370,10 @@ class NotificationTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['is_read'], True)
 
+
 class RBACTests(APITestCase):
     """Test Role-Based Access Control"""
-    
+
     def setUp(self):
         self.client = APIClient()
         import time
@@ -382,7 +392,7 @@ class RBACTests(APITestCase):
             password='testpass123',
             role='coordinator'
         )
-    
+
     def test_student_cannot_access_reports(self):
         """Test student cannot access admin reports"""
         self.client.force_authenticate(user=self.student)
@@ -391,8 +401,10 @@ class RBACTests(APITestCase):
         if response.status_code == 301:
             response = self.client.get(response['Location'])
         # Should be restricted or return empty
-        self.assertIn(response.status_code, [status.HTTP_403_FORBIDDEN, status.HTTP_200_OK])
-    
+        self.assertIn(
+            response.status_code, [
+                status.HTTP_403_FORBIDDEN, status.HTTP_200_OK])
+
     def test_coordinator_can_access_reports(self):
         """Test coordinator can access reports"""
         self.client.force_authenticate(user=self.coordinator)
@@ -402,9 +414,10 @@ class RBACTests(APITestCase):
             response = self.client.get(response['Location'])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+
 class ReportTests(APITestCase):
     """Test reporting endpoints"""
-    
+
     def setUp(self):
         self.client = APIClient()
         import time
@@ -418,7 +431,7 @@ class ReportTests(APITestCase):
             role='coordinator'
         )
         self.client.force_authenticate(user=self.coordinator)
-    
+
     def test_student_progress_report(self):
         """Test student progress report"""
         response = self.client.get('/api/reports/student_progress/')
@@ -428,7 +441,7 @@ class ReportTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('total_students', response.data)
         self.assertIn('stages', response.data)
-    
+
     def test_complaint_report(self):
         """Test complaint statistics report"""
         response = self.client.get('/api/reports/complaint_report/')
@@ -438,9 +451,10 @@ class ReportTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('total', response.data)
 
+
 def run_all_tests():
     """Run all tests"""
-    
+
     test_classes = [
         AuthenticationTests,
         StudentTests,
@@ -452,16 +466,16 @@ def run_all_tests():
         RBACTests,
         ReportTests
     ]
-    
+
     total_tests = 0
     passed_tests = 0
     failed_tests = 0
-    
+
     for test_class in test_classes:
         suite = unittest.TestLoader().loadTestsFromTestCase(test_class)
         runner = unittest.TextTestRunner(verbosity=1)
         result = runner.run(suite)
-        
+
         for test in suite:
             total_tests += 1
             if result.wasSuccessful():
@@ -470,9 +484,11 @@ def run_all_tests():
                 failed_tests += 1
 
     if total_tests > 0:
-        print(f"\nTests completed: {total_tests} total, {passed_tests} passed, {failed_tests} failed")
+        print(
+            f"\nTests completed: {total_tests} total, {passed_tests} passed, {failed_tests} failed")
         return failed_tests == 0
     return False
+
 
 if __name__ == '__main__':
     success = run_all_tests()

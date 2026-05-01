@@ -20,42 +20,74 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='activity',
             name='created_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='created_activities', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='created_activities',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='activity',
             name='marked_done_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='completed_activities', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='completed_activities',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='activity',
             name='stage',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='activities', to='stages.stage'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='activities',
+                to='stages.stage'),
         ),
         migrations.AddField(
             model_name='meeting',
             name='student',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='meetings', to='students.student'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='meetings',
+                to='students.student'),
         ),
         migrations.AddField(
             model_name='meeting',
             name='supervisor',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='supervised_meetings', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='supervised_meetings',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddIndex(
             model_name='activity',
-            index=models.Index(fields=['stage', 'status'], name='activities_stage_i_ffb8cf_idx'),
+            index=models.Index(
+                fields=[
+                    'stage',
+                    'status'],
+                name='activities_stage_i_ffb8cf_idx'),
         ),
         migrations.AddIndex(
             model_name='activity',
-            index=models.Index(fields=['planned_date'], name='activities_planned_925940_idx'),
+            index=models.Index(
+                fields=['planned_date'],
+                name='activities_planned_925940_idx'),
         ),
         migrations.AddIndex(
             model_name='meeting',
-            index=models.Index(fields=['student', 'status'], name='meetings_student_d1ade4_idx'),
+            index=models.Index(
+                fields=[
+                    'student',
+                    'status'],
+                name='meetings_student_d1ade4_idx'),
         ),
         migrations.AddIndex(
             model_name='meeting',
-            index=models.Index(fields=['scheduled_date'], name='meetings_schedul_e94640_idx'),
+            index=models.Index(
+                fields=['scheduled_date'],
+                name='meetings_schedul_e94640_idx'),
         ),
     ]

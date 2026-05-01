@@ -19,23 +19,40 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='stage',
             name='approved_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='approved_stages', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='approved_stages',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='stage',
             name='student',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='stages', to='students.student'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='stages',
+                to='students.student'),
         ),
         migrations.AddIndex(
             model_name='stage',
-            index=models.Index(fields=['student', 'stage_type'], name='stages_student_a7ac32_idx'),
+            index=models.Index(
+                fields=[
+                    'student',
+                    'stage_type'],
+                name='stages_student_a7ac32_idx'),
         ),
         migrations.AddIndex(
             model_name='stage',
-            index=models.Index(fields=['status'], name='stages_status_16795b_idx'),
+            index=models.Index(
+                fields=['status'],
+                name='stages_status_16795b_idx'),
         ),
         migrations.AlterUniqueTogether(
             name='stage',
-            unique_together={('student', 'stage_type')},
+            unique_together={
+                (
+                    'student',
+                    'stage_type')},
         ),
     ]

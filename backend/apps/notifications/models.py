@@ -1,6 +1,7 @@
 from django.db import models
 from apps.users.models import User
 
+
 class Notification(models.Model):
     NOTIFICATION_TYPES = [
         ('ACTIVITY_REMINDER', 'Activity Reminder'),
@@ -14,9 +15,13 @@ class Notification(models.Model):
         ('STAGE_BLOCKED', 'Stage Completion Blocked'),
     ]
 
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    recipient = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='notifications')
     message = models.TextField()
-    notification_type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES)
+    notification_type = models.CharField(
+        max_length=50, choices=NOTIFICATION_TYPES)
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     link = models.CharField(max_length=500, blank=True)

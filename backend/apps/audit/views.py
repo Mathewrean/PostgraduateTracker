@@ -6,6 +6,7 @@ from rest_framework.exceptions import PermissionDenied
 from .models import AuditLog
 from .serializers import AuditLogSerializer
 
+
 class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = AuditLog.objects.all()
     serializer_class = AuditLogSerializer
@@ -13,7 +14,8 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
 
     def _require_audit_access(self):
         if self.request.user.role_key not in ['dean', 'cod', 'director_bps']:
-            raise PermissionDenied('Only the Dean, COD, and Director BPS can access audit logs.')
+            raise PermissionDenied(
+                'Only the Dean, COD, and Director BPS can access audit logs.')
 
     def get_queryset(self):
         self._require_audit_access()

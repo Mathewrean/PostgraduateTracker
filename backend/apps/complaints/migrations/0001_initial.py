@@ -14,13 +14,38 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Complaint',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('content', models.TextField()),
-                ('submitted_at', models.DateTimeField(auto_now_add=True)),
-                ('status', models.CharField(choices=[('SUBMITTED', 'Submitted'), ('UNDER_REVIEW', 'Under Review'), ('RESOLVED', 'Resolved')], default='SUBMITTED', max_length=20)),
-                ('response_content', models.TextField(blank=True)),
-                ('responded_at', models.DateTimeField(blank=True, null=True)),
-                ('is_overdue', models.BooleanField(default=False)),
+                ('id',
+                 models.BigAutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('content',
+                 models.TextField()),
+                ('submitted_at',
+                 models.DateTimeField(
+                     auto_now_add=True)),
+                ('status',
+                 models.CharField(
+                     choices=[
+                         ('SUBMITTED',
+                          'Submitted'),
+                         ('UNDER_REVIEW',
+                          'Under Review'),
+                         ('RESOLVED',
+                          'Resolved')],
+                     default='SUBMITTED',
+                     max_length=20)),
+                ('response_content',
+                 models.TextField(
+                     blank=True)),
+                ('responded_at',
+                 models.DateTimeField(
+                     blank=True,
+                     null=True)),
+                ('is_overdue',
+                 models.BooleanField(
+                     default=False)),
             ],
             options={
                 'db_table': 'complaints',

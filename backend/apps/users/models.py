@@ -25,15 +25,24 @@ def normalize_role_value(value):
     if value is None:
         return 'student'
     cleaned = str(value).strip()
-    return ROLE_NORMALIZATION_MAP.get(cleaned, ROLE_NORMALIZATION_MAP.get(cleaned.lower(), 'student'))
+    return ROLE_NORMALIZATION_MAP.get(
+        cleaned, ROLE_NORMALIZATION_MAP.get(
+            cleaned.lower(), 'student'))
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, admission_number, phone, password=None, **extra_fields):
+    def create_user(
+            self,
+            email,
+            admission_number,
+            phone,
+            password=None,
+            **extra_fields):
         if not email:
             raise ValueError('Email is required')
         email = self.normalize_email(email)
-        extra_fields['role'] = normalize_role_value(extra_fields.get('role', 'student'))
+        extra_fields['role'] = normalize_role_value(
+            extra_fields.get('role', 'student'))
         user = self.model(
             email=email,
             admission_number=admission_number,
@@ -59,11 +68,22 @@ class UserManager(BaseUserManager):
             )
         return user
 
-    def create_superuser(self, email, admission_number, phone, password=None, **extra_fields):
+    def create_superuser(
+            self,
+            email,
+            admission_number,
+            phone,
+            password=None,
+            **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('role', 'dean')
-        return self.create_user(email, admission_number, phone, password, **extra_fields)
+        return self.create_user(
+            email,
+            admission_number,
+            phone,
+            password,
+            **extra_fields)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -78,10 +98,14 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(unique=True)
     admission_number = models.CharField(max_length=50, unique=True)
-    phone = models.CharField(max_length=20)  # Allow formatted numbers like +254 701 618 286
+    # Allow formatted numbers like +254 701 618 286
+    phone = models.CharField(max_length=20)
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student')
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default='student')
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)

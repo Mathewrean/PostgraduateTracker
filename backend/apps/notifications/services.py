@@ -16,7 +16,7 @@ def _dispatch_notification_email(notification_id):
 def notify(recipient, message, notification_type, link=None):
     """
     Create a notification record and dispatch an async email task.
-    
+
     Args:
         recipient: User object who will receive the notification
         message: str - The notification message
@@ -30,7 +30,7 @@ def notify(recipient, message, notification_type, link=None):
             notification_type=notification_type,
             link=link or ''
         )
-        
+
         # Dispatch the Celery handoff in a background thread so broker latency
         # never slows down the API response path.
         threading.Thread(
@@ -38,8 +38,10 @@ def notify(recipient, message, notification_type, link=None):
             args=(notification.id,),
             daemon=True,
         ).start()
-        
-        logger.info(f'Notification created for {recipient.email}: {notification_type}')
+
+        logger.info(
+            f'Notification created for {
+                recipient.email}: {notification_type}')
         return notification
     except Exception as e:
         logger.error(f'Error creating notification: {str(e)}')

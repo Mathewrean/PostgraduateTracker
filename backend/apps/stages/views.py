@@ -9,6 +9,7 @@ from .serializers import StageSerializer
 from apps.audit.services import log_audit_event
 from apps.students.models import Student
 
+
 class StageViewSet(viewsets.ModelViewSet):
     serializer_class = StageSerializer
     permission_classes = [IsAuthenticated]
@@ -37,23 +38,31 @@ class StageViewSet(viewsets.ModelViewSet):
         ).prefetch_related('activities', 'documents', 'minutes')
 
     def create(self, request, *args, **kwargs):
-        if request.user.role_key not in ['coordinator', 'dean', 'cod', 'director_bps']:
-            raise PermissionDenied('Only coordinators and admins can create stages.')
+        if request.user.role_key not in [
+                'coordinator', 'dean', 'cod', 'director_bps']:
+            raise PermissionDenied(
+                'Only coordinators and admins can create stages.')
         return super().create(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
-        if request.user.role_key not in ['coordinator', 'dean', 'cod', 'director_bps']:
-            raise PermissionDenied('Only coordinators and admins can update stages.')
+        if request.user.role_key not in [
+                'coordinator', 'dean', 'cod', 'director_bps']:
+            raise PermissionDenied(
+                'Only coordinators and admins can update stages.')
         return super().update(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
-        if request.user.role_key not in ['coordinator', 'dean', 'cod', 'director_bps']:
-            raise PermissionDenied('Only coordinators and admins can update stages.')
+        if request.user.role_key not in [
+                'coordinator', 'dean', 'cod', 'director_bps']:
+            raise PermissionDenied(
+                'Only coordinators and admins can update stages.')
         return super().partial_update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        if request.user.role_key not in ['coordinator', 'dean', 'cod', 'director_bps']:
-            raise PermissionDenied('Only coordinators and admins can delete stages.')
+        if request.user.role_key not in [
+                'coordinator', 'dean', 'cod', 'director_bps']:
+            raise PermissionDenied(
+                'Only coordinators and admins can delete stages.')
         return super().destroy(request, *args, **kwargs)
 
     @action(detail=False, methods=['get'])
@@ -67,21 +76,26 @@ class StageViewSet(viewsets.ModelViewSet):
             if current_stage:
                 serializer = self.get_serializer(current_stage)
                 return Response(serializer.data)
-            return Response({'error': 'No active stage'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'No active stage'},
+                            status=status.HTTP_404_NOT_FOUND)
         except Student.DoesNotExist:
-            return Response({'error': 'Student profile not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Student profile not found'},
+                            status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=True, methods=['post'])
     def approve(self, request, pk=None):
         stage = self.get_object()
-        
+
         # Check if user is assigned supervisor
         if request.user != stage.student.assigned_supervisor:
-            return Response({'error': 'Only assigned supervisor can approve'}, status=status.HTTP_403_FORBIDDEN)
-        
-        # Check if the stage is in ACTIVE status (only ACTIVE stages can be approved)
+            return Response(
+                {'error': 'Only assigned supervisor can approve'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Check if the stage is in ACTIVE status (only ACTIVE stages can be
+        # approved)
         if stage.status != 'ACTIVE':
-            return Response({'error': 'Only active stages can be approved'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Only active stages can be approved'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         blockers = stage.approval_blockers()
         if blockers.get('missing_documents'):
@@ -101,14 +115,19 @@ class StageViewSet(viewsets.ModelViewSet):
                 'error': 'Minutes of Presentation approval is required before stage approval',
                 'minutes': blockers['minutes'],
             }, status=status.HTTP_400_BAD_REQUEST)
-        
+
         # Approve stage
         stage.status = 'COMPLETED'
         stage.approved_by = request.user
         stage.approval_date = timezone.now()
         stage.completed_at = timezone.now()
-        stage.save(update_fields=['status', 'approved_by', 'approval_date', 'completed_at'])
-        
+        stage.save(
+            update_fields=[
+                'status',
+                'approved_by',
+                'approval_date',
+                'completed_at'])
+
         # Notify student
         from apps.notifications.services import notify
         notify(
@@ -117,13 +136,20 @@ class StageViewSet(viewsets.ModelViewSet):
             notification_type='SUPERVISOR_APPROVAL',
             link=f'/api/stages/{stage.id}/'
         )
-        
+
         # Create next stage if applicable (not for THESIS which is final)
-        stage_progression = {'CONCEPT': 'PROPOSAL', 'PROPOSAL': 'THESIS', 'THESIS': 'COMPLETED'}
+        stage_progression = {
+            'CONCEPT': 'PROPOSAL',
+            'PROPOSAL': 'THESIS',
+            'THESIS': 'COMPLETED'}
         next_stage_type = stage_progression.get(stage.stage_type)
-        
+
         if next_stage_type and next_stage_type != 'COMPLETED':
-            Stage.objects.get_or_create(student=stage.student, stage_type=next_stage_type, defaults={'status': 'ACTIVE'})
+            Stage.objects.get_or_create(
+                student=stage.student,
+                stage_type=next_stage_type,
+                defaults={
+                    'status': 'ACTIVE'})
 
         stage.student.current_stage = next_stage_type if next_stage_type else 'COMPLETED'
         stage.student.save(update_fields=['current_stage'])
@@ -131,18 +157,33 @@ class StageViewSet(viewsets.ModelViewSet):
         log_audit_event(
             user=request.user,
             action='STAGE_APPROVAL',
-            description=f'{request.user.email} approved the {stage.stage_type} stage for {stage.student.user.email}.',
-            ip_address=getattr(request, 'client_ip', None),
-            extra_data={'stage_id': stage.id, 'next_stage': next_stage_type},
+            description=f'{
+                request.user.email} approved the {
+                stage.stage_type} stage for {
+                stage.student.user.email}.',
+            ip_address=getattr(
+                request,
+                'client_ip',
+                    None),
+            extra_data={
+                'stage_id': stage.id,
+                'next_stage': next_stage_type},
         )
 
         if next_stage_type:
             log_audit_event(
                 user=request.user,
                 action='STAGE_TRANSITION',
-                description=f'{stage.student.user.email} moved from {stage.stage_type} to {next_stage_type}.',
-                ip_address=getattr(request, 'client_ip', None),
-                extra_data={'stage_id': stage.id, 'next_stage': next_stage_type},
+                description=f'{
+                    stage.student.user.email} moved from {
+                    stage.stage_type} to {next_stage_type}.',
+                ip_address=getattr(
+                    request,
+                    'client_ip',
+                    None),
+                extra_data={
+                    'stage_id': stage.id,
+                    'next_stage': next_stage_type},
             )
 
         return Response(self.get_serializer(stage).data)

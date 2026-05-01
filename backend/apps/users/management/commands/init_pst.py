@@ -2,8 +2,8 @@
 
 from django.core.management.base import BaseCommand
 from apps.users.models import User
-from apps.students.models import Student, Supervisor
-from apps.stages.models import Stage
+from apps.students.models import Supervisor
+
 
 class Command(BaseCommand):
     help = 'Initialize PST with default data'
@@ -32,7 +32,7 @@ class Command(BaseCommand):
                     'role': 'SUPERVISOR',
                 }
             )
-            
+
             if created:
                 user.set_password('defaultpassword123')
                 user.save()

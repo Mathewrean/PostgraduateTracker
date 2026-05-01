@@ -19,7 +19,8 @@ from apps.users.models import User
 
 
 def build_minimal_pdf(lines):
-    escaped_lines = [line.replace('\\', '\\\\').replace('(', '\\(').replace(')', '\\)') for line in lines]
+    escaped_lines = [line.replace('\\', '\\\\').replace(
+        '(', '\\(').replace(')', '\\)') for line in lines]
     text_commands = ['BT /F1 10 Tf 50 780 Td 14 TL']
     for index, line in enumerate(escaped_lines):
         operator = 'Tj' if index == 0 else "'"
@@ -29,10 +30,17 @@ def build_minimal_pdf(lines):
 
     objects = []
     objects.append(b'1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n')
-    objects.append(b'2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj\n')
-    objects.append(b'3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >> endobj\n')
-    objects.append(f'4 0 obj << /Length {len(content)} >> stream\n'.encode('latin-1') + content + b'\nendstream endobj\n')
-    objects.append(b'5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj\n')
+    objects.append(
+        b'2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj\n')
+    objects.append(
+        b'3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >> endobj\n')
+    objects.append(
+        f'4 0 obj << /Length {
+            len(content)} >> stream\n'.encode('latin-1') +
+        content +
+        b'\nendstream endobj\n')
+    objects.append(
+        b'5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj\n')
 
     pdf = bytearray(b'%PDF-1.4\n')
     offsets = [0]
@@ -59,7 +67,8 @@ class ReportViewSet(viewsets.ViewSet):
 
         class IsCoordinatorOrSeniorAdmin(BasePermission):
             def has_permission(self, request, view):
-                return request.user and request.user.role_key in ['coordinator', 'dean', 'cod', 'director_bps']
+                return request.user and request.user.role_key in [
+                    'coordinator', 'dean', 'cod', 'director_bps']
 
         return [IsCoordinatorOrSeniorAdmin()]
 
@@ -93,7 +102,9 @@ class ReportViewSet(viewsets.ViewSet):
         return queryset.filter(**{f'{field_name}__gte': start_date})
 
     def _student_report_payload(self, request):
-        students = Student.objects.select_related('user', 'assigned_supervisor').prefetch_related('stages', 'stages__activities')
+        students = Student.objects.select_related(
+            'user', 'assigned_supervisor').prefetch_related(
+            'stages', 'stages__activities')
         stages = Stage.objects.select_related('student__user', 'approved_by')
 
         stages = self._filter_queryset_by_date(stages, 'started_at', request)
@@ -171,8 +182,10 @@ class ReportViewSet(viewsets.ViewSet):
                 | Q(last_name__icontains=name_filter)
             )
 
-        login_logs = AuditLog.objects.filter(action='LOGIN').order_by('-timestamp')
-        login_logs = self._filter_queryset_by_date(login_logs, 'timestamp', request)
+        login_logs = AuditLog.objects.filter(
+            action='LOGIN').order_by('-timestamp')
+        login_logs = self._filter_queryset_by_date(
+            login_logs, 'timestamp', request)
 
         return {
             'login_history': [
@@ -210,9 +223,12 @@ class ReportViewSet(viewsets.ViewSet):
         supervisors = User.objects.filter(role='supervisor').order_by('email')
         supervisor_stats = []
         for supervisor in supervisors:
-            assigned_students = Student.objects.filter(assigned_supervisor=supervisor).select_related('user')
-            pending_approvals = Stage.objects.filter(student__assigned_supervisor=supervisor, status='ACTIVE').count()
-            approval_history = Stage.objects.filter(approved_by=supervisor).select_related('student__user').order_by('-approval_date')
+            assigned_students = Student.objects.filter(
+                assigned_supervisor=supervisor).select_related('user')
+            pending_approvals = Stage.objects.filter(
+                student__assigned_supervisor=supervisor, status='ACTIVE').count()
+            approval_history = Stage.objects.filter(approved_by=supervisor).select_related(
+                'student__user').order_by('-approval_date')
             supervisor_stats.append({
                 'supervisor_email': supervisor.email,
                 'students': [
@@ -236,8 +252,10 @@ class ReportViewSet(viewsets.ViewSet):
         return supervisor_stats
 
     def _complaint_report_payload(self, request):
-        complaints = Complaint.objects.select_related('student__user', 'responded_by').order_by('-submitted_at')
-        complaints = self._filter_queryset_by_date(complaints, 'submitted_at', request)
+        complaints = Complaint.objects.select_related(
+            'student__user', 'responded_by').order_by('-submitted_at')
+        complaints = self._filter_queryset_by_date(
+            complaints, 'submitted_at', request)
         return {
             'summary': {
                 'total': complaints.count(),
@@ -307,11 +325,18 @@ class ReportViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'], url_path='stage_transition_report')
     def stage_transition_report(self, request):
-        return Response({
-            'concept_to_proposal': Stage.objects.filter(stage_type='CONCEPT', status='COMPLETED').count(),
-            'proposal_to_thesis': Stage.objects.filter(stage_type='PROPOSAL', status='COMPLETED').count(),
-            'thesis_completion': Stage.objects.filter(stage_type='THESIS', status='COMPLETED').count(),
-        })
+        return Response(
+            {
+                'concept_to_proposal': Stage.objects.filter(
+                    stage_type='CONCEPT',
+                    status='COMPLETED').count(),
+                'proposal_to_thesis': Stage.objects.filter(
+                    stage_type='PROPOSAL',
+                    status='COMPLETED').count(),
+                'thesis_completion': Stage.objects.filter(
+                    stage_type='THESIS',
+                    status='COMPLETED').count(),
+            })
 
     @action(detail=False, methods=['get'], url_path='export')
     def export(self, request):
@@ -324,9 +349,15 @@ class ReportViewSet(viewsets.ViewSet):
             'supervisors': self._supervisor_report_payload(request),
             'complaints': self._complaint_report_payload(request),
             'stage_transition': {
-                'concept_to_proposal': Stage.objects.filter(stage_type='CONCEPT', status='COMPLETED').count(),
-                'proposal_to_thesis': Stage.objects.filter(stage_type='PROPOSAL', status='COMPLETED').count(),
-                'thesis_completion': Stage.objects.filter(stage_type='THESIS', status='COMPLETED').count(),
+                'concept_to_proposal': Stage.objects.filter(
+                    stage_type='CONCEPT',
+                    status='COMPLETED').count(),
+                'proposal_to_thesis': Stage.objects.filter(
+                    stage_type='PROPOSAL',
+                    status='COMPLETED').count(),
+                'thesis_completion': Stage.objects.filter(
+                    stage_type='THESIS',
+                    status='COMPLETED').count(),
             },
             'student_progress': self._student_report_payload(request),
             'supervisor_report': self._supervisor_report_payload(request),
@@ -355,9 +386,15 @@ class ReportViewSet(viewsets.ViewSet):
             log_audit_event(
                 user=request.user,
                 action='REPORT_GENERATION',
-                description=f'{request.user.email} generated a {report_type} report in CSV format.',
-                ip_address=getattr(request, 'client_ip', None),
-                extra_data={'report_type': report_type, 'format': 'csv'},
+                description=f'{
+                    request.user.email} generated a {report_type} report in CSV format.',
+                ip_address=getattr(
+                    request,
+                    'client_ip',
+                    None),
+                extra_data={
+                    'report_type': report_type,
+                    'format': 'csv'},
             )
             return response
 
@@ -368,14 +405,22 @@ class ReportViewSet(viewsets.ViewSet):
                 '',
                 str(data),
             ]
-            response = HttpResponse(build_minimal_pdf(lines), content_type='application/pdf')
+            response = HttpResponse(
+                build_minimal_pdf(lines),
+                content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="{report_type}.pdf"'
             log_audit_event(
                 user=request.user,
                 action='REPORT_GENERATION',
-                description=f'{request.user.email} generated a {report_type} report in PDF format.',
-                ip_address=getattr(request, 'client_ip', None),
-                extra_data={'report_type': report_type, 'format': 'pdf'},
+                description=f'{
+                    request.user.email} generated a {report_type} report in PDF format.',
+                ip_address=getattr(
+                    request,
+                    'client_ip',
+                    None),
+                extra_data={
+                    'report_type': report_type,
+                    'format': 'pdf'},
             )
             return response
 

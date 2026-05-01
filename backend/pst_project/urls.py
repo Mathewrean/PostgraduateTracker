@@ -1,14 +1,14 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
-from apps.users.views import UserViewSet, AuthLoginView, AuthLogoutView, AuthProfileView
+from apps.users.views import AuthLoginView, AuthLogoutView, AuthProfileView
 from apps.notifications.views import MeetingViewSet
 from apps.audit.views import AuditLogViewSet
 from apps.documents.views import MinutesViewSet
+
 
 class APIRootView(APIView):
     permission_classes = [AllowAny]
@@ -34,11 +34,13 @@ class APIRootView(APIView):
             }
         })
 
+
 class HealthCheckView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
         return Response({'status': 'ok'})
+
 
 urlpatterns = [
     path('', APIRootView.as_view(), name='api-root'),

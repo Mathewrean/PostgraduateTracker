@@ -4,7 +4,8 @@ from .views import DocumentViewSet, MinutesViewSet
 
 
 document_list = DocumentViewSet.as_view({'get': 'list', 'post': 'create'})
-document_detail = DocumentViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update'})
+document_detail = DocumentViewSet.as_view(
+    {'get': 'retrieve', 'patch': 'partial_update'})
 document_verify = DocumentViewSet.as_view({'post': 'verify'})
 document_download = DocumentViewSet.as_view({'get': 'download'})
 

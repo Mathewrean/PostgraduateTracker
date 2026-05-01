@@ -1,10 +1,10 @@
 from django.db import models
 from django.core.validators import FileExtensionValidator
-from django.conf import settings
 from apps.users.models import User
 from apps.stages.models import Stage
 from apps.students.models import Student
 import os
+
 
 class Document(models.Model):
     DOC_TYPE_CHOICES = [
@@ -17,16 +17,30 @@ class Document(models.Model):
         ('OTHER', 'Other'),
     ]
 
-    stage = models.ForeignKey(Stage, on_delete=models.CASCADE, related_name='documents')
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='documents')
-    doc_type = models.CharField(max_length=50, choices=DOC_TYPE_CHOICES, default='OTHER')
+    stage = models.ForeignKey(
+        Stage,
+        on_delete=models.CASCADE,
+        related_name='documents')
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name='documents')
+    doc_type = models.CharField(
+        max_length=50,
+        choices=DOC_TYPE_CHOICES,
+        default='OTHER')
     file = models.FileField(upload_to='documents/%Y/%m/%d/', validators=[
         FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx'])
     ])
     uploaded_at = models.DateTimeField(auto_now_add=True)
     file_size = models.BigIntegerField(null=True, blank=True)
     is_verified = models.BooleanField(default=False)
-    verified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='verified_documents')
+    verified_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='verified_documents')
     verified_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
@@ -48,15 +62,27 @@ class Document(models.Model):
     def file_name(self):
         return os.path.basename(self.file.name) if self.file else ''
 
+
 class Minutes(models.Model):
-    stage = models.OneToOneField(Stage, on_delete=models.CASCADE, related_name='minutes')
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='minutes')
+    stage = models.OneToOneField(
+        Stage,
+        on_delete=models.CASCADE,
+        related_name='minutes')
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name='minutes')
     file = models.FileField(upload_to='minutes/%Y/%m/%d/', validators=[
         FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx'])
     ])
     uploaded_at = models.DateTimeField(auto_now_add=True)
     is_approved = models.BooleanField(default=False)
-    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_minutes')
+    approved_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_minutes')
     approved_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:

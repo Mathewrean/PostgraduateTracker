@@ -2,15 +2,14 @@
 """
 Script to create test users for PST application
 """
+from apps.students.models import Student
+from apps.users.models import User
 import os
 import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pst_project.settings')
 django.setup()
 
-from apps.users.models import User
-from apps.students.models import Student
-from django.contrib.auth.models import Group
 
 # Test user data
 test_users = [
@@ -84,7 +83,7 @@ for user_data in test_users:
                 'phone': '+254700000000',
             }
         )
-        
+
         if created:
             pass  # User was created
         else:
@@ -108,7 +107,7 @@ for user_data in test_users:
             )
             if student_created:
                 pass  # Student profile was created
-                
+
     except Exception as e:
         print(f"Error creating user {user_data['email']}: {e}")
 

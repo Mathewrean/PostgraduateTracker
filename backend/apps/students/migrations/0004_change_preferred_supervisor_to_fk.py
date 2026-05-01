@@ -16,11 +16,21 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='student',
             name='preferred_supervisor',
-            field=models.ForeignKey(blank=True, limit_choices_to={'role': 'supervisor'}, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='preferred_by', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                blank=True,
+                limit_choices_to={
+                    'role': 'supervisor'},
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='preferred_by',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterField(
             model_name='student',
             name='preferred_supervisor_other',
-            field=models.CharField(blank=True, help_text='If no supervisor is selected from the list or for custom entry', max_length=255),
+            field=models.CharField(
+                blank=True,
+                help_text='If no supervisor is selected from the list or for custom entry',
+                max_length=255),
         ),
     ]

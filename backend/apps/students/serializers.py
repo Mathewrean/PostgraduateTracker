@@ -2,14 +2,24 @@ from rest_framework import serializers
 from .models import Student
 from apps.users.serializers import UserSerializer
 
+
 class StudentSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     assigned_supervisor_email = serializers.SerializerMethodField()
 
     class Meta:
         model = Student
-        fields = ['id', 'user', 'project_title', 'preferred_supervisor', 'preferred_supervisor_other', 
-                  'assigned_supervisor', 'assigned_supervisor_email', 'current_stage', 'profile_complete', 'created_at']
+        fields = [
+            'id',
+            'user',
+            'project_title',
+            'preferred_supervisor',
+            'preferred_supervisor_other',
+            'assigned_supervisor',
+            'assigned_supervisor_email',
+            'current_stage',
+            'profile_complete',
+            'created_at']
         read_only_fields = ['created_at', 'current_stage']
 
     def get_assigned_supervisor_email(self, obj):
@@ -17,7 +27,12 @@ class StudentSerializer(serializers.ModelSerializer):
             return obj.assigned_supervisor.email
         return None
 
+
 class StudentProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
-        fields = ['project_title', 'preferred_supervisor', 'preferred_supervisor_other', 'profile_complete']
+        fields = [
+            'project_title',
+            'preferred_supervisor',
+            'preferred_supervisor_other',
+            'profile_complete']

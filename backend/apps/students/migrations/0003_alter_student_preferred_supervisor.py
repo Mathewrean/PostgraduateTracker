@@ -13,6 +13,27 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='student',
             name='preferred_supervisor',
-            field=models.CharField(blank=True, choices=[('Professor Okello (Dean)', 'Professor Okello (Dean)'), ('Dr. Prisca Magotu (COD)', 'Dr. Prisca Magotu (COD)'), ('Prof. Miner Titus', 'Prof. Miner Titus'), ('Dr. Joseph Nyakinda', 'Dr. Joseph Nyakinda'), ('Dr. Willy Kangojo (Coordinator)', 'Dr. Willy Kangojo (Coordinator)'), ('Dr. Julius Owino', 'Dr. Julius Owino'), ('Dr. Francis Akwenda Odhiambo', 'Dr. Francis Akwenda Odhiambo'), ('Director BPS', 'Director BPS'), ('OTHER', 'Other (Please specify)')], max_length=255),
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ('Professor Okello (Dean)',
+                     'Professor Okello (Dean)'),
+                    ('Dr. Prisca Magotu (COD)',
+                     'Dr. Prisca Magotu (COD)'),
+                    ('Prof. Miner Titus',
+                     'Prof. Miner Titus'),
+                    ('Dr. Joseph Nyakinda',
+                     'Dr. Joseph Nyakinda'),
+                    ('Dr. Willy Kangojo (Coordinator)',
+                     'Dr. Willy Kangojo (Coordinator)'),
+                    ('Dr. Julius Owino',
+                     'Dr. Julius Owino'),
+                    ('Dr. Francis Akwenda Odhiambo',
+                     'Dr. Francis Akwenda Odhiambo'),
+                    ('Director BPS',
+                     'Director BPS'),
+                    ('OTHER',
+                     'Other (Please specify)')],
+                max_length=255),
         ),
     ]

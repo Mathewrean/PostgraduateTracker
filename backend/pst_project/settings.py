@@ -6,6 +6,7 @@ from django.core.management.utils import get_random_secret_key
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 def env_bool(name, default=False):
     raw_value = config(name, default=str(default))
     if isinstance(raw_value, bool):
@@ -24,9 +25,13 @@ if not SECRET_KEY:
     if DEBUG:
         SECRET_KEY = get_random_secret_key()
     else:
-        raise ValueError('SECRET_KEY environment variable is required when DEBUG is false.')
+        raise ValueError(
+            'SECRET_KEY environment variable is required when DEBUG is false.')
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,testserver', cast=Csv())
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='localhost,127.0.0.1,testserver',
+    cast=Csv())
 
 INSTALLED_APPS = [
     # 'daphne',  # Django Channels - commented for testing
@@ -122,7 +127,11 @@ USE_TZ = True
 # Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'static'] if (BASE_DIR / 'static').exists() else []
+STATICFILES_DIRS = [
+    BASE_DIR /
+    'static'] if (
+        BASE_DIR /
+    'static').exists() else []
 
 # Media files
 MEDIA_URL = '/media/'
@@ -153,11 +162,21 @@ REST_FRAMEWORK = {
 
 # Simple JWT
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=config('JWT_EXPIRATION_HOURS', default=1, cast=int)),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=config('JWT_REFRESH_EXPIRATION_DAYS', default=7, cast=int)),
+    'ACCESS_TOKEN_LIFETIME': timedelta(
+        hours=config(
+            'JWT_EXPIRATION_HOURS',
+            default=1,
+            cast=int)),
+    'REFRESH_TOKEN_LIFETIME': timedelta(
+        days=config(
+            'JWT_REFRESH_EXPIRATION_DAYS',
+            default=7,
+            cast=int)),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
-    'ALGORITHM': config('JWT_ALGORITHM', default='HS256'),
+    'ALGORITHM': config(
+        'JWT_ALGORITHM',
+        default='HS256'),
     'SIGNING_KEY': SECRET_KEY,
 }
 
@@ -208,8 +227,12 @@ CHANNEL_LAYERS = {
 }
 
 # Celery Configuration
-CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
+CELERY_BROKER_URL = config(
+    'CELERY_BROKER_URL',
+    default='redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = config(
+    'CELERY_RESULT_BACKEND',
+    default='redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -234,7 +257,9 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 # Email Configuration
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+EMAIL_BACKEND = config(
+    'EMAIL_BACKEND',
+    default='django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
@@ -247,8 +272,10 @@ MAX_FILE_SIZE = config('MAX_FILE_SIZE', default=10485760, cast=int)  # 10MB
 ALLOWED_UPLOAD_EXTENSIONS = ['pdf', 'doc', 'docx']
 
 # Application Settings
-THESIS_WAITING_PERIOD_DAYS = config('THESIS_WAITING_PERIOD_DAYS', default=90, cast=int)
-COMPLAINT_RESPONSE_DEADLINE_DAYS = config('COMPLAINT_RESPONSE_DEADLINE_DAYS', default=14, cast=int)
+THESIS_WAITING_PERIOD_DAYS = config(
+    'THESIS_WAITING_PERIOD_DAYS', default=90, cast=int)
+COMPLAINT_RESPONSE_DEADLINE_DAYS = config(
+    'COMPLAINT_RESPONSE_DEADLINE_DAYS', default=14, cast=int)
 
 # Security Settings
 if not DEBUG:

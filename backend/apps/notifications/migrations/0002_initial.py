@@ -18,14 +18,23 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='notification',
             name='recipient',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='notifications', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='notifications',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddIndex(
             model_name='notification',
-            index=models.Index(fields=['recipient', 'is_read'], name='notificatio_recipie_583549_idx'),
+            index=models.Index(
+                fields=[
+                    'recipient',
+                    'is_read'],
+                name='notificatio_recipie_583549_idx'),
         ),
         migrations.AddIndex(
             model_name='notification',
-            index=models.Index(fields=['created_at'], name='notificatio_created_e4c995_idx'),
+            index=models.Index(
+                fields=['created_at'],
+                name='notificatio_created_e4c995_idx'),
         ),
     ]

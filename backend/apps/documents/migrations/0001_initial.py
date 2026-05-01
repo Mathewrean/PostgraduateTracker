@@ -15,13 +15,55 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Document',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('doc_type', models.CharField(choices=[('MINUTES', 'Minutes of Presentation'), ('TRANSCRIPT', 'Academic Transcript'), ('FEE_STATEMENT', 'Fee Statement Balance'), ('PROPOSAL', 'Proposal Document'), ('THESIS', 'Thesis Document'), ('INTENT_TO_SUBMIT', 'Intent to Submit Form'), ('OTHER', 'Other')], default='OTHER', max_length=50)),
-                ('file', models.FileField(upload_to='documents/%Y/%m/%d/', validators=[django.core.validators.FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx', 'pptx'])])),
-                ('uploaded_at', models.DateTimeField(auto_now_add=True)),
-                ('file_size', models.BigIntegerField(blank=True, null=True)),
-                ('is_verified', models.BooleanField(default=False)),
-                ('verified_at', models.DateTimeField(blank=True, null=True)),
+                ('id',
+                 models.BigAutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('doc_type',
+                 models.CharField(
+                     choices=[
+                         ('MINUTES',
+                          'Minutes of Presentation'),
+                         ('TRANSCRIPT',
+                          'Academic Transcript'),
+                         ('FEE_STATEMENT',
+                          'Fee Statement Balance'),
+                         ('PROPOSAL',
+                          'Proposal Document'),
+                         ('THESIS',
+                          'Thesis Document'),
+                         ('INTENT_TO_SUBMIT',
+                          'Intent to Submit Form'),
+                         ('OTHER',
+                          'Other')],
+                     default='OTHER',
+                     max_length=50)),
+                ('file',
+                 models.FileField(
+                     upload_to='documents/%Y/%m/%d/',
+                     validators=[
+                         django.core.validators.FileExtensionValidator(
+                             allowed_extensions=[
+                                 'pdf',
+                                 'doc',
+                                 'docx',
+                                 'pptx'])])),
+                ('uploaded_at',
+                 models.DateTimeField(
+                     auto_now_add=True)),
+                ('file_size',
+                 models.BigIntegerField(
+                     blank=True,
+                     null=True)),
+                ('is_verified',
+                 models.BooleanField(
+                     default=False)),
+                ('verified_at',
+                 models.DateTimeField(
+                     blank=True,
+                     null=True)),
             ],
             options={
                 'db_table': 'documents',
@@ -30,11 +72,25 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Minutes',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('file', models.FileField(upload_to='minutes/%Y/%m/%d/')),
-                ('uploaded_at', models.DateTimeField(auto_now_add=True)),
-                ('is_approved', models.BooleanField(default=False)),
-                ('approved_at', models.DateTimeField(blank=True, null=True)),
+                ('id',
+                 models.BigAutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('file',
+                 models.FileField(
+                     upload_to='minutes/%Y/%m/%d/')),
+                ('uploaded_at',
+                 models.DateTimeField(
+                     auto_now_add=True)),
+                ('is_approved',
+                 models.BooleanField(
+                     default=False)),
+                ('approved_at',
+                 models.DateTimeField(
+                     blank=True,
+                     null=True)),
             ],
             options={
                 'verbose_name_plural': 'Minutes',

@@ -19,19 +19,31 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='complaint',
             name='responded_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='responded_complaints', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='responded_complaints',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='complaint',
             name='student',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='complaints', to='students.student'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='complaints',
+                to='students.student'),
         ),
         migrations.AddIndex(
             model_name='complaint',
-            index=models.Index(fields=['status'], name='complaints_status_3d57ee_idx'),
+            index=models.Index(
+                fields=['status'],
+                name='complaints_status_3d57ee_idx'),
         ),
         migrations.AddIndex(
             model_name='complaint',
-            index=models.Index(fields=['submitted_at'], name='complaints_submitt_7d8f70_idx'),
+            index=models.Index(
+                fields=['submitted_at'],
+                name='complaints_submitt_7d8f70_idx'),
         ),
     ]

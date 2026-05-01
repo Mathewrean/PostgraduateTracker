@@ -11,6 +11,7 @@ from apps.activities.models import Meeting
 from apps.students.models import Student
 from apps.notifications.services import notify
 
+
 class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = NotificationSerializer
     permission_classes = [IsAuthenticated]
@@ -31,13 +32,18 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, methods=['post'])
     def mark_all_as_read(self, request):
-        Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
+        Notification.objects.filter(
+            recipient=request.user,
+            is_read=False).update(
+            is_read=True)
         return Response({'success': True})
 
     @action(detail=False, methods=['get'])
     def unread_count(self, request):
-        count = Notification.objects.filter(recipient=request.user, is_read=False).count()
+        count = Notification.objects.filter(
+            recipient=request.user, is_read=False).count()
         return Response({'unread_count': count})
+
 
 class MeetingViewSet(viewsets.ModelViewSet):
     serializer_class = MeetingSerializer
@@ -45,7 +51,8 @@ class MeetingViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Meeting.objects.filter(Q(student__user=user) | Q(supervisor=user)).select_related('student__user', 'supervisor')
+        return Meeting.objects.filter(Q(student__user=user) | Q(
+            supervisor=user)).select_related('student__user', 'supervisor')
 
     def create(self, request, *args, **kwargs):
         supervisor_id = request.data.get('supervisor')
@@ -53,15 +60,18 @@ class MeetingViewSet(viewsets.ModelViewSet):
         if request.user.role_key != 'student':
             raise PermissionDenied('Only students can request meetings.')
         if not supervisor_id or not scheduled_date:
-            return Response({'error': 'supervisor and scheduled_date are required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'supervisor and scheduled_date are required'},
+                            status=status.HTTP_400_BAD_REQUEST)
         try:
             supervisor = User.objects.get(id=supervisor_id, role='supervisor')
         except User.DoesNotExist:
-            return Response({'error': 'Selected supervisor is invalid'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Selected supervisor is invalid'},
+                            status=status.HTTP_400_BAD_REQUEST)
         try:
             student = Student.objects.get(user=request.user)
         except Student.DoesNotExist:
-            return Response({'error': 'Student profile not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Student profile not found'},
+                            status=status.HTTP_404_NOT_FOUND)
 
         meeting = Meeting.objects.create(
             student=student,

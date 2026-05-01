@@ -26,6 +26,7 @@
     "autoprefixer": "^10.4.16",
     "eslint": "^8.55.0",
     "eslint-plugin-react": "^7.33.0",
+    "eslint-plugin-unused-imports": "^4.4.1",
     "postcss": "^8.4.32",
     "vite": "^5.0.0"
   }

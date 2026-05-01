@@ -20,29 +20,51 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='document',
             name='verified_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='verified_documents', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='verified_documents',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='minutes',
             name='approved_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='approved_minutes', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='approved_minutes',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='minutes',
             name='stage',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='minutes', to='stages.stage'),
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='minutes',
+                to='stages.stage'),
         ),
         migrations.AddField(
             model_name='minutes',
             name='student',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='minutes', to='students.student'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='minutes',
+                to='students.student'),
         ),
         migrations.AddIndex(
             model_name='document',
-            index=models.Index(fields=['stage', 'doc_type'], name='documents_stage_i_ebb224_idx'),
+            index=models.Index(
+                fields=[
+                    'stage',
+                    'doc_type'],
+                name='documents_stage_i_ebb224_idx'),
         ),
         migrations.AddIndex(
             model_name='document',
-            index=models.Index(fields=['student'], name='documents_student_c9b435_idx'),
+            index=models.Index(
+                fields=['student'],
+                name='documents_student_c9b435_idx'),
         ),
     ]

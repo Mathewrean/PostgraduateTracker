@@ -3,6 +3,20 @@
 Comprehensive Endpoint & Functionality Testing Suite for PST
 Tests all 40+ endpoints with full coverage of features and RBAC
 """
+from apps.audit.models import AuditLog
+from apps.notifications.models import Notification
+from apps.complaints.models import Complaint
+from apps.documents.models import Document, Minutes
+from apps.activities.models import Activity
+from apps.stages.models import Stage
+from apps.supervisors.models import Supervisor
+from apps.students.models import Student
+from apps.users.models import User
+from rest_framework import status
+from rest_framework.test import APIClient
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase
+import django
 import os
 import sys
 import json
@@ -11,26 +25,12 @@ from io import BytesIO
 # Setup Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pst_project.settings')
 
-import django
 django.setup()
 
-from django.test import TestCase
-from django.core.files.uploadedfile import SimpleUploadedFile
-from rest_framework.test import APIClient
-from rest_framework import status
-from apps.users.models import User
-from apps.students.models import Student
-from apps.supervisors.models import Supervisor
-from apps.stages.models import Stage
-from apps.activities.models import Activity
-from apps.documents.models import Document, Minutes
-from apps.complaints.models import Complaint
-from apps.notifications.models import Notification
-from apps.audit.models import AuditLog
 
 class TestSuite:
     """Main test suite orchestrator"""
-    
+
     def __init__(self):
         self.client = APIClient()
         self.test_results = {
@@ -40,14 +40,14 @@ class TestSuite:
         }
         self.users = {}
         self.tokens = {}
-        
+
     def log(self, status_icon, category, message):
         """Pretty print test results"""
-    
+
     def setup_test_data(self):
         """Create test users and data"""
         self.log("🔧", "SETUP", "Creating test users and data...")
-        
+
         # Create or get superuser
         try:
             self.users['admin'], created = User.objects.get_or_create(
@@ -62,9 +62,9 @@ class TestSuite:
             if created:
                 self.users['admin'].set_password('admin123')
                 self.users['admin'].save()
-        except:
+        except BaseException:
             self.users['admin'] = User.objects.get(email='admin@test.com')
-        
+
         # Create or get student
         try:
             self.users['student'], created = User.objects.get_or_create(
@@ -78,9 +78,9 @@ class TestSuite:
             if created:
                 self.users['student'].set_password('student123')
                 self.users['student'].save()
-        except:
+        except BaseException:
             self.users['student'] = User.objects.get(email='student@test.com')
-        
+
         # Create or get supervisor
         try:
             self.users['supervisor'], created = User.objects.get_or_create(
@@ -94,9 +94,10 @@ class TestSuite:
             if created:
                 self.users['supervisor'].set_password('supervisor123')
                 self.users['supervisor'].save()
-        except:
-            self.users['supervisor'] = User.objects.get(email='supervisor@test.com')
-        
+        except BaseException:
+            self.users['supervisor'] = User.objects.get(
+                email='supervisor@test.com')
+
         # Create or get coordinator
         try:
             self.users['coordinator'], created = User.objects.get_or_create(
@@ -110,9 +111,10 @@ class TestSuite:
             if created:
                 self.users['coordinator'].set_password('coordinator123')
                 self.users['coordinator'].save()
-        except:
-            self.users['coordinator'] = User.objects.get(email='coordinator@test.com')
-        
+        except BaseException:
+            self.users['coordinator'] = User.objects.get(
+                email='coordinator@test.com')
+
         # Create student profile
         self.student_profile, created = Student.objects.get_or_create(
             user=self.users['student'],
@@ -121,16 +123,17 @@ class TestSuite:
                 'project_title': 'AI in Healthcare'
             }
         )
-        
+
         # Create stages
         self.stage_concept, created = Stage.objects.get_or_create(
             student=self.student_profile,
             stage_type='CONCEPT',
             defaults={'status': 'ACTIVE'}
         )
-        
-        self.log("✅", "SETUP", f"Created {len(self.users)} test users and test data")
-    
+
+        self.log("✅", "SETUP",
+                 f"Created {len(self.users)} test users and test data")
+
     def get_token(self, user_type):
         """Get JWT token for user"""
         if user_type not in self.tokens:
@@ -141,25 +144,34 @@ class TestSuite:
             if response.status_code == 200:
                 self.tokens[user_type] = response.data['access']
         return self.tokens.get(user_type)
-    
-    def test_endpoint(self, name, method, url, user_type=None, data=None, expected_status=None, files=None):
+
+    def test_endpoint(
+            self,
+            name,
+            method,
+            url,
+            user_type=None,
+            data=None,
+            expected_status=None,
+            files=None):
         """Test a single endpoint"""
         self.test_results['total'] += 1
-        
+
         # Set auth
         if user_type:
             token = self.get_token(user_type)
             self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
         else:
             self.client.credentials()
-        
+
         try:
             # Make request
             if method == 'GET':
                 response = self.client.get(url)
             elif method == 'POST':
                 if files:
-                    response = self.client.post(url, data=data, format='multipart')
+                    response = self.client.post(
+                        url, data=data, format='multipart')
                 else:
                     response = self.client.post(url, data, format='json')
             elif method == 'PUT':
@@ -170,12 +182,13 @@ class TestSuite:
                 response = self.client.delete(url)
             else:
                 raise ValueError(f"Unsupported method: {method}")
-            
+
             # Check response
             success = True
             if expected_status and response.status_code != expected_status:
                 success = False
-                msg = f"{name}: Expected {expected_status}, got {response.status_code}"
+                msg = f"{name}: Expected {expected_status}, got {
+                    response.status_code}"
                 self.test_results['failed'].append(msg)
                 self.log("❌", "TEST", msg)
             else:
@@ -186,16 +199,16 @@ class TestSuite:
                     # Log other status codes but don't fail
                     self.test_results['passed'].append(name)
                     self.log("⚠️", "TEST", f"{name} ({response.status_code})")
-            
+
             return response
         except Exception as e:
             self.test_results['failed'].append(f"{name}: {str(e)}")
             self.log("❌", "TEST", f"{name}: {str(e)[:80]}")
             return None
-    
+
     def run_authentication_tests(self):
         """Test authentication endpoints"""
-        
+
         # Register new user
         response = self.test_endpoint(
             "POST Register User",
@@ -213,7 +226,7 @@ class TestSuite:
             },
             expected_status=201
         )
-        
+
         # Get JWT token
         self.test_endpoint(
             "POST Get JWT Token",
@@ -225,7 +238,7 @@ class TestSuite:
             },
             expected_status=200
         )
-        
+
         # Get current user
         self.test_endpoint(
             "GET Current User Profile",
@@ -234,10 +247,10 @@ class TestSuite:
             user_type='student',
             expected_status=200
         )
-    
+
     def run_user_management_tests(self):
         """Test user management endpoints"""
-        
+
         # Update profile
         self.test_endpoint(
             "POST Update User Profile",
@@ -251,7 +264,7 @@ class TestSuite:
             },
             expected_status=200
         )
-        
+
         # List users (admin only)
         self.test_endpoint(
             "GET List Users (Admin)",
@@ -260,7 +273,7 @@ class TestSuite:
             user_type='admin',
             expected_status=200
         )
-        
+
         # Try list users as student (should be denied)
         self.test_endpoint(
             "GET List Users (Student - should be denied)",
@@ -268,10 +281,10 @@ class TestSuite:
             "/api/users/",
             user_type='student'
         )
-    
+
     def run_student_tests(self):
         """Test student endpoints"""
-        
+
         # Get student profile
         self.test_endpoint(
             "GET Student Profile",
@@ -280,7 +293,7 @@ class TestSuite:
             user_type='student',
             expected_status=200
         )
-        
+
         # Update student profile
         self.test_endpoint(
             "POST Update Student Profile",
@@ -294,7 +307,7 @@ class TestSuite:
             },
             expected_status=200
         )
-        
+
         # List students (coordinator only)
         self.test_endpoint(
             "GET List Students (Coordinator)",
@@ -303,10 +316,10 @@ class TestSuite:
             user_type='coordinator',
             expected_status=200
         )
-    
+
     def run_stage_tests(self):
         """Test stage workflow endpoints"""
-        
+
         # Get current stage
         self.test_endpoint(
             "GET Current Stage",
@@ -315,7 +328,7 @@ class TestSuite:
             user_type='student',
             expected_status=200
         )
-        
+
         # List stages
         self.test_endpoint(
             "GET List Stages",
@@ -324,7 +337,7 @@ class TestSuite:
             user_type='student',
             expected_status=200
         )
-        
+
         # Get specific stage
         response = self.test_endpoint(
             "GET Specific Stage",
@@ -333,7 +346,7 @@ class TestSuite:
             user_type='student',
             expected_status=200
         )
-        
+
         # Try to approve stage (should fail - missing requirements)
         self.test_endpoint(
             "POST Approve Stage (should fail - missing docs)",
@@ -342,10 +355,10 @@ class TestSuite:
             user_type='supervisor',
             data={'approval_notes': 'Approved'}
         )
-    
+
     def run_activity_tests(self):
         """Test activity endpoints"""
-        
+
         # Create activity
         response = self.test_endpoint(
             "POST Create Activity",
@@ -360,11 +373,11 @@ class TestSuite:
             },
             expected_status=201
         )
-        
+
         activity_id = None
         if response and response.status_code == 201:
             activity_id = response.data.get('id')
-        
+
         # Get activities
         self.test_endpoint(
             "GET List Activities",
@@ -373,7 +386,7 @@ class TestSuite:
             user_type='student',
             expected_status=200
         )
-        
+
         # Mark activity as done
         if activity_id:
             self.test_endpoint(
@@ -383,7 +396,7 @@ class TestSuite:
                 user_type='student',
                 expected_status=200
             )
-        
+
         # Get calendar view
         self.test_endpoint(
             "GET Activity Calendar",
@@ -392,10 +405,10 @@ class TestSuite:
             user_type='student',
             expected_status=200
         )
-    
+
     def run_document_tests(self):
         """Test document endpoints"""
-        
+
         # Get documents
         self.test_endpoint(
             "GET List Documents",
@@ -404,14 +417,14 @@ class TestSuite:
             user_type='student',
             expected_status=200
         )
-        
+
         # Upload document
         pdf_file = SimpleUploadedFile(
             "test_document.pdf",
             b"fake pdf content",
             content_type="application/pdf"
         )
-        
+
         response = self.test_endpoint(
             "POST Upload Document",
             "POST",
@@ -425,11 +438,11 @@ class TestSuite:
             expected_status=201,
             files=True
         )
-        
+
         doc_id = None
         if response and response.status_code == 201:
             doc_id = response.data.get('id')
-        
+
         # Verify document (supervisor)
         if doc_id:
             self.test_endpoint(
@@ -443,7 +456,7 @@ class TestSuite:
                 },
                 expected_status=200
             )
-        
+
         # Get minutes
         self.test_endpoint(
             "GET List Minutes",
@@ -452,10 +465,10 @@ class TestSuite:
             user_type='student',
             expected_status=200
         )
-    
+
     def run_complaint_tests(self):
         """Test complaint endpoints"""
-        
+
         # Submit complaint
         response = self.test_endpoint(
             "POST Submit Complaint",
@@ -467,11 +480,11 @@ class TestSuite:
             },
             expected_status=201
         )
-        
+
         complaint_id = None
         if response and response.status_code == 201:
             complaint_id = response.data.get('id')
-        
+
         # Get complaints (student)
         self.test_endpoint(
             "GET List Complaints (Student)",
@@ -480,7 +493,7 @@ class TestSuite:
             user_type='student',
             expected_status=200
         )
-        
+
         # Get complaints (coordinator - should see all)
         self.test_endpoint(
             "GET List Complaints (Coordinator)",
@@ -489,7 +502,7 @@ class TestSuite:
             user_type='coordinator',
             expected_status=200
         )
-        
+
         # Respond to complaint (coordinator)
         if complaint_id:
             self.test_endpoint(
@@ -502,10 +515,10 @@ class TestSuite:
                 },
                 expected_status=200
             )
-    
+
     def run_notification_tests(self):
         """Test notification endpoints"""
-        
+
         # Get notifications
         self.test_endpoint(
             "GET List Notifications",
@@ -514,7 +527,7 @@ class TestSuite:
             user_type='student',
             expected_status=200
         )
-        
+
         # Get unread count
         self.test_endpoint(
             "GET Unread Notification Count",
@@ -523,7 +536,7 @@ class TestSuite:
             user_type='student',
             expected_status=200
         )
-        
+
         # Mark all as read
         self.test_endpoint(
             "POST Mark All Notifications Read",
@@ -532,7 +545,7 @@ class TestSuite:
             user_type='student',
             expected_status=200
         )
-        
+
         # Get meetings
         self.test_endpoint(
             "GET List Meetings",
@@ -541,10 +554,10 @@ class TestSuite:
             user_type='student',
             expected_status=200
         )
-    
+
     def run_report_tests(self):
         """Test report endpoints"""
-        
+
         # Student progress report
         self.test_endpoint(
             "GET Student Progress Report",
@@ -553,7 +566,7 @@ class TestSuite:
             user_type='coordinator',
             expected_status=200
         )
-        
+
         # Supervisor report
         self.test_endpoint(
             "GET Supervisor Activity Report",
@@ -562,7 +575,7 @@ class TestSuite:
             user_type='coordinator',
             expected_status=200
         )
-        
+
         # Complaint report
         self.test_endpoint(
             "GET Complaint Report",
@@ -571,7 +584,7 @@ class TestSuite:
             user_type='coordinator',
             expected_status=200
         )
-        
+
         # Activity log
         self.test_endpoint(
             "GET Activity Audit Log",
@@ -580,7 +593,7 @@ class TestSuite:
             user_type='coordinator',
             expected_status=200
         )
-        
+
         # Login history
         self.test_endpoint(
             "GET Login History Report",
@@ -589,7 +602,7 @@ class TestSuite:
             user_type='admin',
             expected_status=200
         )
-        
+
         # Stage transition report
         self.test_endpoint(
             "GET Stage Transition Report",
@@ -598,10 +611,10 @@ class TestSuite:
             user_type='coordinator',
             expected_status=200
         )
-    
+
     def run_audit_tests(self):
         """Test audit endpoints"""
-        
+
         # Get audit logs (admin only)
         self.test_endpoint(
             "GET Audit Logs (Admin)",
@@ -610,7 +623,7 @@ class TestSuite:
             user_type='admin',
             expected_status=200
         )
-        
+
         # Try to access audit logs as student (should be denied)
         self.test_endpoint(
             "GET Audit Logs (Student - should be denied)",
@@ -618,10 +631,10 @@ class TestSuite:
             "/api/audit/",
             user_type='student'
         )
-    
+
     def run_rbac_tests(self):
         """Test Role-Based Access Control"""
-        
+
         # Student cannot list all students
         response = self.test_endpoint(
             "RBAC: Student cannot list students",
@@ -629,7 +642,7 @@ class TestSuite:
             "/api/students/",
             user_type='student'
         )
-        
+
         # Student cannot access reports
         response = self.test_endpoint(
             "RBAC: Student cannot access reports",
@@ -637,7 +650,7 @@ class TestSuite:
             "/api/reports/student_progress/",
             user_type='student'
         )
-        
+
         # Supervisor cannot access admin endpoints
         response = self.test_endpoint(
             "RBAC: Supervisor cannot list users",
@@ -645,7 +658,7 @@ class TestSuite:
             "/api/users/",
             user_type='supervisor'
         )
-        
+
         # Coordinator can access reports
         response = self.test_endpoint(
             "RBAC: Coordinator can access reports",
@@ -654,7 +667,7 @@ class TestSuite:
             user_type='coordinator',
             expected_status=200
         )
-        
+
         # Admin can access all endpoints
         response = self.test_endpoint(
             "RBAC: Admin can access all endpoints",
@@ -663,10 +676,10 @@ class TestSuite:
             user_type='admin',
             expected_status=200
         )
-    
+
     def run_stage_gating_tests(self):
         """Test stage-gating logic"""
-        
+
         # Student should not be able to approve stage
         self.test_endpoint(
             "Stage Gating: Student cannot approve stage",
@@ -675,7 +688,7 @@ class TestSuite:
             user_type='student',
             data={'approval_notes': 'Approved'}
         )
-        
+
         # Supervisor can view stage
         self.test_endpoint(
             "Stage Gating: Supervisor can view stage",
@@ -684,7 +697,7 @@ class TestSuite:
             user_type='supervisor',
             expected_status=200
         )
-        
+
         # Coordinator can view stage
         self.test_endpoint(
             "Stage Gating: Coordinator can view stage",
@@ -693,13 +706,13 @@ class TestSuite:
             user_type='coordinator',
             expected_status=200
         )
-    
+
     def run_all_tests(self):
         """Execute all test suites"""
-        
+
         try:
             self.setup_test_data()
-            
+
             self.run_authentication_tests()
             self.run_user_management_tests()
             self.run_student_tests()
@@ -712,27 +725,25 @@ class TestSuite:
             self.run_audit_tests()
             self.run_rbac_tests()
             self.run_stage_gating_tests()
-            
+
         except Exception as e:
             self.log("❌", "ERROR", f"Test suite error: {str(e)}")
             import traceback
             traceback.print_exc()
-        
+
         self.print_summary()
-    
+
     def print_summary(self):
         """Print test summary"""
-        
+
         passed = len(self.test_results['passed'])
         failed = len(self.test_results['failed'])
         total = self.test_results['total']
         success_rate = (passed / total * 100) if total > 0 else 0
-        
-        
+
         if failed > 0:
             for failure in self.test_results['failed']:
-        
-        
+
         categories = {
             'Authentication': self.test_results['passed'][:3],
             'User Management': self.test_results['passed'][3:6],
@@ -747,13 +758,14 @@ class TestSuite:
             'RBAC': self.test_results['passed'][35:40],
             'Stage Gating': self.test_results['passed'][40:],
         }
-        
+
         for category, tests in categories.items():
             if tests:
                 for test in tests:
-        
+
         if success_rate >= 80:
         else:
+
 
 if __name__ == '__main__':
     suite = TestSuite()

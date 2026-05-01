@@ -69,12 +69,14 @@ class BaseStageFileViewSet(viewsets.ModelViewSet):
         return False
 
     def _require_stage_access(self, stage):
-        if not self._can_access_student_stage(self.request.user, stage.student):
+        if not self._can_access_student_stage(
+                self.request.user, stage.student):
             raise PermissionDenied('You are not allowed to access this stage.')
 
     def _require_active_stage(self, stage):
         if stage.status != 'ACTIVE':
-            raise PermissionDenied('Uploads are only allowed for active stages.')
+            raise PermissionDenied(
+                'Uploads are only allowed for active stages.')
 
 
 class DocumentViewSet(BaseStageFileViewSet):
@@ -91,7 +93,8 @@ class DocumentViewSet(BaseStageFileViewSet):
         elif user.role_key in ['coordinator', 'dean', 'cod', 'director_bps']:
             queryset = Document.objects.all()
         elif user.role_key == 'supervisor':
-            queryset = Document.objects.filter(stage__student__assigned_supervisor=user)
+            queryset = Document.objects.filter(
+                stage__student__assigned_supervisor=user)
         else:
             return Document.objects.none()
 
@@ -120,16 +123,24 @@ class DocumentViewSet(BaseStageFileViewSet):
 
         validation_error = validate_uploaded_file(uploaded_file)
         if validation_error:
-            return Response({'error': validation_error}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': validation_error},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            stage = Stage.objects.select_related('student__user', 'student__assigned_supervisor').get(id=stage_id)
+            stage = Stage.objects.select_related(
+                'student__user',
+                'student__assigned_supervisor').get(
+                id=stage_id)
         except Stage.DoesNotExist:
-            return Response({'error': 'Stage not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Stage not found'},
+                            status=status.HTTP_404_NOT_FOUND)
 
         self._require_stage_access(stage)
         if stage.status != 'ACTIVE':
-            return Response({'error': 'Uploading to a completed or locked stage is not allowed.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    'error': 'Uploading to a completed or locked stage is not allowed.'},
+                status=status.HTTP_400_BAD_REQUEST)
 
         if doc_type == 'MINUTES':
             return Response(
@@ -152,17 +163,30 @@ class DocumentViewSet(BaseStageFileViewSet):
         if stage.student.assigned_supervisor:
             notify(
                 recipient=stage.student.assigned_supervisor,
-                message=f'{stage.student.user.email} uploaded {document.get_doc_type_display()} for the {stage.get_stage_type_display()} stage.',
+                message=f'{
+                    stage.student.user.email} uploaded {
+                    document.get_doc_type_display()} for the {
+                    stage.get_stage_type_display()} stage.',
                 notification_type='DOCUMENT_UPLOAD',
-                link=f'/api/documents/{document.id}/',
+                link=f'/api/documents/{
+                    document.id}/',
             )
 
         log_audit_event(
             user=request.user,
             action='DOCUMENT_UPLOAD',
-            description=f'{request.user.email} uploaded {document.get_doc_type_display()} for stage {stage.stage_type}.',
-            ip_address=getattr(request, 'client_ip', None),
-            extra_data={'document_id': document.id, 'stage_id': stage.id, 'doc_type': document.doc_type},
+            description=f'{
+                request.user.email} uploaded {
+                document.get_doc_type_display()} for stage {
+                stage.stage_type}.',
+            ip_address=getattr(
+                request,
+                'client_ip',
+                    None),
+            extra_data={
+                'document_id': document.id,
+                'stage_id': stage.id,
+                'doc_type': document.doc_type},
         )
 
         serializer = self.get_serializer(document)
@@ -171,20 +195,32 @@ class DocumentViewSet(BaseStageFileViewSet):
     @action(detail=True, methods=['post'])
     def verify(self, request, pk=None):
         document = self.get_object()
-        if request.user.role_key not in ['coordinator', 'dean', 'cod', 'director_bps'] and document.student.assigned_supervisor_id != request.user.id:
-            raise PermissionDenied('Only the assigned supervisor, coordinator, or senior administrators can verify this document.')
+        if request.user.role_key not in [
+            'coordinator',
+            'dean',
+            'cod',
+                'director_bps'] and document.student.assigned_supervisor_id != request.user.id:
+            raise PermissionDenied(
+                'Only the assigned supervisor, coordinator, or senior administrators can verify this document.')
 
         document.is_verified = True
         document.verified_by = request.user
         document.verified_at = timezone.now()
-        document.save(update_fields=['is_verified', 'verified_by', 'verified_at'])
+        document.save(
+            update_fields=[
+                'is_verified',
+                'verified_by',
+                'verified_at'])
 
         return Response(self.get_serializer(document).data)
 
     @action(detail=True, methods=['get'], url_path='download')
     def download(self, request, pk=None):
         document = self.get_object()
-        return FileResponse(document.file.open('rb'), as_attachment=True, filename=document.file_name)
+        return FileResponse(
+            document.file.open('rb'),
+            as_attachment=True,
+            filename=document.file_name)
 
 
 class MinutesViewSet(BaseStageFileViewSet):
@@ -201,7 +237,8 @@ class MinutesViewSet(BaseStageFileViewSet):
         elif user.role_key in ['coordinator', 'dean', 'cod', 'director_bps']:
             queryset = Minutes.objects.all()
         elif user.role_key == 'supervisor':
-            queryset = Minutes.objects.filter(stage__student__assigned_supervisor=user)
+            queryset = Minutes.objects.filter(
+                stage__student__assigned_supervisor=user)
         else:
             return Minutes.objects.none()
 
@@ -209,32 +246,49 @@ class MinutesViewSet(BaseStageFileViewSet):
         if stage_id:
             queryset = queryset.filter(stage_id=stage_id)
 
-        return queryset.select_related('student__user', 'stage', 'approved_by', 'stage__student__assigned_supervisor')
+        return queryset.select_related(
+            'student__user',
+            'stage',
+            'approved_by',
+            'stage__student__assigned_supervisor')
 
     def create(self, request, *args, **kwargs):
         uploaded_file = request.FILES.get('file')
         stage_id = request.data.get('stage')
 
         if not uploaded_file or not stage_id:
-            return Response({'error': 'stage and file are required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'stage and file are required'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         if uploaded_file.size > 10 * 1024 * 1024:
-            return Response({'error': 'File size exceeds the 10MB limit.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'File size exceeds the 10MB limit.'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         validation_error = validate_uploaded_file(uploaded_file)
         if validation_error:
-            return Response({'error': validation_error}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': validation_error},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            stage = Stage.objects.select_related('student__user', 'student__assigned_supervisor').get(id=stage_id)
+            stage = Stage.objects.select_related(
+                'student__user',
+                'student__assigned_supervisor').get(
+                id=stage_id)
         except Stage.DoesNotExist:
-            return Response({'error': 'Stage not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Stage not found'},
+                            status=status.HTTP_404_NOT_FOUND)
 
         self._require_stage_access(stage)
         if stage.status != 'ACTIVE':
-            return Response({'error': 'Uploading to a completed or locked stage is not allowed.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    'error': 'Uploading to a completed or locked stage is not allowed.'},
+                status=status.HTTP_400_BAD_REQUEST)
         if stage.stage_type not in ['CONCEPT', 'PROPOSAL']:
-            return Response({'error': 'Minutes of Presentation are only required for Concept and Proposal stages.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    'error': 'Minutes of Presentation are only required for Concept and Proposal stages.'},
+                status=status.HTTP_400_BAD_REQUEST)
 
         minutes, _ = Minutes.objects.update_or_create(
             stage=stage,
@@ -250,34 +304,44 @@ class MinutesViewSet(BaseStageFileViewSet):
         if stage.student.assigned_supervisor:
             notify(
                 recipient=stage.student.assigned_supervisor,
-                message=f'{stage.student.user.email} uploaded Minutes of Presentation for the {stage.get_stage_type_display()} stage.',
+                message=f'{
+                    stage.student.user.email} uploaded Minutes of Presentation for the {
+                    stage.get_stage_type_display()} stage.',
                 notification_type='DOCUMENT_UPLOAD',
-                link=f'/api/minutes/{minutes.id}/',
+                link=f'/api/minutes/{
+                    minutes.id}/',
             )
 
         log_audit_event(
-            user=request.user,
-            action='MINUTES_UPLOAD',
-            description=f'{request.user.email} uploaded Minutes of Presentation for stage {stage.stage_type}.',
-            ip_address=getattr(request, 'client_ip', None),
-            extra_data={'minutes_id': minutes.id, 'stage_id': stage.id},
-        )
+            user=request.user, action='MINUTES_UPLOAD', description=f'{
+                request.user.email} uploaded Minutes of Presentation for stage {
+                stage.stage_type}.', ip_address=getattr(
+                request, 'client_ip', None), extra_data={
+                    'minutes_id': minutes.id, 'stage_id': stage.id}, )
 
-        return Response(self.get_serializer(minutes).data, status=status.HTTP_201_CREATED)
+        return Response(
+            self.get_serializer(minutes).data,
+            status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['post'])
     def approve(self, request, pk=None):
         minutes = self.get_object()
 
         if minutes.stage.student.assigned_supervisor_id != request.user.id:
-            return Response({'error': 'Only assigned supervisor can approve minutes'}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {'error': 'Only assigned supervisor can approve minutes'}, status=status.HTTP_403_FORBIDDEN)
         if minutes.is_approved:
-            return Response({'error': 'Minutes have already been approved'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Minutes have already been approved'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         minutes.is_approved = True
         minutes.approved_by = request.user
         minutes.approved_at = timezone.now()
-        minutes.save(update_fields=['is_approved', 'approved_by', 'approved_at'])
+        minutes.save(
+            update_fields=[
+                'is_approved',
+                'approved_by',
+                'approved_at'])
 
         notify(
             recipient=minutes.student.user,
@@ -287,16 +351,18 @@ class MinutesViewSet(BaseStageFileViewSet):
         )
 
         log_audit_event(
-            user=request.user,
-            action='MINUTES_APPROVAL',
-            description=f'{request.user.email} approved Minutes of Presentation for {minutes.student.user.email}.',
-            ip_address=getattr(request, 'client_ip', None),
-            extra_data={'minutes_id': minutes.id, 'stage_id': minutes.stage.id},
-        )
+            user=request.user, action='MINUTES_APPROVAL', description=f'{
+                request.user.email} approved Minutes of Presentation for {
+                minutes.student.user.email}.', ip_address=getattr(
+                request, 'client_ip', None), extra_data={
+                    'minutes_id': minutes.id, 'stage_id': minutes.stage.id}, )
 
         return Response(self.get_serializer(minutes).data)
 
     @action(detail=True, methods=['get'], url_path='download')
     def download(self, request, pk=None):
         minutes = self.get_object()
-        return FileResponse(minutes.file.open('rb'), as_attachment=True, filename=minutes.file_name)
+        return FileResponse(
+            minutes.file.open('rb'),
+            as_attachment=True,
+            filename=minutes.file_name)

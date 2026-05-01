@@ -14,12 +14,46 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Notification',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('message', models.TextField()),
-                ('notification_type', models.CharField(choices=[('ACTIVITY_REMINDER', 'Activity Reminder'), ('DOCUMENT_UPLOAD', 'Document Upload'), ('SUPERVISOR_APPROVAL', 'Supervisor Approval'), ('MINUTES_APPROVAL', 'Minutes Approval'), ('COMPLAINT_RECEIVED', 'Complaint Received'), ('COMPLAINT_RESPONSE', 'Complaint Response'), ('COMPLAINT_OVERDUE', 'Complaint Overdue'), ('MEETING_REQUEST', 'Meeting Request'), ('STAGE_BLOCKED', 'Stage Completion Blocked')], max_length=50)),
-                ('is_read', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('link', models.CharField(blank=True, max_length=500)),
+                ('id',
+                 models.BigAutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('message',
+                 models.TextField()),
+                ('notification_type',
+                 models.CharField(
+                     choices=[
+                         ('ACTIVITY_REMINDER',
+                          'Activity Reminder'),
+                         ('DOCUMENT_UPLOAD',
+                          'Document Upload'),
+                         ('SUPERVISOR_APPROVAL',
+                          'Supervisor Approval'),
+                         ('MINUTES_APPROVAL',
+                          'Minutes Approval'),
+                         ('COMPLAINT_RECEIVED',
+                          'Complaint Received'),
+                         ('COMPLAINT_RESPONSE',
+                          'Complaint Response'),
+                         ('COMPLAINT_OVERDUE',
+                          'Complaint Overdue'),
+                         ('MEETING_REQUEST',
+                          'Meeting Request'),
+                         ('STAGE_BLOCKED',
+                          'Stage Completion Blocked')],
+                     max_length=50)),
+                ('is_read',
+                 models.BooleanField(
+                     default=False)),
+                ('created_at',
+                 models.DateTimeField(
+                     auto_now_add=True)),
+                ('link',
+                 models.CharField(
+                     blank=True,
+                     max_length=500)),
             ],
             options={
                 'db_table': 'notifications',

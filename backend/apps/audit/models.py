@@ -1,9 +1,13 @@
 from django.db import models
 from apps.users.models import User
-import json
+
 
 class AuditLog(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True)
     action = models.CharField(max_length=255)
     description = models.TextField()
     ip_address = models.GenericIPAddressField(null=True, blank=True)

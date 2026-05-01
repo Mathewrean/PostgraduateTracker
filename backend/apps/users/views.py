@@ -14,6 +14,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -24,7 +25,9 @@ class UserViewSet(viewsets.ModelViewSet):
         if user.role_key in ['coordinator', 'dean', 'cod', 'director_bps']:
             queryset = User.objects.all()
         elif user.role_key == 'supervisor':
-            queryset = User.objects.filter(id=user.id) | User.objects.filter(student_profile__assigned_supervisor=user)
+            queryset = User.objects.filter(
+                id=user.id) | User.objects.filter(
+                student_profile__assigned_supervisor=user)
         else:
             queryset = User.objects.filter(id=user.id)
 
@@ -34,7 +37,8 @@ class UserViewSet(viewsets.ModelViewSet):
         return queryset
 
     def _require_admin_or_coordinator(self):
-        if self.request.user.role_key not in ['coordinator', 'dean', 'cod', 'director_bps']:
+        if self.request.user.role_key not in [
+                'coordinator', 'dean', 'cod', 'director_bps']:
             raise PermissionDenied('You are not allowed to manage users.')
 
     def list(self, request, *args, **kwargs):
@@ -108,16 +112,18 @@ class UserViewSet(viewsets.ModelViewSet):
         """Legacy login endpoint (for non-OIDC flows)"""
         email = request.data.get('email')
         password = request.data.get('password')
-        
+
         if not email or not password:
             return Response({
                 'error': 'Email and password are required'
             }, status=status.HTTP_400_BAD_REQUEST)
-        
+
         user = authenticate(request, email=email, password=password)
         if user:
             refresh = RefreshToken.for_user(user)
-            user.update_last_login(request.client_ip if hasattr(request, 'client_ip') else None)
+            user.update_last_login(
+                request.client_ip if hasattr(
+                    request, 'client_ip') else None)
             log_audit_event(
                 user=user,
                 action='LOGIN',
@@ -129,7 +135,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
             })
-        
+
         return Response({
             'error': 'Invalid credentials'
         }, status=status.HTTP_401_UNAUTHORIZED)
@@ -147,9 +153,11 @@ class UserViewSet(viewsets.ModelViewSet):
                 description='User logged out of the PST platform.',
                 ip_address=getattr(request, 'client_ip', None),
             )
-            return Response({'success': True}, status=status.HTTP_205_RESET_CONTENT)
+            return Response({'success': True},
+                            status=status.HTTP_205_RESET_CONTENT)
         except Exception:
-            return Response({'error': 'Invalid or expired refresh token'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Invalid or expired refresh token'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class AuthLoginView(APIView):
@@ -160,14 +168,18 @@ class AuthLoginView(APIView):
         password = request.data.get('password')
 
         if not email or not password:
-            return Response({'error': 'Email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Email and password are required'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         user = authenticate(request, email=email, password=password)
         if not user:
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'error': 'Invalid credentials'},
+                            status=status.HTTP_401_UNAUTHORIZED)
 
         refresh = RefreshToken.for_user(user)
-        user.update_last_login(request.client_ip if hasattr(request, 'client_ip') else None)
+        user.update_last_login(
+            request.client_ip if hasattr(
+                request, 'client_ip') else None)
         log_audit_event(
             user=user,
             action='LOGIN',
@@ -195,19 +207,28 @@ class AuthLogoutView(APIView):
                 description='User logged out of the PST platform.',
                 ip_address=getattr(request, 'client_ip', None),
             )
-            return Response({'success': True}, status=status.HTTP_205_RESET_CONTENT)
+            return Response({'success': True},
+                            status=status.HTTP_205_RESET_CONTENT)
         except Exception:
-            return Response({'error': 'Invalid or expired refresh token'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Invalid or expired refresh token'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class AuthProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response(UserSerializer(request.user, context={'request': request}).data)
+        return Response(
+            UserSerializer(
+                request.user, context={
+                    'request': request}).data)
 
     def patch(self, request):
-        serializer = UserProfileUpdateSerializer(request.user, data=request.data, partial=True)
+        serializer = UserProfileUpdateSerializer(
+            request.user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(UserSerializer(request.user, context={'request': request}).data)
+        return Response(
+            UserSerializer(
+                request.user, context={
+                    'request': request}).data)

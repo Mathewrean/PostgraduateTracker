@@ -55,17 +55,17 @@ export const RegisterPage = () => {
 
     setLoading(true)
     
-    try {
-      const response = await authService.register({
-        email: formData.email,
-        admission_number: formData.admission_number,
-        phone: formData.phone,
-        first_name: formData.first_name || '',
-        last_name: formData.last_name || '',
-        password: formData.password,
-        password_confirm: formData.password_confirm,
-        role: formData.role
-      })
+     try {
+       await authService.register({
+         email: formData.email,
+         admission_number: formData.admission_number,
+         phone: formData.phone,
+         first_name: formData.first_name || '',
+         last_name: formData.last_name || '',
+         password: formData.password,
+         password_confirm: formData.password_confirm,
+         role: formData.role
+       })
       
       toast.success('Registration successful! Please login.')
       navigate('/login')

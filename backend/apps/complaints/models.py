@@ -3,6 +3,7 @@ from django.utils import timezone
 from apps.users.models import User
 from apps.students.models import Student
 
+
 class Complaint(models.Model):
     STATUS_CHOICES = [
         ('SUBMITTED', 'Submitted'),
@@ -10,13 +11,24 @@ class Complaint(models.Model):
         ('RESOLVED', 'Resolved'),
     ]
 
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='complaints')
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name='complaints')
     content = models.TextField()
     submitted_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='SUBMITTED')
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='SUBMITTED')
     response_content = models.TextField(blank=True)
     responded_at = models.DateTimeField(null=True, blank=True)
-    responded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='responded_complaints')
+    responded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='responded_complaints')
     is_overdue = models.BooleanField(default=False)
 
     class Meta:

@@ -18,19 +18,31 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='student',
             name='assigned_supervisor',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='students_assigned', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='students_assigned',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='student',
             name='user',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='student_profile', to=settings.AUTH_USER_MODEL),
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='student_profile',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddIndex(
             model_name='student',
-            index=models.Index(fields=['user'], name='students_user_id_b061ff_idx'),
+            index=models.Index(
+                fields=['user'],
+                name='students_user_id_b061ff_idx'),
         ),
         migrations.AddIndex(
             model_name='student',
-            index=models.Index(fields=['current_stage'], name='students_current_1243d0_idx'),
+            index=models.Index(
+                fields=['current_stage'],
+                name='students_current_1243d0_idx'),
         ),
     ]
