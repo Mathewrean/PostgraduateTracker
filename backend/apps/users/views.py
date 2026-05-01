@@ -8,6 +8,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User, normalize_role_value
 from .serializers import UserSerializer, UserRegistrationSerializer, UserDetailSerializer, UserProfileUpdateSerializer
 from .permissions import RoleBasedPermission
+from apps.audit.services import log_audit_event
 import logging
 
 logger = logging.getLogger(__name__)
@@ -79,7 +80,7 @@ class UserViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['post', 'patch'])
     def update_profile(self, request):
         """Update user profile"""
         user = request.user
@@ -110,6 +111,12 @@ class UserViewSet(viewsets.ModelViewSet):
         if user:
             refresh = RefreshToken.for_user(user)
             user.update_last_login(request.client_ip if hasattr(request, 'client_ip') else None)
+            log_audit_event(
+                user=user,
+                action='LOGIN',
+                description='User logged into the PST platform.',
+                ip_address=getattr(request, 'client_ip', None),
+            )
             return Response({
                 'user': UserSerializer(user, context={'request': request}).data,
                 'refresh': str(refresh),
@@ -127,6 +134,12 @@ class UserViewSet(viewsets.ModelViewSet):
             refresh_token = request.data.get('refresh')
             token = RefreshToken(refresh_token)
             token.blacklist()
+            log_audit_event(
+                user=request.user,
+                action='LOGOUT',
+                description='User logged out of the PST platform.',
+                ip_address=getattr(request, 'client_ip', None),
+            )
             return Response({'success': True}, status=status.HTTP_205_RESET_CONTENT)
         except Exception:
             return Response({'error': 'Invalid or expired refresh token'}, status=status.HTTP_400_BAD_REQUEST)

@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.audit.models import AuditLog
+from apps.audit.services import log_audit_event
 from apps.complaints.models import Complaint
 from apps.stages.models import Stage
 from apps.students.models import Student
@@ -346,6 +347,13 @@ class ReportViewSet(viewsets.ViewSet):
                     writer.writerow([row])
             response = HttpResponse(buffer.getvalue(), content_type='text/csv')
             response['Content-Disposition'] = f'attachment; filename="{report_type}.csv"'
+            log_audit_event(
+                user=request.user,
+                action='REPORT_GENERATION',
+                description=f'{request.user.email} generated a {report_type} report in CSV format.',
+                ip_address=getattr(request, 'client_ip', None),
+                extra_data={'report_type': report_type, 'format': 'csv'},
+            )
             return response
 
         if format_type == 'pdf':
@@ -357,6 +365,13 @@ class ReportViewSet(viewsets.ViewSet):
             ]
             response = HttpResponse(build_minimal_pdf(lines), content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="{report_type}.pdf"'
+            log_audit_event(
+                user=request.user,
+                action='REPORT_GENERATION',
+                description=f'{request.user.email} generated a {report_type} report in PDF format.',
+                ip_address=getattr(request, 'client_ip', None),
+                extra_data={'report_type': report_type, 'format': 'pdf'},
+            )
             return response
 
         return Response({'error': 'Invalid format'}, status=400)

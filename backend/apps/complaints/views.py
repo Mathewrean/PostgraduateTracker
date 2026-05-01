@@ -6,6 +6,7 @@ from rest_framework.exceptions import PermissionDenied
 from django.utils import timezone
 from .models import Complaint
 from .serializers import ComplaintSerializer
+from apps.audit.services import log_audit_event
 from apps.students.models import Student
 from apps.notifications.services import notify
 from apps.users.models import User
@@ -47,6 +48,14 @@ class ComplaintViewSet(viewsets.ModelViewSet):
                     notification_type='COMPLAINT_RECEIVED',
                     link=f'/api/complaints/{complaint.id}/'
                 )
+
+            log_audit_event(
+                user=request.user,
+                action='COMPLAINT_SUBMISSION',
+                description=f'{request.user.email} submitted a complaint.',
+                ip_address=getattr(request, 'client_ip', None),
+                extra_data={'complaint_id': complaint.id},
+            )
             
             serializer = self.get_serializer(complaint)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -80,6 +89,14 @@ class ComplaintViewSet(viewsets.ModelViewSet):
             message='Your complaint has been responded to',
             notification_type='COMPLAINT_RESPONSE',
             link=f'/api/complaints/{complaint.id}/'
+        )
+
+        log_audit_event(
+            user=request.user,
+            action='COMPLAINT_RESPONSE',
+            description=f'{request.user.email} responded to complaint {complaint.id}.',
+            ip_address=getattr(request, 'client_ip', None),
+            extra_data={'complaint_id': complaint.id},
         )
         
         serializer = self.get_serializer(complaint)

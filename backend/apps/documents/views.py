@@ -10,6 +10,7 @@ from rest_framework.response import Response
 
 from .models import Document, Minutes
 from .serializers import DocumentSerializer, MinutesSerializer
+from apps.audit.services import log_audit_event
 from apps.notifications.services import notify
 from apps.stages.models import Stage
 from apps.students.models import Student
@@ -156,6 +157,14 @@ class DocumentViewSet(BaseStageFileViewSet):
                 link=f'/api/documents/{document.id}/',
             )
 
+        log_audit_event(
+            user=request.user,
+            action='DOCUMENT_UPLOAD',
+            description=f'{request.user.email} uploaded {document.get_doc_type_display()} for stage {stage.stage_type}.',
+            ip_address=getattr(request, 'client_ip', None),
+            extra_data={'document_id': document.id, 'stage_id': stage.id, 'doc_type': document.doc_type},
+        )
+
         serializer = self.get_serializer(document)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -246,6 +255,14 @@ class MinutesViewSet(BaseStageFileViewSet):
                 link=f'/api/minutes/{minutes.id}/',
             )
 
+        log_audit_event(
+            user=request.user,
+            action='MINUTES_UPLOAD',
+            description=f'{request.user.email} uploaded Minutes of Presentation for stage {stage.stage_type}.',
+            ip_address=getattr(request, 'client_ip', None),
+            extra_data={'minutes_id': minutes.id, 'stage_id': stage.id},
+        )
+
         return Response(self.get_serializer(minutes).data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['post'])
@@ -267,6 +284,14 @@ class MinutesViewSet(BaseStageFileViewSet):
             message='Your Minutes of Presentation have been approved.',
             notification_type='MINUTES_APPROVAL',
             link=f'/api/stages/{minutes.stage.id}/',
+        )
+
+        log_audit_event(
+            user=request.user,
+            action='MINUTES_APPROVAL',
+            description=f'{request.user.email} approved Minutes of Presentation for {minutes.student.user.email}.',
+            ip_address=getattr(request, 'client_ip', None),
+            extra_data={'minutes_id': minutes.id, 'stage_id': minutes.stage.id},
         )
 
         return Response(self.get_serializer(minutes).data)

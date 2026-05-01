@@ -9,6 +9,7 @@ from .serializers import NotificationSerializer, MeetingSerializer
 from apps.users.models import User
 from apps.activities.models import Meeting
 from apps.students.models import Student
+from apps.notifications.services import notify
 
 class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = NotificationSerializer
@@ -69,8 +70,7 @@ class MeetingViewSet(viewsets.ModelViewSet):
             notes=request.data.get('notes', '')
         )
 
-        # Send notification to supervisor
-        Notification.objects.create(
+        notify(
             recipient=supervisor,
             message=f'Meeting request from {request.user.email}',
             notification_type='MEETING_REQUEST',

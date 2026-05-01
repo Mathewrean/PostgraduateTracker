@@ -6,6 +6,7 @@ from rest_framework.exceptions import PermissionDenied
 from django.utils import timezone
 from .models import Stage
 from .serializers import StageSerializer
+from apps.audit.services import log_audit_event
 from apps.students.models import Student
 
 class StageViewSet(viewsets.ModelViewSet):
@@ -126,5 +127,22 @@ class StageViewSet(viewsets.ModelViewSet):
 
         stage.student.current_stage = next_stage_type if next_stage_type else 'COMPLETED'
         stage.student.save(update_fields=['current_stage'])
+
+        log_audit_event(
+            user=request.user,
+            action='STAGE_APPROVAL',
+            description=f'{request.user.email} approved the {stage.stage_type} stage for {stage.student.user.email}.',
+            ip_address=getattr(request, 'client_ip', None),
+            extra_data={'stage_id': stage.id, 'next_stage': next_stage_type},
+        )
+
+        if next_stage_type:
+            log_audit_event(
+                user=request.user,
+                action='STAGE_TRANSITION',
+                description=f'{stage.student.user.email} moved from {stage.stage_type} to {next_stage_type}.',
+                ip_address=getattr(request, 'client_ip', None),
+                extra_data={'stage_id': stage.id, 'next_stage': next_stage_type},
+            )
 
         return Response(self.get_serializer(stage).data)
