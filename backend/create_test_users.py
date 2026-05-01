@@ -86,6 +86,7 @@ for user_data in test_users:
         )
         
         if created:
+            pass  # User was created
         else:
 
         user.first_name = user_data['first_name']
@@ -105,7 +106,8 @@ for user_data in test_users:
                 }
             )
             if student_created:
-            
-    except Exception as e:
+                pass  # Student profile was created
+     except Exception as e:
+         print(f"Error creating user {user_data['email']}: {e}")
 
-for user_data in test_users:
+print("Test users created successfully!")
