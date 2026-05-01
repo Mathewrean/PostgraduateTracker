@@ -15,14 +15,16 @@ export const SupervisorDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [studentsRes] = await Promise.all([
-        supervisorService.getStudents()
+      const [studentsRes, approvalsRes] = await Promise.all([
+        supervisorService.getStudents(),
+        supervisorService.getApprovals()
       ])
       const studentsList = Array.isArray(studentsRes.data) ? studentsRes.data : studentsRes.data.results || []
+      const approvals = Array.isArray(approvalsRes.data) ? approvalsRes.data : approvalsRes.data.results || []
       setStudents(studentsList)
       setStats({
         total: studentsList.length,
-        pending: studentsList.filter(s => s.current_stage === 'CONCEPT' || s.current_stage === 'PROPOSAL').length
+        pending: approvals.length
       })
     } catch (error) {
       console.error('Failed to fetch supervisor data:', error)

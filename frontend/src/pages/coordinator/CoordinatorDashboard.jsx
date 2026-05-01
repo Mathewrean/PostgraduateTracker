@@ -58,10 +58,14 @@ export const CoordinatorDashboard = () => {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[
-            { label: 'Total Students', value: reports.progress?.total_students || 0, valueClass: 'text-blue-600' },
-            { label: 'Concept Stage', value: reports.progress?.stages?.CONCEPT || 0, valueClass: 'text-yellow-600' },
-            { label: 'Proposal Stage', value: reports.progress?.stages?.PROPOSAL || 0, valueClass: 'text-orange-600' },
-            { label: 'Completed', value: reports.progress?.stages?.COMPLETED || 0, valueClass: 'text-green-600' },
+            {
+              label: 'Total Students',
+              value: Object.values(reports.progress?.current_stage_students || {}).reduce((sum, items) => sum + items.length, 0),
+              valueClass: 'text-blue-600'
+            },
+            { label: 'Concept Stage', value: reports.progress?.current_stage_students?.CONCEPT?.length || 0, valueClass: 'text-yellow-600' },
+            { label: 'Proposal Stage', value: reports.progress?.current_stage_students?.PROPOSAL?.length || 0, valueClass: 'text-orange-600' },
+            { label: 'Completed', value: reports.progress?.current_stage_students?.COMPLETED?.length || 0, valueClass: 'text-green-600' },
           ].map((stat, idx) => (
             <div key={idx} className={`${cardBg} p-6 rounded-lg border ${borderColor}`}>
               <p className={textColor}>{stat.label}</p>
@@ -76,23 +80,23 @@ export const CoordinatorDashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div>
               <p className="text-gray-600 text-sm">Total</p>
-              <p className="text-2xl font-bold">{reports.complaints?.total}</p>
+              <p className="text-2xl font-bold">{reports.complaints?.summary?.total}</p>
             </div>
             <div>
               <p className="text-gray-600 text-sm">Submitted</p>
-              <p className="text-2xl font-bold text-blue-600">{reports.complaints?.submitted}</p>
+              <p className="text-2xl font-bold text-blue-600">{reports.complaints?.summary?.submitted}</p>
             </div>
             <div>
               <p className="text-gray-600 text-sm">Under Review</p>
-              <p className="text-2xl font-bold text-yellow-600">{reports.complaints?.under_review}</p>
+              <p className="text-2xl font-bold text-yellow-600">{reports.complaints?.summary?.under_review}</p>
             </div>
             <div>
               <p className="text-gray-600 text-sm">Resolved</p>
-              <p className="text-2xl font-bold text-green-600">{reports.complaints?.resolved}</p>
+              <p className="text-2xl font-bold text-green-600">{reports.complaints?.summary?.resolved}</p>
             </div>
             <div>
               <p className="text-gray-600 text-sm">Overdue</p>
-              <p className="text-2xl font-bold text-red-600">{reports.complaints?.overdue}</p>
+              <p className="text-2xl font-bold text-red-600">{reports.complaints?.summary?.overdue}</p>
             </div>
           </div>
         </div>

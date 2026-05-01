@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../context/store'
 import { useUIStore } from '../context/store'
-import { authService } from '../services'
+import { authService, notificationService } from '../services'
 import { getCookie } from '../services/api'
 
 export const NavbarComponent = () => {
@@ -10,7 +10,22 @@ export const NavbarComponent = () => {
   const isDark = useUIStore((state) => state.isDark)
   const user = useAuthStore((state) => state.user)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
   const logout = useAuthStore((state) => state.logout)
+
+  useEffect(() => {
+    const fetchUnread = async () => {
+      if (!user) return
+      try {
+        const response = await notificationService.getUnreadCount()
+        setUnreadCount(response.data?.unread_count || 0)
+      } catch (error) {
+        setUnreadCount(0)
+      }
+    }
+
+    fetchUnread()
+  }, [user])
 
   const handleLogout = async () => {
     const refreshToken = getCookie('pst_refresh_token')
@@ -84,6 +99,21 @@ export const NavbarComponent = () => {
 
           {/* Mobile Menu & Logout */}
           <div className="flex items-center gap-3 ml-auto">
+            {user && (
+              <button
+                onClick={() => navigate('/notifications')}
+                className={`relative px-3 py-2 rounded-lg text-sm ${
+                  isDark ? 'hover:bg-gray-800 text-gray-300' : 'hover:bg-gray-100 text-gray-700'
+                }`}
+              >
+                Notifications
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-red-600 text-white text-xs flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+            )}
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
