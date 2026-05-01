@@ -37,6 +37,22 @@ export const useUIStore = create((set) => ({
   toggleTheme: () => set((state) => {
     const newTheme = !state.isDark
     localStorage.setItem('theme', newTheme ? 'dark' : 'light')
+    // Update the document root class for dark mode
+    if (newTheme) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
     return { isDark: newTheme }
   }),
+  // Initialize the theme on load
+  initializeTheme: () => set((state) => {
+    const isDark = localStorage.getItem('theme') === 'dark'
+    if (isDark) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+    return { isDark }
+  })
 }))

@@ -8,23 +8,78 @@ html {
   font-family: 'Merriweather', Georgia, serif;
 }
 
-body {
-  @apply bg-gray-50;
-  font-family: 'Merriweather', Georgia, serif;
+:root {
+  /* JOOUST Light Mode Colors */
+  --jooust-primary: #002B5C; /* Dark Blue */
+  --jooust-primary-hover: #004080; /* Lighter Blue for hover */
+  --jooust-secondary: #FFD700; /* Gold */
+  --jooust-secondary-hover: #FFE8A0; /* Lighter Gold for hover */
+  --jooust-bg: #FFFFFF;
+  --jooust-bg-alt: #F8F9FA;
+  --jooust-text: #212529;
+  --jooust-border: #DEE2E6;
 }
 
+.dark {
+  /* JOOUST Dark Mode Colors */
+  --jooust-primary: #004080; /* Lighter Blue for accent glow */
+  --jooust-primary-hover: #005A9C; /* Even lighter for hover */
+  --jooust-secondary: #FFE8A0; /* Lighter Gold */
+  --jooust-secondary-hover: #FFF5B0; /* Pale Gold for hover */
+  --jooust-bg: #121212; /* Deep Charcoal */
+  --jooust-bg-alt: #1E1E1E;
+  --jooust-text: #E9ECEF;
+  --jooust-border: #495057;
+}
+
+body {
+  background-color: var(--jooust-bg);
+  color: var(--jooust-text);
+  font-family: 'Merriweather', Georgia, serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom Components */
 .btn-primary {
-  @apply px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition;
+  @apply px-4 py-2 rounded-lg transition-all duration-200;
+  background-color: var(--jooust-primary);
+  color: var(--jooust-bg);
+}
+.btn-primary:hover {
+  background-color: var(--jooust-primary-hover);
 }
 
 .btn-secondary {
-  @apply px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition;
+  @apply px-4 py-2 rounded-lg transition-all duration-200;
+  background-color: var(--jooust-bg-alt);
+  color: var(--jooust-text);
+  border: 1px solid var(--jooust-border);
+}
+.btn-secondary:hover {
+  background-color: var(--jooust-bg);
 }
 
 .card {
-  @apply bg-white rounded-lg shadow-md p-6;
+  @apply rounded-lg shadow-md p-6 transition-all duration-200;
+  background-color: var(--jooust-bg-alt);
+  border: 1px solid var(--jooust-border);
 }
 
 .input-field {
-  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500;
+  @apply w-full px-3 py-2 rounded-lg focus:outline-none transition-all duration-200;
+  background-color: var(--jooust-bg);
+  color: var(--jooust-text);
+  border: 1px solid var(--jooust-border);
+}
+.input-field:focus {
+  border-color: var(--jooust-primary);
+  box-shadow: 0 0 0 2px rgba(0, 43, 92, 0.25); /* Light mode focus glow */
+}
+.dark .input-field:focus {
+  box-shadow: 0 0 0 2px rgba(0, 64, 128, 0.4); /* Dark mode focus glow */
+}
+
+/* Ensure smooth transitions for dark mode */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }

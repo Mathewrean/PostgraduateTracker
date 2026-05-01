@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './context/store'
+import { useUIStore } from './context/store'
 import { authService } from './services'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { Toaster } from 'react-hot-toast'
@@ -81,6 +82,11 @@ export const App = () => {
   const setUser = useAuthStore((state) => state.setUser)
   const setToken = useAuthStore((state) => state.setToken)
   const setInitialized = useAuthStore((state) => state.setInitialized)
+  const initializeTheme = useUIStore((state) => state.initializeTheme)
+
+  useEffect(() => {
+    initializeTheme()
+  }, [initializeTheme])
 
   useEffect(() => {
     let ignore = false
