@@ -43,7 +43,6 @@ class TestSuite:
         
     def log(self, status_icon, category, message):
         """Pretty print test results"""
-        print(f"{status_icon} [{category}] {message}")
     
     def setup_test_data(self):
         """Create test users and data"""
@@ -196,9 +195,6 @@ class TestSuite:
     
     def run_authentication_tests(self):
         """Test authentication endpoints"""
-        print("\n" + "="*60)
-        print("🔐 AUTHENTICATION ENDPOINTS")
-        print("="*60)
         
         # Register new user
         response = self.test_endpoint(
@@ -241,9 +237,6 @@ class TestSuite:
     
     def run_user_management_tests(self):
         """Test user management endpoints"""
-        print("\n" + "="*60)
-        print("👥 USER MANAGEMENT ENDPOINTS")
-        print("="*60)
         
         # Update profile
         self.test_endpoint(
@@ -278,9 +271,6 @@ class TestSuite:
     
     def run_student_tests(self):
         """Test student endpoints"""
-        print("\n" + "="*60)
-        print("🎓 STUDENT ENDPOINTS")
-        print("="*60)
         
         # Get student profile
         self.test_endpoint(
@@ -316,9 +306,6 @@ class TestSuite:
     
     def run_stage_tests(self):
         """Test stage workflow endpoints"""
-        print("\n" + "="*60)
-        print("📋 STAGE WORKFLOW ENDPOINTS")
-        print("="*60)
         
         # Get current stage
         self.test_endpoint(
@@ -358,9 +345,6 @@ class TestSuite:
     
     def run_activity_tests(self):
         """Test activity endpoints"""
-        print("\n" + "="*60)
-        print("📅 ACTIVITY ENDPOINTS")
-        print("="*60)
         
         # Create activity
         response = self.test_endpoint(
@@ -411,9 +395,6 @@ class TestSuite:
     
     def run_document_tests(self):
         """Test document endpoints"""
-        print("\n" + "="*60)
-        print("📄 DOCUMENT ENDPOINTS")
-        print("="*60)
         
         # Get documents
         self.test_endpoint(
@@ -474,9 +455,6 @@ class TestSuite:
     
     def run_complaint_tests(self):
         """Test complaint endpoints"""
-        print("\n" + "="*60)
-        print("⚠️  COMPLAINT ENDPOINTS")
-        print("="*60)
         
         # Submit complaint
         response = self.test_endpoint(
@@ -527,9 +505,6 @@ class TestSuite:
     
     def run_notification_tests(self):
         """Test notification endpoints"""
-        print("\n" + "="*60)
-        print("🔔 NOTIFICATION ENDPOINTS")
-        print("="*60)
         
         # Get notifications
         self.test_endpoint(
@@ -569,9 +544,6 @@ class TestSuite:
     
     def run_report_tests(self):
         """Test report endpoints"""
-        print("\n" + "="*60)
-        print("📊 REPORT ENDPOINTS")
-        print("="*60)
         
         # Student progress report
         self.test_endpoint(
@@ -629,9 +601,6 @@ class TestSuite:
     
     def run_audit_tests(self):
         """Test audit endpoints"""
-        print("\n" + "="*60)
-        print("🔍 AUDIT LOG ENDPOINTS")
-        print("="*60)
         
         # Get audit logs (admin only)
         self.test_endpoint(
@@ -652,9 +621,6 @@ class TestSuite:
     
     def run_rbac_tests(self):
         """Test Role-Based Access Control"""
-        print("\n" + "="*60)
-        print("🔐 RBAC (ROLE-BASED ACCESS CONTROL) TESTS")
-        print("="*60)
         
         # Student cannot list all students
         response = self.test_endpoint(
@@ -700,9 +666,6 @@ class TestSuite:
     
     def run_stage_gating_tests(self):
         """Test stage-gating logic"""
-        print("\n" + "="*60)
-        print("🚪 STAGE GATING LOGIC TESTS")
-        print("="*60)
         
         # Student should not be able to approve stage
         self.test_endpoint(
@@ -733,9 +696,6 @@ class TestSuite:
     
     def run_all_tests(self):
         """Execute all test suites"""
-        print("\n" + "="*60)
-        print("🚀 PST COMPREHENSIVE ENDPOINT & FUNCTIONALITY TEST SUITE")
-        print("="*60)
         
         try:
             self.setup_test_data()
@@ -762,28 +722,16 @@ class TestSuite:
     
     def print_summary(self):
         """Print test summary"""
-        print("\n" + "="*60)
-        print("✅ TEST SUMMARY")
-        print("="*60)
         
         passed = len(self.test_results['passed'])
         failed = len(self.test_results['failed'])
         total = self.test_results['total']
         success_rate = (passed / total * 100) if total > 0 else 0
         
-        print(f"\n📊 Results:")
-        print(f"   Total Tests: {total}")
-        print(f"   ✅ Passed:   {passed}")
-        print(f"   ❌ Failed:   {failed}")
-        print(f"   Success Rate: {success_rate:.1f}%")
         
         if failed > 0:
-            print(f"\n❌ Failed Tests:")
             for failure in self.test_results['failed']:
-                print(f"   • {failure}")
         
-        print("\n" + "="*60)
-        print("🎯 Endpoints Tested:")
         
         categories = {
             'Authentication': self.test_results['passed'][:3],
@@ -802,16 +750,10 @@ class TestSuite:
         
         for category, tests in categories.items():
             if tests:
-                print(f"\n{category}:")
                 for test in tests:
-                    print(f"   ✓ {test}")
         
-        print("\n" + "="*60)
         if success_rate >= 80:
-            print("🎉 TEST SUITE: PASSED")
         else:
-            print("⚠️  TEST SUITE: REVIEW REQUIRED")
-        print("="*60 + "\n")
 
 if __name__ == '__main__':
     suite = TestSuite()

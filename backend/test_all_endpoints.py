@@ -55,7 +55,6 @@ class AuthenticationTests(APITestCase):
         self.assertIn('access', response.data)
         self.assertIn('refresh', response.data)
         self.assertEqual(response.data['user']['email'], self.user_data['email'])
-        print("✓ User Registration: PASS")
     
     def test_jwt_token_obtain(self):
         """Test JWT token endpoint"""
@@ -77,7 +76,6 @@ class AuthenticationTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('access', response.data)
-        print("✓ JWT Token: PASS")
     
     def test_get_current_user(self):
         """Test get current user endpoint"""
@@ -94,7 +92,6 @@ class AuthenticationTests(APITestCase):
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['email'], 'current@test.com')
-        print("✓ Get Current User: PASS")
 
 class StudentTests(APITestCase):
     """Test student endpoints"""
@@ -116,7 +113,6 @@ class StudentTests(APITestCase):
         response = self.client.get('/api/students/profile/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['user']['email'], 'student@test.com')
-        print("✓ Get Student Profile: PASS")
     
     def test_update_student_profile(self):
         """Test update student profile"""
@@ -131,7 +127,6 @@ class StudentTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('project_title', response.data)
-        print("✓ Update Student Profile: PASS")
 
 class StageWorkflowTests(APITestCase):
     """Test stage-gated workflow"""
@@ -168,7 +163,6 @@ class StageWorkflowTests(APITestCase):
         response = self.client.get('/api/stages/current_stage/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['stage_type'], 'CONCEPT')
-        print("✓ Get Current Stage: PASS")
     
     def test_stage_progression(self):
         """Test stage workflow progression"""
@@ -176,7 +170,6 @@ class StageWorkflowTests(APITestCase):
         # Stages should be CONCEPT, PROPOSAL, THESIS
         response = self.client.get('/api/stages/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        print("✓ Stage Progression: PASS")
 
 class ActivityTests(APITestCase):
     """Test activity endpoints"""
@@ -212,7 +205,6 @@ class ActivityTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['title'], 'Literature Review')
-        print("✓ Create Activity: PASS")
     
     def test_get_activities(self):
         """Test getting all activities"""
@@ -225,7 +217,6 @@ class ActivityTests(APITestCase):
         response = self.client.get('/api/activities/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreater(len(response.data), 0)
-        print("✓ Get Activities: PASS")
     
     def test_mark_activity_done(self):
         """Test marking activity as completed"""
@@ -241,7 +232,6 @@ class ActivityTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['status'], 'COMPLETED')
-        print("✓ Mark Activity Done: PASS")
 
 class DocumentTests(APITestCase):
     """Test document upload endpoints"""
@@ -267,7 +257,6 @@ class DocumentTests(APITestCase):
         """Test getting documents"""
         response = self.client.get('/api/documents/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        print("✓ Get Documents: PASS")
 
 class ComplaintTests(APITestCase):
     """Test complaint endpoints"""
@@ -302,7 +291,6 @@ class ComplaintTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['status'], 'SUBMITTED')
-        print("✓ Submit Complaint: PASS")
     
     def test_get_complaints(self):
         """Test getting complaints"""
@@ -313,7 +301,6 @@ class ComplaintTests(APITestCase):
         )
         response = self.client.get('/api/complaints/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        print("✓ Get Complaints: PASS")
 
 class NotificationTests(APITestCase):
     """Test notification endpoints"""
@@ -337,7 +324,6 @@ class NotificationTests(APITestCase):
         """Test getting notifications"""
         response = self.client.get('/api/notifications/notifications/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        print("✓ Get Notifications: PASS")
     
     def test_mark_notification_read(self):
         """Test marking notification as read"""
@@ -346,7 +332,6 @@ class NotificationTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['is_read'], True)
-        print("✓ Mark Notification Read: PASS")
 
 class RBACTests(APITestCase):
     """Test Role-Based Access Control"""
@@ -374,14 +359,12 @@ class RBACTests(APITestCase):
         response = self.client.get('/api/reports/student_progress/')
         # Should be restricted or return empty
         self.assertIn(response.status_code, [status.HTTP_403_FORBIDDEN, status.HTTP_200_OK])
-        print("✓ RBAC - Student Report Restriction: PASS")
     
     def test_coordinator_can_access_reports(self):
         """Test coordinator can access reports"""
         self.client.force_authenticate(user=self.coordinator)
         response = self.client.get('/api/reports/student_progress/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        print("✓ RBAC - Coordinator Report Access: PASS")
 
 class ReportTests(APITestCase):
     """Test reporting endpoints"""
@@ -403,20 +386,15 @@ class ReportTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('total_students', response.data)
         self.assertIn('stages', response.data)
-        print("✓ Student Progress Report: PASS")
     
     def test_complaint_report(self):
         """Test complaint statistics report"""
         response = self.client.get('/api/reports/complaint_report/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('total', response.data)
-        print("✓ Complaint Report: PASS")
 
 def run_all_tests():
     """Run all tests"""
-    print("\n" + "="*50)
-    print("PST API COMPREHENSIVE TEST SUITE")
-    print("="*50 + "\n")
     
     test_classes = [
         AuthenticationTests,
@@ -435,7 +413,6 @@ def run_all_tests():
     failed_tests = 0
     
     for test_class in test_classes:
-        print(f"\n[Testing: {test_class.__name__}]")
         suite = unittest.TestLoader().loadTestsFromTestCase(test_class)
         runner = unittest.TextTestRunner(verbosity=1)
         result = runner.run(suite)
@@ -445,15 +422,7 @@ def run_all_tests():
             if result.wasSuccessful():
                 passed_tests += 1
     
-    print("\n" + "="*50)
-    print("TEST SUMMARY")
-    print("="*50)
-    print(f"Total Tests: {total_tests}")
-    print(f"Passed: {passed_tests} ✓")
-    print(f"Failed: {failed_tests} ✗")
     if total_tests > 0:
-        print(f"Success Rate: {(passed_tests/total_tests*100):.1f}%")
-    print("="*50 + "\n")
 
 if __name__ == '__main__':
     run_all_tests()

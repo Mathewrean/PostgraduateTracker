@@ -72,7 +72,6 @@ test_users = [
     },
 ]
 
-print("Creating test users...")
 for user_data in test_users:
     try:
         user, created = User.objects.get_or_create(
@@ -87,9 +86,7 @@ for user_data in test_users:
         )
         
         if created:
-            print(f"✅ Created {user_data['role']}: {user_data['email']}")
         else:
-            print(f"⏭️  Already exists: {user_data['email']}")
 
         user.first_name = user_data['first_name']
         user.last_name = user_data['last_name']
@@ -108,12 +105,7 @@ for user_data in test_users:
                 }
             )
             if student_created:
-                print(f"✅ Added student profile: {user_data['email']}")
             
     except Exception as e:
-        print(f"❌ Error creating {user_data['email']}: {str(e)}")
 
-print("\n✅ Test users setup complete!")
-print("\nYou can now login with:")
 for user_data in test_users:
-    print(f"  - {user_data['email']} / {user_data['password']} ({user_data['role']})")
