@@ -7,6 +7,8 @@ from django.utils import timezone
 from .models import Complaint
 from .serializers import ComplaintSerializer
 from apps.students.models import Student
+from apps.notifications.services import notify
+from apps.users.models import User
 
 class ComplaintViewSet(viewsets.ModelViewSet):
     serializer_class = ComplaintSerializer
@@ -14,19 +16,19 @@ class ComplaintViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'student':
+        if user.role_key == 'student':
             try:
                 student = Student.objects.get(user=user)
                 return Complaint.objects.filter(student=student)
             except Student.DoesNotExist:
                 return Complaint.objects.none()
-        elif user.role in ['coordinator', 'dean', 'cod', 'director_bps']:
+        elif user.role_key in ['coordinator', 'dean', 'cod', 'director_bps']:
             return Complaint.objects.all()
         return Complaint.objects.none()
 
     def create(self, request):
         """Submit a new complaint"""
-        if request.user.role != 'student':
+        if request.user.role_key != 'student':
             raise PermissionDenied('Only students can submit complaints.')
         try:
             student = Student.objects.get(user=request.user)
@@ -37,13 +39,9 @@ class ComplaintViewSet(viewsets.ModelViewSet):
             
             complaint = Complaint.objects.create(student=student, content=content)
             
-            # Send notifications to Coordinator and Admins
-            from apps.notifications.models import Notification
-            from apps.users.models import User
-            
             recipients = User.objects.filter(role__in=['coordinator', 'dean', 'cod', 'director_bps'])
             for recipient in recipients:
-                Notification.objects.create(
+                notify(
                     recipient=recipient,
                     message=f'New complaint submitted by {student.user.email}',
                     notification_type='COMPLAINT_RECEIVED',
@@ -58,7 +56,7 @@ class ComplaintViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def respond(self, request, pk=None):
         """Respond to a complaint"""
-        if request.user.role not in ['coordinator', 'dean', 'cod', 'director_bps']:
+        if request.user.role_key not in ['coordinator', 'dean', 'cod', 'director_bps']:
             raise PermissionDenied('Only coordinators and admins can respond to complaints.')
         complaint = self.get_object()
         
@@ -74,11 +72,10 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         complaint.responded_at = timezone.now()
         complaint.responded_by = request.user
         complaint.status = 'RESOLVED'
-        complaint.save()
+        complaint.save(update_fields=['response_content', 'responded_at', 'responded_by', 'status'])
         
         # Send notification to student
-        from apps.notifications.models import Notification
-        Notification.objects.create(
+        notify(
             recipient=complaint.student.user,
             message='Your complaint has been responded to',
             notification_type='COMPLAINT_RESPONSE',

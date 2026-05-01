@@ -11,17 +11,25 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AuditLogSerializer
     permission_classes = [IsAuthenticated]
 
+    def _require_audit_access(self):
+        if self.request.user.role_key not in ['dean', 'cod', 'director_bps']:
+            raise PermissionDenied('Only the Dean, COD, and Director BPS can access audit logs.')
+
     def get_queryset(self):
-        user = self.request.user
-        # Only Director BPS can view audit logs
-        if user.role == 'director_bps':
-            return AuditLog.objects.all()
-        return AuditLog.objects.none()
+        self._require_audit_access()
+        return AuditLog.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        self._require_audit_access()
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        self._require_audit_access()
+        return super().retrieve(request, *args, **kwargs)
 
     @action(detail=False, methods=['get'])
     def user_logs(self, request):
-        if request.user.role != 'director_bps':
-            raise PermissionDenied('Only Director BPS can access audit logs.')
+        self._require_audit_access()
         user_id = request.query_params.get('user_id')
         if user_id:
             logs = self.get_queryset().filter(user_id=user_id)

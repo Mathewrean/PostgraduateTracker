@@ -21,7 +21,7 @@ class AuditLoggingMiddleware(MiddlewareMixin):
         return ip
 
     def process_response(self, request, response):
-        if request.user and request.user.is_authenticated:
+        if hasattr(request, 'user') and request.user and request.user.is_authenticated:
             # Log API endpoints
             if request.path.startswith('/api/'):
                 try:
