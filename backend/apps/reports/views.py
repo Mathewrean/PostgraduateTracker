@@ -323,6 +323,11 @@ class ReportViewSet(viewsets.ViewSet):
             'users': self._user_report_payload(request),
             'supervisors': self._supervisor_report_payload(request),
             'complaints': self._complaint_report_payload(request),
+            'stage_transition': {
+                'concept_to_proposal': Stage.objects.filter(stage_type='CONCEPT', status='COMPLETED').count(),
+                'proposal_to_thesis': Stage.objects.filter(stage_type='PROPOSAL', status='COMPLETED').count(),
+                'thesis_completion': Stage.objects.filter(stage_type='THESIS', status='COMPLETED').count(),
+            },
             'student_progress': self._student_report_payload(request),
             'supervisor_report': self._supervisor_report_payload(request),
             'complaint_report': self._complaint_report_payload(request),
