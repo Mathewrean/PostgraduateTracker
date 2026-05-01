@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Layout } from '../../components/Layout'
-import { studentService } from '../../services'
+import { authService, studentService } from '../../services'
 import { useAuthStore } from '../../context/store'
 
 export const ProfilePage = () => {
@@ -8,6 +8,8 @@ export const ProfilePage = () => {
   const [profile, setProfile] = useState({
     project_title: '',
     preferred_supervisor: '',
+    preferred_supervisor_other: '',
+    email: user?.email || '',
     phone: '',
     first_name: user?.first_name || '',
     last_name: user?.last_name || ''
@@ -27,7 +29,9 @@ export const ProfilePage = () => {
         ...prev,
         project_title: response.data.project_title || '',
         preferred_supervisor: response.data.preferred_supervisor || '',
-        phone: response.data.phone || user?.phone || ''
+        preferred_supervisor_other: response.data.preferred_supervisor_other || '',
+        email: user?.email || '',
+        phone: user?.phone || ''
       }))
     } catch (error) {
       console.error('Failed to fetch profile:', error)
@@ -44,9 +48,13 @@ export const ProfilePage = () => {
     e.preventDefault()
     setMessage({ type: '', text: '' })
     try {
-      await studentService.updateProfile({
+      await authService.updateProfile({
+        email: profile.email,
+        first_name: profile.first_name,
+        last_name: profile.last_name,
         project_title: profile.project_title,
         preferred_supervisor: profile.preferred_supervisor,
+        preferred_supervisor_other: profile.preferred_supervisor_other,
         phone: profile.phone
       })
       setMessage({ type: 'success', text: 'Profile updated successfully' })
@@ -66,7 +74,14 @@ export const ProfilePage = () => {
   return (
     <Layout title="Profile">
       <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold">My Profile</h1>
+        <div>
+          <h1 className="text-3xl font-bold">My Profile</h1>
+          {user?.profile_complete === false && (
+            <p className="text-sm text-amber-700 mt-2">
+              Complete your project title and supervisor preference before using the student dashboard.
+            </p>
+          )}
+        </div>
 
         {message.text && (
           <div className={`p-4 rounded ${message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
@@ -84,8 +99,7 @@ export const ProfilePage = () => {
                   name="first_name"
                   value={profile.first_name}
                   onChange={handleChange}
-                  disabled
-                  className="w-full border rounded p-2 bg-gray-100"
+                  className="w-full border rounded p-2"
                 />
               </div>
               <div>
@@ -95,8 +109,7 @@ export const ProfilePage = () => {
                   name="last_name"
                   value={profile.last_name}
                   onChange={handleChange}
-                  disabled
-                  className="w-full border rounded p-2 bg-gray-100"
+                  className="w-full border rounded p-2"
                 />
               </div>
             </div>
@@ -104,9 +117,10 @@ export const ProfilePage = () => {
               <label className="block text-sm font-medium mb-1">Email</label>
               <input
                 type="email"
-                value={user?.email || ''}
-                disabled
-                className="w-full border rounded p-2 bg-gray-100"
+                name="email"
+                value={profile.email}
+                onChange={handleChange}
+                className="w-full border rounded p-2"
               />
             </div>
             <div>
@@ -138,20 +152,22 @@ export const ProfilePage = () => {
                 className="w-full border rounded p-2"
               >
                 <option value="">Select a supervisor</option>
-                <option value="Dr. Michael Kipchoge">Dr. Michael Kipchoge</option>
-                <option value="Prof. Jane Njeri">Prof. Jane Njeri</option>
-                <option value="Dr. James Omondi">Dr. James Omondi</option>
-                <option value="Dr. Sarah Mwangi">Dr. Sarah Mwangi</option>
-                <option value="Prof. David Kiplagat">Prof. David Kiplagat</option>
-                <option value="Dr. Grace Kariuki">Dr. Grace Kariuki</option>
-                <option value="Dr. Robert Kimani">Dr. Robert Kimani</option>
-                <option value="Dr. Alice Ochieng">Dr. Alice Ochieng</option>
+                <option value="Professor Okello (Dean)">Professor Okello (Dean)</option>
+                <option value="Dr. Prisca Magotu (COD)">Dr. Prisca Magotu (COD)</option>
+                <option value="Prof. Miner Titus">Prof. Miner Titus</option>
+                <option value="Dr. Joseph Nyakinda">Dr. Joseph Nyakinda</option>
+                <option value="Dr. Willy Kangojo (Coordinator)">Dr. Willy Kangojo (Coordinator)</option>
+                <option value="Dr. Julius Owino">Dr. Julius Owino</option>
+                <option value="Dr. Francis Akwenda Odhiambo">Dr. Francis Akwenda Odhiambo</option>
+                <option value="Director BPS">Director BPS</option>
                 <option value="OTHER">Other</option>
               </select>
               {profile.preferred_supervisor === 'OTHER' && (
                 <input
                   type="text"
                   name="preferred_supervisor_other"
+                  value={profile.preferred_supervisor_other}
+                  onChange={handleChange}
                   placeholder="Specify preferred supervisor"
                   className="w-full border rounded p-2 mt-2"
                 />
