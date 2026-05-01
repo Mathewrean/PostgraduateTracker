@@ -2,11 +2,30 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from decouple import config, Csv
+from django.core.management.utils import get_random_secret_key
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-in-production')
-DEBUG = config('DEBUG', default=True, cast=bool)
+def env_bool(name, default=False):
+    raw_value = config(name, default=str(default))
+    if isinstance(raw_value, bool):
+        return raw_value
+    value = str(raw_value).strip().lower()
+    if value in {'1', 'true', 'yes', 'on', 'debug'}:
+        return True
+    if value in {'0', 'false', 'no', 'off', 'release', 'prod', 'production'}:
+        return False
+    return bool(default)
+
+
+DEBUG = env_bool('DEBUG', default=True)
+SECRET_KEY = config('SECRET_KEY', default='')
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = get_random_secret_key()
+    else:
+        raise ValueError('SECRET_KEY environment variable is required when DEBUG is false.')
+
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,testserver', cast=Csv())
 
 INSTALLED_APPS = [
@@ -19,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'django_filters',
     # 'django_celery_beat',  # Commented due to Django 5.0 incompatibility

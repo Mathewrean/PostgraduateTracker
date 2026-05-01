@@ -6,6 +6,7 @@ from apps.stages.models import Stage
 from apps.complaints.models import Complaint
 from apps.notifications.models import Notification
 from apps.activities.models import Activity
+from apps.notifications.services import notify
 from django.core.mail import send_mail
 import logging
 
@@ -46,20 +47,11 @@ def check_thesis_submission_timer():
         
         # Send notification to supervisor
         if stage.student.assigned_supervisor:
-            Notification.objects.create(
+            notify(
                 recipient=stage.student.assigned_supervisor,
                 message=f'3-month waiting period for {stage.student.user.email}\'s thesis is complete. You can now approve.',
                 notification_type='SUPERVISOR_APPROVAL',
                 link=f'/api/stages/{stage.id}/approve/'
-            )
-            
-            # Send email
-            send_mail(
-                subject='Thesis Waiting Period Complete',
-                message=f'The 3-month waiting period for {stage.student.user.email}\'s thesis submission is now complete. You can proceed with approval.',
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[stage.student.assigned_supervisor.email],
-                fail_silently=False,
             )
         
         logger.info(f'Thesis timer expired for student {stage.student.user.email}')
@@ -84,7 +76,7 @@ def check_complaint_escalation():
         from apps.users.models import User
         escalation_recipients = User.objects.filter(role__in=['coordinator', 'dean', 'cod', 'director_bps'])
         for recipient in escalation_recipients:
-            Notification.objects.create(
+            notify(
                 recipient=recipient,
                 message=f'Complaint from {complaint.student.user.email} is now overdue (14+ days without response)',
                 notification_type='COMPLAINT_OVERDUE',
@@ -109,20 +101,11 @@ def send_activity_reminders():
     
     for activity in upcoming:
         # Send notification to student
-        Notification.objects.create(
+        notify(
             recipient=activity.stage.student.user,
             message=f'Reminder: {activity.title} is scheduled for tomorrow',
             notification_type='ACTIVITY_REMINDER',
             link=f'/api/activities/{activity.id}/'
-        )
-        
-        # Send email
-        send_mail(
-            subject='Activity Reminder',
-            message=f'You have the following activity scheduled for tomorrow: {activity.title}',
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[activity.stage.student.user.email],
-            fail_silently=False,
         )
         
         logger.info(f'Activity reminder sent for {activity.id}')

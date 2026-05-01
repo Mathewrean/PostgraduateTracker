@@ -2,7 +2,7 @@ import csv
 import io
 from datetime import timedelta
 
-from django.db.models import Count, F
+from django.db.models import Q
 from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework import viewsets
@@ -162,9 +162,13 @@ class ReportViewSet(viewsets.ViewSet):
         name_filter = request.query_params.get('name')
 
         if role_filter:
-            users = users.filter(role=role_filter)
+            users = users.filter(role=role_filter.lower())
         if name_filter:
-            users = users.filter(email__icontains=name_filter) | users.filter(first_name__icontains=name_filter) | users.filter(last_name__icontains=name_filter)
+            users = users.filter(
+                Q(email__icontains=name_filter)
+                | Q(first_name__icontains=name_filter)
+                | Q(last_name__icontains=name_filter)
+            )
 
         login_logs = AuditLog.objects.filter(action='LOGIN').order_by('-timestamp')
         login_logs = self._filter_queryset_by_date(login_logs, 'timestamp', request)

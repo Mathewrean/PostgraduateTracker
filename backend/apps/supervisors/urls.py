@@ -1,10 +1,12 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from django.urls import path
+
 from .views import SupervisorViewSet
 
-router = DefaultRouter()
-router.register(r'', SupervisorViewSet, basename='supervisor')
+
+supervisor_students = SupervisorViewSet.as_view({'get': 'students'})
+supervisor_approvals = SupervisorViewSet.as_view({'get': 'approvals'})
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('students/', supervisor_students, name='supervisor-students'),
+    path('approvals/', supervisor_approvals, name='supervisor-approvals'),
 ]
