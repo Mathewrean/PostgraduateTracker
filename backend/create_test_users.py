@@ -88,13 +88,12 @@ for user_data in test_users:
         if created:
             pass  # User was created
         else:
-
-        user.first_name = user_data['first_name']
-        user.last_name = user_data['last_name']
-        user.role = user_data['role']
-        user.phone = '+254700000000'
-        user.set_password(user_data['password'])
-        user.save()
+            user.first_name = user_data['first_name']
+            user.last_name = user_data['last_name']
+            user.role = user_data['role']
+            user.phone = '+254700000000'
+            user.set_password(user_data['password'])
+            user.save()
 
         if user_data['role'] == 'student':
             student_profile, student_created = Student.objects.get_or_create(
@@ -107,7 +106,8 @@ for user_data in test_users:
             )
             if student_created:
                 pass  # Student profile was created
-     except Exception as e:
-         print(f"Error creating user {user_data['email']}: {e}")
+                
+    except Exception as e:
+        print(f"Error creating user {user_data['email']}: {e}")
 
 print("Test users created successfully!")

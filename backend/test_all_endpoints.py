@@ -33,9 +33,12 @@ class AuthenticationTests(APITestCase):
     
     def setUp(self):
         self.client = APIClient()
+        # Use unique email/admission number to avoid conflicts with create_test_users.py
+        import time
+        timestamp = str(int(time.time() * 1000))[-6:]
         self.user_data = {
-            'email': 'test@example.com',
-            'admission_number': 'ADM001',
+            'email': f'test{timestamp}@example.com',
+            'admission_number': f'ADM{timestamp}',
             'phone': '+254712345678',
             'first_name': 'Test',
             'last_name': 'User',
@@ -58,10 +61,12 @@ class AuthenticationTests(APITestCase):
     
     def test_jwt_token_obtain(self):
         """Test JWT token endpoint"""
-        # First create a user
+        # First create a user with unique data
+        import time
+        timestamp = str(int(time.time() * 1000))[-6:]
         user = User.objects.create_user(
-            email='student@test.com',
-            admission_number='ADM002',
+            email=f'student{timestamp}@test.com',
+            admission_number=f'ADM{timestamp}',
             phone='+254712345679',
             password='testpass123'
         )
@@ -69,7 +74,7 @@ class AuthenticationTests(APITestCase):
         response = self.client.post(
             '/api/auth/token/',
             {
-                'email': 'student@test.com',
+                'email': f'student{timestamp}@test.com',
                 'password': 'testpass123'
             },
             format='json'
@@ -79,10 +84,12 @@ class AuthenticationTests(APITestCase):
     
     def test_get_current_user(self):
         """Test get current user endpoint"""
-        # Create and login user
+        # Create and login user with unique data
+        import time
+        timestamp = str(int(time.time() * 1000))[-6:]
         user = User.objects.create_user(
-            email='current@test.com',
-            admission_number='ADM003',
+            email=f'current{timestamp}@test.com',
+            admission_number=f'ADM{timestamp}',
             phone='+254712345680',
             password='testpass123'
         )
@@ -91,16 +98,18 @@ class AuthenticationTests(APITestCase):
         response = self.client.get('/api/auth/profile/')
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['email'], 'current@test.com')
+        self.assertEqual(response.data['email'], f'current{timestamp}@test.com')
 
 class StudentTests(APITestCase):
     """Test student endpoints"""
     
     def setUp(self):
         self.client = APIClient()
+        import time
+        timestamp = str(int(time.time() * 1000))[-6:]
         self.student_user = User.objects.create_user(
-            email='student@test.com',
-            admission_number='STU001',
+            email=f'student{timestamp}@test.com',
+            admission_number=f'STU{timestamp}',
             phone='+254712345681',
             password='testpass123',
             role='student'
@@ -112,7 +121,7 @@ class StudentTests(APITestCase):
         """Test get student profile"""
         response = self.client.get('/api/students/profile/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['user']['email'], 'student@test.com')
+        self.assertEqual(response.data['user']['email'], f'student{timestamp}@test.com')
     
     def test_update_student_profile(self):
         """Test update student profile"""
@@ -133,16 +142,18 @@ class StageWorkflowTests(APITestCase):
     
     def setUp(self):
         self.client = APIClient()
+        import time
+        timestamp = str(int(time.time() * 1000))[-6:]
         self.student_user = User.objects.create_user(
-            email='stage_student@test.com',
-            admission_number='STG001',
+            email=f'stage_student{timestamp}@test.com',
+            admission_number=f'STG{timestamp}',
             phone='+254712345682',
             password='testpass123',
             role='student'
         )
         self.supervisor_user = User.objects.create_user(
-            email='supervisor@test.com',
-            admission_number='SUP001',
+            email=f'supervisor{timestamp}@test.com',
+            admission_number=f'SUP{timestamp}',
             phone='+254712345683',
             password='testpass123',
             role='supervisor'
@@ -176,9 +187,11 @@ class ActivityTests(APITestCase):
     
     def setUp(self):
         self.client = APIClient()
+        import time
+        timestamp = str(int(time.time() * 1000))[-6:]
         self.student_user = User.objects.create_user(
-            email='activity_student@test.com',
-            admission_number='ACT001',
+            email=f'activity_student{timestamp}@test.com',
+            admission_number=f'ACT{timestamp}',
             phone='+254712345684',
             password='testpass123',
             role='student'
@@ -238,9 +251,11 @@ class DocumentTests(APITestCase):
     
     def setUp(self):
         self.client = APIClient()
+        import time
+        timestamp = str(int(time.time() * 1000))[-6:]
         self.student_user = User.objects.create_user(
-            email='doc_student@test.com',
-            admission_number='DOC001',
+            email=f'doc_student{timestamp}@test.com',
+            admission_number=f'DOC{timestamp}',
             phone='+254712345685',
             password='testpass123',
             role='student'
@@ -263,17 +278,19 @@ class ComplaintTests(APITestCase):
     
     def setUp(self):
         self.client = APIClient()
+        import time
+        timestamp = str(int(time.time() * 1000))[-6:]
         self.student_user = User.objects.create_user(
-            email='complaint_student@test.com',
-            admission_number='CMP001',
+            email=f'complaint_student{timestamp}@test.com',
+            admission_number=f'CMP{timestamp}',
             phone='+254712345686',
             password='testpass123',
             role='student'
         )
         self.student = Student.objects.create(user=self.student_user)
         self.coordinator_user = User.objects.create_user(
-            email='coordinator@test.com',
-            admission_number='CRD001',
+            email=f'coordinator{timestamp}@test.com',
+            admission_number=f'CRD{timestamp}',
             phone='+254712345687',
             password='testpass123',
             role='coordinator'
@@ -421,8 +438,14 @@ def run_all_tests():
             total_tests += 1
             if result.wasSuccessful():
                 passed_tests += 1
-    
+            else:
+                failed_tests += 1
+
     if total_tests > 0:
+        print(f"\nTests completed: {total_tests} total, {passed_tests} passed, {failed_tests} failed")
+        return failed_tests == 0
+    return False
 
 if __name__ == '__main__':
-    run_all_tests()
+    success = run_all_tests()
+    sys.exit(0 if success else 1)
