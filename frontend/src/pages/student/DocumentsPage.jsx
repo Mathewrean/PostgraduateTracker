@@ -3,6 +3,9 @@ import { Layout } from '../../components/Layout'
 import { documentService, minutesService, stageService } from '../../services'
 import { useAuthStore } from '../../context/store'
 
+const MAX_SIZE = 10 * 1024 * 1024
+const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx']
+
 export const DocumentsPage = () => {
   const user = useAuthStore((state) => state.user)
   const [documents, setDocuments] = useState([])
@@ -34,7 +37,45 @@ export const DocumentsPage = () => {
   }
 
   const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0])
+    const file = e.target.files[0]
+    if (!file) {
+      setSelectedFile(null)
+      return
+    }
+
+    const extension = file.name.split('.').pop()?.toLowerCase()
+    if (!ALLOWED_EXTENSIONS.includes(extension)) {
+      setMessage({ type: 'error', text: 'Only PDF, DOC, and DOCX files are allowed.' })
+      e.target.value = ''
+      return
+    }
+
+    if (file.size > MAX_SIZE) {
+      setMessage({ type: 'error', text: 'File size exceeds the 10MB limit.' })
+      e.target.value = ''
+      return
+    }
+
+    setMessage({ type: '', text: '' })
+    setSelectedFile(file)
+  }
+
+  const handleDownload = async (doc) => {
+    try {
+      const response = await documentService.download(doc.id)
+      const blobUrl = window.URL.createObjectURL(
+        new Blob([response.data], { type: response.headers['content-type'] || 'application/octet-stream' })
+      )
+      const link = document.createElement('a')
+      link.href = blobUrl
+      link.setAttribute('download', doc.file_name || `${doc.doc_type}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(blobUrl)
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Download failed' })
+    }
   }
 
   const handleUpload = async (e) => {
@@ -145,14 +186,13 @@ export const DocumentsPage = () => {
                   </p>
                   {doc.is_verified && <span className="inline-block mt-1 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Verified</span>}
                 </div>
-                <a
-                  href={doc.file}
-                  target="_blank"
-                  rel="noreferrer"
+                <button
+                  type="button"
+                  onClick={() => handleDownload(doc)}
                   className="text-blue-600 hover:underline"
                 >
                   Download
-                </a>
+                </button>
               </div>
             ))
           )}

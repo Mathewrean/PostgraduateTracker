@@ -34,14 +34,15 @@ export const StudentDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [stageRes, activitiesRes, docsRes, profileRes] = await Promise.all([
-          stageService.getCurrentStage(),
-          activityService.getAll(),
-          documentService.getAll(),
-          studentService.getProfile()
+        const stageRes = await stageService.getCurrentStage()
+        const profileRes = await studentService.getProfile()
+        const currentStage = stageRes.data
+        const [activitiesRes, docsRes] = await Promise.all([
+          activityService.getAll(currentStage?.id ? { stage: currentStage.id } : {}),
+          documentService.getAll(currentStage?.id ? { stage: currentStage.id } : {}),
         ])
         
-        setStage(stageRes.data)
+        setStage(currentStage)
         setActivities(asList(activitiesRes.data))
         setDocuments(asList(docsRes.data))
         setStudentProfile(profileRes.data)
@@ -102,10 +103,12 @@ export const StudentDashboard = () => {
           <div className={`${cardBg} p-6 rounded-lg border ${borderColor}`}>
             <h3 className="text-xl font-bold mb-4">Quick Actions</h3>
             <div className="grid grid-cols-2 gap-3">
-              <Link to="/documents" className={`p-4 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>Upload Documents</Link>
-              <Link to="/activities" className={`p-4 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>Manage Activities</Link>
-              <Link to="/notifications" className={`p-4 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>View Notifications</Link>
-              <Link to="/messages" className={`p-4 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>Submit Complaint</Link>
+              <Link to="/student/documents" className={`p-4 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>Upload Documents</Link>
+              <Link to="/student/activities" className={`p-4 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>Add Activity</Link>
+              <Link to="/student/activities" className={`p-4 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>View Calendar</Link>
+              <Link to="/student/meetings" className={`p-4 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>Schedule Meeting</Link>
+              <Link to="/student/messages" className={`p-4 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>Submit Complaint</Link>
+              <a href="#stage-progress" className={`p-4 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>View Stage Progress</a>
             </div>
           </div>
 
@@ -144,7 +147,7 @@ export const StudentDashboard = () => {
 
         {/* Stage Progress Info */}
         {stage && (
-          <div className={`${cardBg} p-6 rounded-lg border ${borderColor}`}>
+          <div id="stage-progress" className={`${cardBg} p-6 rounded-lg border ${borderColor}`}>
             <h3 className="text-xl font-bold mb-4">Stage Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>

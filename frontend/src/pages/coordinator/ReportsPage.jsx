@@ -17,27 +17,30 @@ export const ReportsPage = ({ isDark = false }) => {
   const handleGenerateReport = async () => {
     setLoading(true)
     setError('')
+    const params = {}
+    if (dateFrom) params.from = dateFrom
+    if (dateTo) params.to = dateTo
     
     try {
       let response
       switch (reportType) {
         case 'students':
-          response = await reportService.getStudentProgress()
+          response = await reportService.getStudentProgress(params)
           break
         case 'supervisors':
-          response = await reportService.getSupervisorReport()
+          response = await reportService.getSupervisorReport(params)
           break
         case 'complaints':
-          response = await reportService.getComplaintReport()
+          response = await reportService.getComplaintReport(params)
           break
         case 'users':
-          response = await reportService.getUserReport()
+          response = await reportService.getUserReport(params)
           break
         case 'stage_transition':
           response = await reportService.getStageTransitionReport()
           break
         default:
-          response = await reportService.getStudentProgress()
+          response = await reportService.getStudentProgress(params)
       }
       setReportData(response.data)
     } catch (err) {

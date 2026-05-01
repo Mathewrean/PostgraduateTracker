@@ -1,19 +1,23 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Layout } from '../../components/Layout'
 import { authService, studentService } from '../../services'
 import { useAuthStore } from '../../context/store'
 
 export const ProfilePage = () => {
   const user = useAuthStore((state) => state.user)
+  const setUser = useAuthStore((state) => state.setUser)
+  const navigate = useNavigate()
   const [profile, setProfile] = useState({
     project_title: '',
-    preferred_supervisor: '',
+    preferred_supervisor: null,
     preferred_supervisor_other: '',
     email: user?.email || '',
     phone: '',
     first_name: user?.first_name || '',
     last_name: user?.last_name || ''
   })
+  const [supervisorOptions, setSupervisorOptions] = useState([])
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState({ type: '', text: '' })
 
@@ -28,11 +32,14 @@ export const ProfilePage = () => {
       setProfile(prev => ({
         ...prev,
         project_title: response.data.project_title || '',
-        preferred_supervisor: response.data.preferred_supervisor || '',
+        preferred_supervisor: response.data.preferred_supervisor || null,
         preferred_supervisor_other: response.data.preferred_supervisor_other || '',
         email: user?.email || '',
-        phone: user?.phone || ''
+        phone: user?.phone || '',
+        first_name: user?.first_name || '',
+        last_name: user?.last_name || ''
       }))
+      setSupervisorOptions(response.data.preferred_supervisor_options || [])
     } catch (error) {
       console.error('Failed to fetch profile:', error)
     } finally {
@@ -48,16 +55,20 @@ export const ProfilePage = () => {
     e.preventDefault()
     setMessage({ type: '', text: '' })
     try {
-      await authService.updateProfile({
+      const response = await authService.updateProfile({
         email: profile.email,
         first_name: profile.first_name,
         last_name: profile.last_name,
         project_title: profile.project_title,
-        preferred_supervisor: profile.preferred_supervisor,
+        preferred_supervisor: profile.preferred_supervisor || null,
         preferred_supervisor_other: profile.preferred_supervisor_other,
         phone: profile.phone
       })
+      setUser(response.data)
       setMessage({ type: 'success', text: 'Profile updated successfully' })
+      if (response.data?.profile_complete) {
+        navigate('/dashboard', { replace: true })
+      }
     } catch (error) {
       setMessage({ type: 'error', text: error.response?.data?.error || 'Update failed' })
     }
@@ -147,31 +158,33 @@ export const ProfilePage = () => {
               <label className="block text-sm font-medium mb-1">Preferred Supervisor</label>
               <select
                 name="preferred_supervisor"
-                value={profile.preferred_supervisor}
-                onChange={handleChange}
+                value={profile.preferred_supervisor || ''}
+                onChange={(e) => setProfile((prev) => ({
+                  ...prev,
+                  preferred_supervisor: e.target.value ? Number(e.target.value) : null,
+                  preferred_supervisor_other: e.target.value ? '' : prev.preferred_supervisor_other
+                }))}
                 className="w-full border rounded p-2"
               >
                 <option value="">Select a supervisor</option>
-                <option value="Professor Okello (Dean)">Professor Okello (Dean)</option>
-                <option value="Dr. Prisca Magotu (COD)">Dr. Prisca Magotu (COD)</option>
-                <option value="Prof. Miner Titus">Prof. Miner Titus</option>
-                <option value="Dr. Joseph Nyakinda">Dr. Joseph Nyakinda</option>
-                <option value="Dr. Willy Kangojo (Coordinator)">Dr. Willy Kangojo (Coordinator)</option>
-                <option value="Dr. Julius Owino">Dr. Julius Owino</option>
-                <option value="Dr. Francis Akwenda Odhiambo">Dr. Francis Akwenda Odhiambo</option>
-                <option value="Director BPS">Director BPS</option>
-                <option value="OTHER">Other</option>
+                {supervisorOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.full_name} ({option.role.replace('_', ' ')})
+                  </option>
+                ))}
               </select>
-              {profile.preferred_supervisor === 'OTHER' && (
-                <input
-                  type="text"
-                  name="preferred_supervisor_other"
-                  value={profile.preferred_supervisor_other}
-                  onChange={handleChange}
-                  placeholder="Specify preferred supervisor"
-                  className="w-full border rounded p-2 mt-2"
-                />
-              )}
+              <input
+                type="text"
+                name="preferred_supervisor_other"
+                value={profile.preferred_supervisor_other}
+                onChange={(e) => setProfile((prev) => ({
+                  ...prev,
+                  preferred_supervisor_other: e.target.value,
+                  preferred_supervisor: e.target.value ? null : prev.preferred_supervisor
+                }))}
+                placeholder="Or specify another preferred supervisor"
+                className="w-full border rounded p-2 mt-2"
+              />
             </div>
             <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
               Save Profile

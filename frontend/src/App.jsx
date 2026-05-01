@@ -18,11 +18,13 @@ import { DocumentsPage } from './pages/student/DocumentsPage'
 import { NotificationsPage } from './pages/student/NotificationsPage'
 import { MessagesPage } from './pages/student/MessagesPage'
 import { ProfilePage } from './pages/student/ProfilePage'
+import { MeetingsPage } from './pages/student/MeetingsPage'
 
 // Supervisor Pages
 import { SupervisorDashboard } from './pages/supervisor/SupervisorDashboard'
 import { MyStudentsPage } from './pages/supervisor/MyStudentsPage'
 import { PendingApprovalsPage } from './pages/supervisor/PendingApprovalsPage'
+import { SupervisorStudentDetailPage } from './pages/supervisor/SupervisorStudentDetailPage'
 
 // Coordinator Pages
 import { CoordinatorDashboard } from './pages/coordinator/CoordinatorDashboard'
@@ -34,6 +36,13 @@ import { ReportsPage } from './pages/coordinator/ReportsPage'
 // Admin Pages
 import { AuditLogPage } from './pages/admin/AuditLogPage'
 import { UserActivityPage } from './pages/admin/UserActivityPage'
+
+function getHomePath(role) {
+  if (role === 'student') return '/dashboard'
+  if (role === 'supervisor') return '/dashboard'
+  if (['coordinator', 'dean', 'cod', 'director_bps'].includes(role)) return '/dashboard'
+  return '/dashboard'
+}
 
 function PrivateRoute({ children, allowedRoles }) {
   const token = useAuthStore((state) => state.token)
@@ -53,7 +62,7 @@ function PrivateRoute({ children, allowedRoles }) {
   }
 
   if (allowedRoles && !allowedRoles.includes(user?.role)) {
-    return <Navigate to="/unauthorized" replace />
+    return <Navigate to={getHomePath(user?.role)} replace />
   }
 
   return children
@@ -71,32 +80,32 @@ export const App = () => {
   const user = useAuthStore((state) => state.user)
   const setUser = useAuthStore((state) => state.setUser)
   const setToken = useAuthStore((state) => state.setToken)
-  const initialized = useAuthStore((state) => state.setInitialized)
+  const setInitialized = useAuthStore((state) => state.setInitialized)
 
   useEffect(() => {
     let ignore = false
     const hydrateSession = async () => {
       if (!token) {
-        initialized()
+        setInitialized(true)
         return
       }
       try {
         const response = await authService.getCurrentUser()
         if (!ignore) {
           setUser(response.data)
-          initialized()
+          setInitialized(true)
         }
       } catch (error) {
         if (!ignore) {
           setToken(null)
           setUser(null)
-          initialized()
+          setInitialized(true)
         }
       }
     }
     hydrateSession()
     return () => { ignore = true }
-  }, [setUser, setToken, initialized])
+  }, [setUser, setToken, setInitialized, token])
 
   return (
     <ErrorBoundary>
@@ -121,13 +130,21 @@ export const App = () => {
           />
 
           <Route path="/activities" element={<PrivateRoute allowedRoles={['student']}><ActivitiesPage /></PrivateRoute>} />
+          <Route path="/student/activities" element={<PrivateRoute allowedRoles={['student']}><ActivitiesPage /></PrivateRoute>} />
           <Route path="/documents" element={<PrivateRoute allowedRoles={['student']}><DocumentsPage /></PrivateRoute>} />
+          <Route path="/student/documents" element={<PrivateRoute allowedRoles={['student']}><DocumentsPage /></PrivateRoute>} />
           <Route path="/notifications" element={<PrivateRoute allowedRoles={['student', 'supervisor', 'coordinator', 'dean', 'cod', 'director_bps']}><NotificationsPage /></PrivateRoute>} />
+          <Route path="/student/notifications" element={<PrivateRoute allowedRoles={['student']}><NotificationsPage /></PrivateRoute>} />
           <Route path="/messages" element={<PrivateRoute allowedRoles={['student']}><MessagesPage /></PrivateRoute>} />
+          <Route path="/student/messages" element={<PrivateRoute allowedRoles={['student']}><MessagesPage /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute allowedRoles={['student']}><ProfilePage /></PrivateRoute>} />
+          <Route path="/student/profile" element={<PrivateRoute allowedRoles={['student']}><ProfilePage /></PrivateRoute>} />
+          <Route path="/meetings" element={<PrivateRoute allowedRoles={['student']}><MeetingsPage /></PrivateRoute>} />
+          <Route path="/student/meetings" element={<PrivateRoute allowedRoles={['student']}><MeetingsPage /></PrivateRoute>} />
 
           {/* Supervisor Routes */}
           <Route path="/supervisor/students" element={<PrivateRoute allowedRoles={['supervisor']}><MyStudentsPage /></PrivateRoute>} />
+          <Route path="/supervisor/students/:studentId" element={<PrivateRoute allowedRoles={['supervisor']}><SupervisorStudentDetailPage /></PrivateRoute>} />
           <Route path="/supervisor/approvals" element={<PrivateRoute allowedRoles={['supervisor']}><PendingApprovalsPage /></PrivateRoute>} />
 
           {/* Coordinator Routes */}

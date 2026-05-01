@@ -39,7 +39,7 @@ class Stage(models.Model):
     approval_date = models.DateTimeField(null=True, blank=True)
     thesis_submission_date = models.DateTimeField(null=True, blank=True)
     three_month_unlock_date = models.DateTimeField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now, editable=False)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

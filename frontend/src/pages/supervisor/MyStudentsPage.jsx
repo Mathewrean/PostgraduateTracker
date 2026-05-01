@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { Layout } from '../../components/Layout'
 import { supervisorService } from '../../services'
 
@@ -55,6 +56,14 @@ export const MyStudentsPage = () => {
                     <p className="text-gray-500 text-sm">Current Stage</p>
                     <p className="capitalize font-semibold">{student.current_stage?.toLowerCase()}</p>
                   </div>
+                </div>
+                <div className="mt-4 flex justify-end">
+                  <Link
+                    to={`/supervisor/students/${student.id}`}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                  >
+                    View
+                  </Link>
                 </div>
               </div>
             ))}

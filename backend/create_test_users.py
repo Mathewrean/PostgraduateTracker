@@ -2,13 +2,14 @@
 """
 Script to create test users for PST application
 """
-from apps.students.models import Student
-from apps.users.models import User
 import os
 import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pst_project.settings')
 django.setup()
+
+from apps.students.models import Student
+from apps.users.models import User
 
 
 # Test user data
@@ -36,6 +37,14 @@ test_users = [
         'last_name': 'Supervisor',
         'role': 'supervisor',
         'admission_number': 'SUP001'
+    },
+    {
+        'email': 'supervisor2@test.com',
+        'password': 'supervisor234',
+        'first_name': 'Dr',
+        'last_name': 'Second Supervisor',
+        'role': 'supervisor',
+        'admission_number': 'SUP002'
     },
     {
         'email': 'coordinator@test.com',
@@ -85,14 +94,17 @@ for user_data in test_users:
         )
 
         if created:
-            pass  # User was created
+            user.first_name = user_data['first_name']
+            user.last_name = user_data['last_name']
+            user.role = user_data['role']
+            user.phone = '+254700000000'
         else:
             user.first_name = user_data['first_name']
             user.last_name = user_data['last_name']
             user.role = user_data['role']
             user.phone = '+254700000000'
-            user.set_password(user_data['password'])
-            user.save()
+        user.set_password(user_data['password'])
+        user.save()
 
         if user_data['role'] == 'student':
             # Find a supervisor user to assign as preferred supervisor
@@ -102,11 +114,16 @@ for user_data in test_users:
                 defaults={
                     'project_title': f"Research Project by {user_data['first_name']}",
                     'preferred_supervisor': supervisor_user,
+                    'assigned_supervisor': supervisor_user,
                     'profile_complete': True,
                 }
             )
-            if student_created:
-                pass  # Student profile was created
+            if not student_created:
+                student_profile.project_title = f"Research Project by {user_data['first_name']}"
+                student_profile.preferred_supervisor = supervisor_user
+                student_profile.assigned_supervisor = supervisor_user
+                student_profile.profile_complete = True
+                student_profile.save()
 
     except Exception as e:
         print(f"Error creating user {user_data['email']}: {e}")

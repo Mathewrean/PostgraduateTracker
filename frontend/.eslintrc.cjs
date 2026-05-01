@@ -1,4 +1,5 @@
 module.exports = {
+  ignorePatterns: ['dist/', 'node_modules/'],
   env: {
     browser: true,
     es2021: true,
@@ -17,6 +18,8 @@ module.exports = {
   plugins: ['react', 'unused-imports'],
   rules: {
     'react/react-in-jsx-scope': 'off',
+    'react/prop-types': 'off',
+    'react/no-unescaped-entities': 'off',
     'unused-imports/no-unused-imports': 'error',
     'unused-imports/no-unused-vars': [
       'error',

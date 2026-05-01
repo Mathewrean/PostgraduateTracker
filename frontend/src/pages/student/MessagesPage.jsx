@@ -102,7 +102,7 @@ export const MessagesPage = () => {
                 </div>
                 {c.response_content && (
                   <div className="bg-gray-50 p-4 rounded">
-                    <p className="text-sm font-medium text-gray-600">Response from {c.responded_by_email || 'Administration'}:</p>
+                    <p className="text-sm font-medium text-gray-600">Department Response:</p>
                     <p>{c.response_content}</p>
                     <p className="text-xs text-gray-500 mt-2">Responded at: {new Date(c.responded_at).toLocaleString()}</p>
                   </div>
