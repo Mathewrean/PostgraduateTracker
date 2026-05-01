@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { Layout } from '../../components/Layout'
-import { documentService } from '../../services'
+import { documentService, minutesService, stageService } from '../../services'
 import { useAuthStore } from '../../context/store'
 
 export const DocumentsPage = () => {
   const user = useAuthStore((state) => state.user)
   const [documents, setDocuments] = useState([])
+  const [currentStage, setCurrentStage] = useState(null)
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [selectedFile, setSelectedFile] = useState(null)
-  const [stageId, setStageId] = useState('')
   const [docType, setDocType] = useState('')
   const [message, setMessage] = useState({ type: '', text: '' })
 
@@ -19,7 +19,11 @@ export const DocumentsPage = () => {
 
   const fetchDocuments = async () => {
     try {
-      const response = await documentService.getAll()
+      const [stageResponse, response] = await Promise.all([
+        stageService.getCurrentStage(),
+        documentService.getAll()
+      ])
+      setCurrentStage(stageResponse.data)
       const data = Array.isArray(response.data) ? response.data : response.data.results || []
       setDocuments(data)
     } catch (error) {
@@ -35,8 +39,8 @@ export const DocumentsPage = () => {
 
   const handleUpload = async (e) => {
     e.preventDefault()
-    if (!selectedFile || !stageId || !docType) {
-      setMessage({ type: 'error', text: 'Please select file, stage, and document type' })
+    if (!selectedFile || !currentStage?.id || !docType) {
+      setMessage({ type: 'error', text: 'Please select a file and document type' })
       return
     }
     setUploading(true)
@@ -44,12 +48,15 @@ export const DocumentsPage = () => {
     try {
       const formData = new FormData()
       formData.append('file', selectedFile)
-      formData.append('stage', stageId)
-      formData.append('doc_type', docType)
-      await documentService.upload(formData)
+      formData.append('stage', currentStage.id)
+      if (docType === 'MINUTES') {
+        await minutesService.upload(formData)
+      } else {
+        formData.append('doc_type', docType)
+        await documentService.upload(formData)
+      }
       setMessage({ type: 'success', text: 'Document uploaded successfully' })
       setSelectedFile(null)
-      setStageId('')
       setDocType('')
       fetchDocuments()
     } catch (error) {
@@ -81,18 +88,10 @@ export const DocumentsPage = () => {
         {/* Upload Form */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4">Upload Document</h2>
+          <p className="text-sm text-gray-500 mb-4">
+            Current stage: {currentStage?.stage_type || user?.current_stage || 'Concept'}
+          </p>
           <form onSubmit={handleUpload} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Stage ID</label>
-              <input
-                type="number"
-                value={stageId}
-                onChange={(e) => setStageId(e.target.value)}
-                required
-                className="w-full border rounded p-2"
-                placeholder="Current stage ID"
-              />
-            </div>
             <div>
               <label className="block text-sm font-medium mb-1">Document Type</label>
               <select
@@ -112,10 +111,10 @@ export const DocumentsPage = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">File (PDF, DOC, DOCX, PPTX; max 10MB)</label>
+              <label className="block text-sm font-medium mb-1">File (PDF, DOC, DOCX; max 10MB)</label>
               <input
                 type="file"
-                accept=".pdf,.doc,.docx,.pptx"
+                accept=".pdf,.doc,.docx"
                 onChange={handleFileChange}
                 required
                 className="w-full border rounded p-2"
