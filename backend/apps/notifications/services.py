@@ -1,8 +1,16 @@
 from apps.notifications.models import Notification
 from apps.notifications.tasks import send_notification_email_task
+import threading
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def _dispatch_notification_email(notification_id):
+    try:
+        send_notification_email_task.delay(notification_id)
+    except Exception as exc:
+        logger.error(f'Error dispatching notification email task: {str(exc)}')
 
 
 def notify(recipient, message, notification_type, link=None):
@@ -23,8 +31,13 @@ def notify(recipient, message, notification_type, link=None):
             link=link or ''
         )
         
-        # Dispatch async email task
-        send_notification_email_task.delay(notification.id)
+        # Dispatch the Celery handoff in a background thread so broker latency
+        # never slows down the API response path.
+        threading.Thread(
+            target=_dispatch_notification_email,
+            args=(notification.id,),
+            daemon=True,
+        ).start()
         
         logger.info(f'Notification created for {recipient.email}: {notification_type}')
         return notification

@@ -66,6 +66,7 @@ class ContractAuditTests(APITestCase):
         self.student.profile_complete = True
         self.student.assigned_supervisor = self.supervisor_user
         self.student.save()
+        self.student_user.refresh_from_db()
 
         self.concept_stage = Stage.objects.get(student=self.student, stage_type='CONCEPT')
 
