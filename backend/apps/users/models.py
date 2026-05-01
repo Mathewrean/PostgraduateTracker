@@ -42,6 +42,21 @@ class UserManager(BaseUserManager):
         )
         user.set_password(password)
         user.save(using=self._db)
+
+        role = extra_fields['role']
+        if role == 'student':
+            from apps.students.models import Student
+            from apps.stages.models import Stage
+
+            student, _ = Student.objects.get_or_create(user=user)
+            Stage.objects.get_or_create(student=student, stage_type='CONCEPT')
+        elif role == 'supervisor':
+            from apps.supervisors.models import Supervisor
+
+            Supervisor.objects.get_or_create(
+                user=user,
+                defaults={'department': 'Pure and Applied Mathematics'}
+            )
         return user
 
     def create_superuser(self, email, admission_number, phone, password=None, **extra_fields):
