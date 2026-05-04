@@ -8,6 +8,7 @@ import { getCookie } from '../services/api'
 export const NavbarComponent = () => {
   const navigate = useNavigate()
   const isDark = useUIStore((state) => state.isDark)
+  const toggleTheme = useUIStore((state) => state.toggleTheme)
   const user = useAuthStore((state) => state.user)
   const [menuOpen, setMenuOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
@@ -73,11 +74,7 @@ export const NavbarComponent = () => {
   const navItems = getUserNavItems()
 
   return (
-    <nav
-      className={`${
-        isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'
-      } border-b transition-colors duration-300`}
-    >
+    <nav className={`app-nav border-b transition-colors duration-300`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14">
           {/* Nav Items */}
@@ -108,18 +105,35 @@ export const NavbarComponent = () => {
               >
                 Notifications
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-red-600 text-white text-xs flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full badge-warning text-xs flex items-center justify-center">
                     {unreadCount}
                   </span>
                 )}
               </button>
             )}
+            {/* Theme toggle */}
+            <div
+              role="switch"
+              aria-checked={isDark}
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  toggleTheme()
+                }
+              }}
+              onClick={() => toggleTheme()}
+              className="theme-toggle"
+              data-checked={isDark}
+              title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              <div className="thumb" aria-hidden="true" />
+            </div>
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className={`md:hidden p-2 rounded-lg ${
-                isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'
-              }`}
+              className="md:hidden p-2 rounded-lg"
+              style={{ backgroundColor: 'transparent', color: 'var(--text-primary)' }}
             >
               {menuOpen ? 'Close' : 'Menu'}
             </button>
@@ -127,11 +141,7 @@ export const NavbarComponent = () => {
             {/* Logout Button */}
             <button
               onClick={handleLogout}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 ${
-                isDark
-                  ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50'
-                  : 'bg-red-100 text-red-600 hover:bg-red-200'
-              }`}
+              className="px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 btn-danger"
             >
               Logout
             </button>
@@ -152,11 +162,8 @@ export const NavbarComponent = () => {
                   item.path && navigate(item.path)
                   setMenuOpen(false)
                 }}
-                className={`w-full text-left px-4 py-2 rounded-lg transition-all ${
-                  isDark
-                    ? 'hover:bg-gray-800 text-gray-300'
-                    : 'hover:bg-gray-100 text-gray-700'
-                }`}
+                className={`w-full text-left px-4 py-2 rounded-lg transition-all`}
+                style={{ color: 'var(--text-primary)' }}
               >
                 {item.label}
               </button>

@@ -9,77 +9,156 @@ html {
 }
 
 :root {
-  /* JOOUST Light Mode Colors */
-  --jooust-primary: #002B5C; /* Dark Blue */
-  --jooust-primary-hover: #004080; /* Lighter Blue for hover */
-  --jooust-secondary: #FFD700; /* Gold */
-  --jooust-secondary-hover: #FFE8A0; /* Lighter Gold for hover */
-  --jooust-bg: #FFFFFF;
-  --jooust-bg-alt: #F8F9FA;
-  --jooust-text: #212529;
-  --jooust-border: #DEE2E6;
+  /* Brand */
+  --color-primary: #003366;
+  --color-primary-dark: #002244;
+  --color-primary-dark-mode: #4D88FF;
+  --color-accent: #CC9900;
+  --color-accent-dark-mode: #FFD700;
+
+  /* Light Mode Defaults */
+  --bg-main: #FFFFFF;
+  --bg-surface: #F5F5F5;
+  --text-primary: #1A1A1A;
+  --text-secondary: #595959;
+  --color-brand: #003366;
+  --color-gold: #CC9900;
+  --border-color: #E0E0E0;
+  --shadow: rgba(0, 0, 0, 0.1);
+
+  /* Status */
+  --color-success: #2E7D32;
+  --color-warning: #F9A825;
+  --color-danger: #C62828;
+  --color-info: #1565C0;
 }
 
-.dark {
-  /* JOOUST Dark Mode Colors */
-  --jooust-primary: #004080; /* Lighter Blue for accent glow */
-  --jooust-primary-hover: #005A9C; /* Even lighter for hover */
-  --jooust-secondary: #FFE8A0; /* Lighter Gold */
-  --jooust-secondary-hover: #FFF5B0; /* Pale Gold for hover */
-  --jooust-bg: #121212; /* Deep Charcoal */
-  --jooust-bg-alt: #1E1E1E;
-  --jooust-text: #E9ECEF;
-  --jooust-border: #495057;
+[data-theme="dark"] {
+  --bg-main: #121212;
+  --bg-surface: #1E1E1E;
+  --text-primary: #E0E0E0;
+  --text-secondary: #A0A0A0;
+  --color-brand: #4D88FF;
+  --color-gold: #FFD700;
+  --border-color: #2E2E2E;
+  --shadow: none;
 }
 
 body {
-  background-color: var(--jooust-bg);
-  color: var(--jooust-text);
+  background-color: var(--bg-main);
+  color: var(--text-primary);
   font-family: 'Merriweather', Georgia, serif;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Navigation */
+.app-nav {
+  background-color: var(--color-brand);
+  color: var(--bg-main);
+  border-bottom: 1px solid var(--border-color);
+}
+.app-nav .nav-link {
+  color: var(--bg-main);
+}
+.app-nav .nav-link:hover {
+  color: var(--bg-main);
+  opacity: 0.9;
 }
 
 /* Custom Components */
 .btn-primary {
   @apply px-4 py-2 rounded-lg transition-all duration-200;
-  background-color: var(--jooust-primary);
-  color: var(--jooust-bg);
+  background-color: var(--color-brand);
+  color: var(--bg-main);
 }
 .btn-primary:hover {
-  background-color: var(--jooust-primary-hover);
+  background-color: var(--color-primary-dark);
 }
 
 .btn-secondary {
   @apply px-4 py-2 rounded-lg transition-all duration-200;
-  background-color: var(--jooust-bg-alt);
-  color: var(--jooust-text);
-  border: 1px solid var(--jooust-border);
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 .btn-secondary:hover {
-  background-color: var(--jooust-bg);
+  background-color: var(--bg-main);
 }
 
 .card {
-  @apply rounded-lg shadow-md p-6 transition-all duration-200;
-  background-color: var(--jooust-bg-alt);
-  border: 1px solid var(--jooust-border);
+  @apply rounded-lg p-6 transition-all duration-200;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 3px 10px var(--shadow);
 }
 
 .input-field {
   @apply w-full px-3 py-2 rounded-lg focus:outline-none transition-all duration-200;
-  background-color: var(--jooust-bg);
-  color: var(--jooust-text);
-  border: 1px solid var(--jooust-border);
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 .input-field:focus {
-  border-color: var(--jooust-primary);
-  box-shadow: 0 0 0 2px rgba(0, 43, 92, 0.25); /* Light mode focus glow */
-}
-.dark .input-field:focus {
-  box-shadow: 0 0 0 2px rgba(0, 64, 128, 0.4); /* Dark mode focus glow */
+  border-color: var(--color-brand);
+  outline: 3px solid var(--color-brand);
+  outline-offset: 2px;
 }
 
-/* Ensure smooth transitions for dark mode */
+/* Toggle switch */
+.theme-toggle {
+  width: 48px;
+  height: 26px;
+  border-radius: 9999px;
+  background: var(--bg-surface);
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.theme-toggle[data-checked="true"] {
+  background: var(--color-brand);
+}
+.theme-toggle .thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  background: var(--bg-main);
+  transition: transform 0.3s ease;
+}
+.theme-toggle[data-checked="true"] .thumb {
+  transform: translateX(22px);
+}
+
+/* Status badges */
+.badge-primary { background: var(--color-brand); color: var(--bg-main); }
+.badge-success { background: var(--color-success); color: var(--bg-main); }
+.badge-warning { background: var(--color-gold); color: var(--text-primary); }
+.badge-danger { background: var(--color-danger); color: var(--bg-main); }
+
+.btn-success {
+  @apply px-4 py-2 rounded-lg transition-all duration-200;
+  background-color: var(--color-success);
+  color: var(--bg-main);
+}
+.btn-success:hover { opacity: 0.95; }
+
+.btn-danger {
+  @apply px-4 py-2 rounded-lg transition-all duration-200;
+  background-color: var(--color-danger);
+  color: var(--bg-main);
+}
+.btn-danger:hover { opacity: 0.95; }
+
+.btn-outline {
+  @apply px-4 py-2 rounded-lg transition-all duration-200 border-2;
+  background: transparent;
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+.btn-outline:hover { background-color: var(--bg-surface); }
+
+/* Ensure smooth transitions for theme changes */
 * {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }

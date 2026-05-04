@@ -14,21 +14,11 @@ export const Button = ({
   const isDark = useUIStore((state) => state.isDark)
 
   const variants = {
-    primary: isDark
-      ? 'bg-blue-600 hover:bg-blue-700 text-white'
-      : 'bg-blue-600 hover:bg-blue-700 text-white',
-    secondary: isDark
-      ? 'bg-gray-700 hover:bg-gray-600 text-gray-100'
-      : 'bg-gray-200 hover:bg-gray-300 text-gray-900',
-    success: isDark
-      ? 'bg-green-600 hover:bg-green-700 text-white'
-      : 'bg-green-600 hover:bg-green-700 text-white',
-    danger: isDark
-      ? 'bg-red-600 hover:bg-red-700 text-white'
-      : 'bg-red-600 hover:bg-red-700 text-white',
-    outline: isDark
-      ? 'border-2 border-gray-600 hover:bg-gray-800 text-gray-300'
-      : 'border-2 border-gray-300 hover:bg-gray-50 text-gray-900',
+    primary: 'btn-primary',
+    secondary: 'btn-secondary',
+    success: 'btn-success',
+    danger: 'btn-danger',
+    outline: 'btn-outline',
   }
 
   const sizes = {

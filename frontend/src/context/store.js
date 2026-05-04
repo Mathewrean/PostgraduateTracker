@@ -29,29 +29,37 @@ export const useUIStore = create((set) => ({
   sidebarOpen: true,
   notifications: [],
   unreadCount: 0,
-  isDark: localStorage.getItem('theme') === 'dark',
+  isDark: localStorage.getItem('pst-theme') === 'dark',
   
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
   setNotifications: (notifications) => set({ notifications }),
   setUnreadCount: (count) => set({ unreadCount: count }),
   toggleTheme: () => set((state) => {
     const newTheme = !state.isDark
-    localStorage.setItem('theme', newTheme ? 'dark' : 'light')
-    // Update the document root class for dark mode
+    localStorage.setItem('pst-theme', newTheme ? 'dark' : 'light')
+    // Update the document root attribute for dark mode
     if (newTheme) {
-      document.documentElement.classList.add('dark')
+      document.documentElement.setAttribute('data-theme', 'dark')
     } else {
-      document.documentElement.classList.remove('dark')
+      document.documentElement.removeAttribute('data-theme')
     }
     return { isDark: newTheme }
   }),
   // Initialize the theme on load
   initializeTheme: () => set((state) => {
-    const isDark = localStorage.getItem('theme') === 'dark'
-    if (isDark) {
-      document.documentElement.classList.add('dark')
+    // Respect saved preference first, then OS-level preference
+    const saved = localStorage.getItem('pst-theme')
+    let isDark
+    if (saved === 'dark') {
+      isDark = true
+      document.documentElement.setAttribute('data-theme', 'dark')
+    } else if (saved === 'light') {
+      isDark = false
+      document.documentElement.removeAttribute('data-theme')
     } else {
-      document.documentElement.classList.remove('dark')
+      isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+      if (isDark) document.documentElement.setAttribute('data-theme', 'dark')
+      else document.documentElement.removeAttribute('data-theme')
     }
     return { isDark }
   })

@@ -40,9 +40,7 @@ export const Layout = ({ children, title = 'PST Application', stage = null, user
   }, [effectiveUser, stage])
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${
-      isDark ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'
-    }`}>
+    <div className="min-h-screen transition-colors duration-300" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}>
       {/* Header */}
       <HeaderComponent title={title} stage={currentStage} user={effectiveUser} />
 
@@ -50,7 +48,7 @@ export const Layout = ({ children, title = 'PST Application', stage = null, user
       <NavbarComponent />
 
       {/* Main Content Area */}
-      <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} min-h-[calc(100vh-140px)]`}>
+      <main className="min-h-[calc(100vh-140px)]" style={{ backgroundColor: 'var(--bg-main)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {effectiveUser?.role === 'student' && currentStage && (
             <div className="mb-6">
@@ -62,34 +60,31 @@ export const Layout = ({ children, title = 'PST Application', stage = null, user
       </main>
 
       {/* Footer */}
-      <footer className={`border-t ${
-        isDark ? 'border-gray-800 bg-gray-900' : 'border-gray-200 bg-white'
-      } mt-12`}>
+      <footer className="mt-12" style={{ borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--bg-main)', color: 'var(--text-secondary)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
-              <h4 className={`font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>About PST</h4>
-              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              <h4 className="font-bold mb-3" style={{ color: 'var(--text-primary)' }}>About PST</h4>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                 Postgraduate Submissions Tracker for Jaramogi Oginga Odinga University of Science and Technology
               </p>
             </div>
             <div>
-              <h4 className={`font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>Quick Links</h4>
-              <ul className={`text-sm space-y-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                <li><a href="#" className="hover:text-blue-600">Dashboard</a></li>
-                <li><a href="#" className="hover:text-blue-600">Documents</a></li>
-                <li><a href="#" className="hover:text-blue-600">Reports</a></li>
+              <h4 className="font-bold mb-3" style={{ color: 'var(--text-primary)' }}>Quick Links</h4>
+              <ul className="text-sm space-y-2" style={{ color: 'var(--text-secondary)' }}>
+                <li><a href="#" className="hover:opacity-90">Dashboard</a></li>
+                <li><a href="#" className="hover:opacity-90">Documents</a></li>
+                <li><a href="#" className="hover:opacity-90">Reports</a></li>
               </ul>
             </div>
             <div>
-              <h4 className={`font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>Support</h4>
-              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              <h4 className="font-bold mb-3" style={{ color: 'var(--text-primary)' }}>Support</h4>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                 For assistance, contact the admin team or visit the documentation.
               </p>
             </div>
           </div>
-
-          <div className={`border-t pt-8 text-center ${isDark ? 'border-gray-800 text-gray-500' : 'border-gray-200 text-gray-600'} text-sm`}>
+          <div className="pt-8 text-center text-sm" style={{ borderTop: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
             <p>&copy; 2026 PST - Jaramogi Oginga Odinga University of Science and Technology. All rights reserved.</p>
           </div>
         </div>
