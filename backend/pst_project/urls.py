@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -71,4 +73,4 @@ urlpatterns = [
     path('api/audit/', include('apps.audit.urls')),
     path('api/logs/', AuditLogViewSet.as_view({'get': 'list'}), name='audit-log-list'),
     path('api/logs/<int:pk>/', AuditLogViewSet.as_view({'get': 'retrieve'}), name='audit-log-detail'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
