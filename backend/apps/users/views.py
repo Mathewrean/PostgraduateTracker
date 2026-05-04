@@ -37,8 +37,9 @@ class UserViewSet(viewsets.ModelViewSet):
         return queryset
 
     def _require_admin_or_coordinator(self):
-        if self.request.user.role_key not in [
-                'coordinator', 'dean', 'cod', 'director_bps']:
+        user = self.request.user
+        if not (user.is_superuser or user.role_key in [
+                'coordinator', 'dean', 'cod', 'director_bps']):
             raise PermissionDenied('You are not allowed to manage users.')
 
     def list(self, request, *args, **kwargs):

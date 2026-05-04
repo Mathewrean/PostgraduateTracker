@@ -58,3 +58,10 @@ class SupervisorViewSet(viewsets.ViewSet):
         from apps.stages.serializers import StageSerializer
         serializer = StageSerializer(stages, many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def profile(self, request):
+        from apps.users.serializers import UserSerializer
+
+        serializer = UserSerializer(request.user, context={'request': request})
+        return Response(serializer.data)

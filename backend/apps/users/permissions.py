@@ -48,8 +48,8 @@ class RoleBasedPermission(BasePermission):
         if not user or not user.is_authenticated:
             return False
 
-        # Coordinators and Admins can access everything
-        if user.role_key in ['coordinator', 'dean', 'cod', 'director_bps']:
+        # Coordinators, Admins, and superusers can access everything
+        if user.is_superuser or user.role_key in ['coordinator', 'dean', 'cod', 'director_bps']:
             return True
 
         # Students can only access their own data

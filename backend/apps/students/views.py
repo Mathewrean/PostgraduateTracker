@@ -5,8 +5,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from .models import Student
 from .serializers import StudentSerializer, StudentProfileSerializer
+from apps.activities.models import Activity
+from apps.documents.models import Document
 from apps.stages.models import Stage
 from apps.users.models import User
+from apps.activities.serializers import ActivitySerializer
+from apps.documents.serializers import DocumentSerializer
 
 
 class StudentViewSet(viewsets.ModelViewSet):
@@ -116,3 +120,41 @@ class StudentViewSet(viewsets.ModelViewSet):
             return Response(
                 serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'])
+    def activities(self, request):
+        user = request.user
+        if user.role_key == 'student':
+            try:
+                student = Student.objects.get(user=user)
+            except Student.DoesNotExist:
+                return Response(
+                    {'error': 'Student profile not found'},
+                    status=status.HTTP_404_NOT_FOUND)
+            activities = Activity.objects.filter(stage__student=student).select_related('stage', 'created_by', 'marked_done_by')
+        elif user.role_key == 'supervisor':
+            activities = Activity.objects.filter(stage__student__assigned_supervisor=user).select_related('stage', 'created_by', 'marked_done_by')
+        else:
+            activities = Activity.objects.none()
+
+        serializer = ActivitySerializer(activities, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def documents(self, request):
+        user = request.user
+        if user.role_key == 'student':
+            try:
+                student = Student.objects.get(user=user)
+            except Student.DoesNotExist:
+                return Response(
+                    {'error': 'Student profile not found'},
+                    status=status.HTTP_404_NOT_FOUND)
+            documents = Document.objects.filter(student=student).select_related('stage', 'student')
+        elif user.role_key == 'supervisor':
+            documents = Document.objects.filter(stage__student__assigned_supervisor=user).select_related('stage', 'student')
+        else:
+            documents = Document.objects.none()
+
+        serializer = DocumentSerializer(documents, many=True, context={'request': request})
+        return Response(serializer.data)

@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import NotificationViewSet
+from .views import NotificationViewSet, MeetingViewSet
 
 
 notification_list = NotificationViewSet.as_view({'get': 'list'})
@@ -12,6 +12,7 @@ notification_mark_all = NotificationViewSet.as_view(
     {'post': 'mark_all_as_read'})
 notification_unread_count = NotificationViewSet.as_view(
     {'get': 'unread_count'})
+meeting_list = MeetingViewSet.as_view({'get': 'list'})
 
 urlpatterns = [
     path(
@@ -19,23 +20,31 @@ urlpatterns = [
         notification_list,
         name='notification-list'),
     path(
-        '<int:pk>/',
+        'notifications/',
+        notification_list,
+        name='notification-list-alias'),
+    path(
+        'notifications/<int:pk>/',
         notification_detail,
-        name='notification-detail'),
+        name='notification-detail-alias'),
     path(
-        '<int:pk>/read/',
+        'notifications/<int:pk>/read/',
         notification_read,
-        name='notification-read'),
+        name='notification-read-alias'),
     path(
-        '<int:pk>/mark_as_read/',
+        'notifications/<int:pk>/mark_as_read/',
         notification_mark_as_read,
-        name='notification-mark-as-read'),
+        name='notification-mark-as-read-alias'),
     path(
-        'mark_all_as_read/',
+        'notifications/mark_all_as_read/',
         notification_mark_all,
-        name='notification-mark-all'),
+        name='notification-mark-all-alias'),
     path(
-        'unread_count/',
+        'notifications/unread_count/',
         notification_unread_count,
-        name='notification-unread-count'),
+        name='notification-unread-count-alias'),
+    path(
+        'meetings/',
+        meeting_list,
+        name='notification-meeting-list'),
 ]

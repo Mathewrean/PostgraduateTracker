@@ -15,9 +15,10 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def _require_audit_access(self):
-        if self.request.user.role_key not in ['dean', 'cod', 'director_bps']:
+        user = self.request.user
+        if not (user.is_superuser or user.role_key in ['dean', 'cod', 'director_bps']):
             raise PermissionDenied(
-                'Only the Dean, COD, and Director BPS can access audit logs.')
+                'Only the Dean, COD, Director BPS, or superusers can access audit logs.')
 
     def get_queryset(self):
         self._require_audit_access()
