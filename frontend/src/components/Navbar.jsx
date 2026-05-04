@@ -95,8 +95,7 @@ export const NavbarComponent = () => {
             {user && (
               <button
                 onClick={() => navigate('/notifications')}
-                className={`relative px-3 py-2 rounded-lg text-sm`}
-                className="text-text-primary"
+                className="relative px-3 py-2 rounded-lg text-sm text-text-primary"
               >
                 Notifications
                 {unreadCount > 0 && (
@@ -127,8 +126,7 @@ export const NavbarComponent = () => {
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden p-2 rounded-lg"
-              className="text-text-primary"
+              className="md:hidden p-2 rounded-lg text-text-primary"
             >
               {menuOpen ? 'Close' : 'Menu'}
             </button>
@@ -153,8 +151,7 @@ export const NavbarComponent = () => {
                   item.path && navigate(item.path)
                   setMenuOpen(false)
                 }}
-                className={`w-full text-left px-4 py-2 rounded-lg transition-all`}
-                className="text-text-primary"
+                className="w-full text-left px-4 py-2 rounded-lg transition-all text-text-primary"
               >
                 {item.label}
               </button>

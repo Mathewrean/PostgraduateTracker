@@ -5,6 +5,7 @@ import { useUIStore } from './context/store'
 import { authService } from './services'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { Toaster } from 'react-hot-toast'
+import { getHomePath } from './utils/navigation'
 
 // Pages
 import { LoginPage } from './pages/auth/LoginPage'
@@ -37,13 +38,6 @@ import { ReportsPage } from './pages/coordinator/ReportsPage'
 // Admin Pages
 import { AuditLogPage } from './pages/admin/AuditLogPage'
 import { UserActivityPage } from './pages/admin/UserActivityPage'
-
-function getHomePath(role) {
-  if (role === 'student') return '/dashboard'
-  if (role === 'supervisor') return '/dashboard'
-  if (['coordinator', 'dean', 'cod', 'director_bps'].includes(role)) return '/dashboard'
-  return '/dashboard'
-}
 
 function PrivateRoute({ children, allowedRoles }) {
   const token = useAuthStore((state) => state.token)
@@ -131,6 +125,14 @@ export const App = () => {
                  user?.role === 'supervisor' ? <SupervisorDashboard /> :
                  ['coordinator', 'dean', 'cod', 'director_bps'].includes(user?.role) ? <CoordinatorDashboard /> :
                  <Navigate to="/unauthorized" replace />}
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/supervisor/dashboard"
+            element={
+              <PrivateRoute allowedRoles={['supervisor']}>
+                <SupervisorDashboard />
               </PrivateRoute>
             }
           />

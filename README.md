@@ -1,81 +1,88 @@
 # Postgraduate Submissions Tracker (PST)
 
-A comprehensive system for tracking postgraduate student submissions, supervisor approvals, and administrative workflows.
+## Overview
+Postgraduate Tracker is a full-stack application for managing postgraduate student progress, supervisor approvals, coordinator oversight, and audit workflows.
 
-## 🚀 Quick Start
+## Production Readiness
+This repository is configured for local development and can be production-ready with the following improvements:
+- Use a production-grade database such as PostgreSQL instead of SQLite
+- Configure secure `SECRET_KEY` and environment variables in `.env`
+- Use a proper web server or container orchestration for deployment
+- Enable HTTPS for frontend/backend communication
 
-1. **Clone the repository**
+## Quick Start
+
+### Backend
+1. Navigate to the backend folder:
    ```bash
-   git clone <repository-url>
-   cd PostgraduateTracker
+   cd backend
+   ```
+2. Activate the virtual environment:
+   ```bash
+   source .venv/bin/activate
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Run database migrations:
+   ```bash
+   python manage.py migrate
+   ```
+5. Start the backend server:
+   ```bash
+   python manage.py runserver
    ```
 
-2. **Set up environment**
+### Frontend
+1. Navigate to the frontend folder:
    ```bash
-   # Backend
-   cd backend
-   python -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   
-   # Frontend
    cd ../frontend
+   ```
+2. Install dependencies:
+   ```bash
    npm install
    ```
-
-3. **Configure environment**
-   - Copy `.env.example` to `.env` in both `backend/` and `frontend/` directories
-   - Update environment variables as needed
-
-4. **Run the application**
+3. Start the frontend server:
    ```bash
-   # Backend (in backend directory)
-   source venv/bin/activate
-   python manage.py migrate
-   python manage.py runserver
-   
-   # Frontend (in frontend directory, in a new terminal)
    npm run dev
    ```
 
-## 🔐 User Login & Roles
+### Environment configuration
+- Copy `.env.example` to `.env` in both the `backend/` and `frontend/` directories.
+- Update API URLs, secret keys, and other settings as needed.
 
-Access the application at `http://localhost:5173` (frontend) after starting both servers.
+## Authentication & Role-Based Dashboard Flow
+The application supports user registration and role-based login. After login, users are routed to the correct dashboard based on the selected role.
 
-### Default Login Credentials
+### Supported roles
+- `student`
+- `supervisor`
+- `coordinator`
+- `dean`
+- `cod`
+- `director_bps`
+
+### Example demo accounts
 | Role | Email | Password |
 |------|-------|----------|
-| Super Admin | admin@pst.system | AdminPass123! |
-| Coordinator | coordinator@pst.system | CoordinatorPass123! |
-| Supervisor | supervisor@pst.system | SupervisorPass123! |
-| Student | student@pst.system | StudentPass123! |
+| Student | student@test.com | student123 |
+| Supervisor | supervisor@test.com | supervisor123 |
+| Coordinator | coordinator@test.com | coordinator123 |
 
-### Role Permissions
-- **Student**: View/edit own profile, submit documents, view activities, send messages
-- **Supervisor**: Manage assigned students, approve/reject submissions, view student progress
-- **Coordinator**: Oversee all students/supervisors, manage complaints, generate reports
-- **Admin**: Full system access including audit logs, user management, system configuration
+## API Endpoints
+- `POST /api/users/register/` — user registration
+- `POST /api/auth/login/` — login with email/password
+- `GET /api/auth/profile/` — fetch current authenticated user
+- `POST /api/auth/logout/` — logout
+- `GET /api/health/` — health check
 
-## 📁 Project Structure
-```
-PostgraduateTracker/
-├── backend/          # Django REST Framework API
-├── frontend/         # React/Vite frontend application
-└── docker-compose.yml # Optional: Containerized deployment
-```
+## Cleanup and Local Artifacts
+Local development artifacts such as `db.sqlite3`, `venv/`, and `backend/venv/` are not required for production and should be removed before packaging the project.
 
-## 🐳 Docker Deployment (Alternative)
-```bash
-docker-compose up --build
-```
-Access at:
-- Frontend: http://localhost
-- Backend API: http://localhost/api
-- Adminer (DB): http://localhost:8080
-
-## 📖 Documentation
-- API Documentation: http://localhost:8000/api/docs/ (when running backend)
-- Detailed setup: See `docs/` directory (if exists)
+## Notes
+- After registering, users should login and be redirected to the correct dashboard based on their selected role.
+- Supervisor users should be able to access supervisor-specific pages such as `My Students` and `Pending Approvals` without full page reloads.
 
 ---
 *Last updated: May 2026*

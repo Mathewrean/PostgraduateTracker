@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { authService } from '../../services'
 import { useAuthStore, useUIStore } from '../../context/store'
 import { setCookie } from '../../services/api'
+import { getHomePath } from '../../utils/navigation'
 import toast from 'react-hot-toast'
 
 export const LoginPage = () => {
@@ -25,7 +26,8 @@ export const LoginPage = () => {
       setToken(response.data.access)
       setUser(response.data.user)
       toast.success('Login successful!')
-      navigate('/dashboard')
+      const destination = getHomePath(response.data.user?.role)
+      navigate(destination, { replace: true })
     } catch (error) {
       toast.error(error.response?.data?.error || error.response?.data?.detail || 'Login failed')
     } finally {

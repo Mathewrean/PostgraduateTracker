@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { Layout } from '../../components/Layout'
 import { supervisorService } from '../../services'
 import { useAuthStore } from '../../context/store'
@@ -68,8 +69,8 @@ export const SupervisorDashboard = () => {
           <div className="bg-white p-6 rounded shadow">
             <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
             <div className="space-y-3">
-              <a href="/supervisor/students" className="block bg-blue-50 hover:bg-blue-100 p-3 rounded">View My Students</a>
-              <a href="/supervisor/approvals" className="block bg-yellow-50 hover:bg-yellow-100 p-3 rounded">Pending Approvals</a>
+              <Link to="/supervisor/students" className="block bg-blue-50 hover:bg-blue-100 p-3 rounded">View My Students</Link>
+              <Link to="/supervisor/approvals" className="block bg-yellow-50 hover:bg-yellow-100 p-3 rounded">Pending Approvals</Link>
             </div>
           </div>
           <div className="bg-white p-6 rounded shadow">
