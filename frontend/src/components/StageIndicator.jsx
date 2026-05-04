@@ -19,8 +19,8 @@ const STAGE_COLORS = {
 export const StageIndicator = ({ currentStage }) => {
   const currentIndex = STAGE_ORDER.indexOf(currentStage) || 0
   return (
-    <div style={{ padding: '1rem', borderRadius: '0.5rem', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
-      <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>Progress</h3>
+    <div className="p-4 rounded-lg bg-bg-secondary border border-border-primary">
+      <h3 className="text-sm font-semibold text-text-secondary mb-3">Progress</h3>
       <div className="flex items-center justify-between">
         {STAGE_ORDER.map((stage, index) => {
           const isCompleted = index <= currentIndex
@@ -30,20 +30,20 @@ export const StageIndicator = ({ currentStage }) => {
           return (
             <React.Fragment key={stage}>
               <div className="flex flex-col items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${badgeClass}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${badgeClass}`}>
                   {isCompleted ? (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--bg-main)' }}>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   ) : (
-                    <span style={{ fontSize: '0.625rem', color: 'var(--text-secondary)' }}>{index + 1}</span>
+                    <span className="text-xs text-text-secondary">{index + 1}</span>
                   )}
                 </div>
-                <span style={{ fontSize: '0.625rem', marginTop: '0.25rem', color: isCurrent ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: isCurrent ? 600 : 400 }}>{STAGE_LABELS[stage]}</span>
+                <span className={`text-xs mt-1 ${isCurrent ? 'text-text-primary font-semibold' : 'text-text-secondary font-normal'}`}>{STAGE_LABELS[stage]}</span>
               </div>
 
               {index < STAGE_ORDER.length - 1 && (
-                <div style={{ flex: 1, height: '6px', margin: '0 0.5rem', borderRadius: '9999px', backgroundColor: index < currentIndex ? 'var(--color-brand)' : 'var(--border-color)' }} />
+                <div className={`flex-1 h-1.5 mx-2 rounded-full ${index < currentIndex ? 'bg-brand' : 'bg-border-primary'}`} />
               )}
             </React.Fragment>
           )

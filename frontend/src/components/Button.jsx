@@ -1,5 +1,4 @@
 import React from 'react'
-import { useUIStore } from '../context/store'
 
 export const Button = ({
   children,
@@ -11,7 +10,6 @@ export const Button = ({
   className = '',
   ...props
 }) => {
-  const isDark = useUIStore((state) => state.isDark)
 
   const variants = {
     primary: 'btn-primary',

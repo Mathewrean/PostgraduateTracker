@@ -131,15 +131,53 @@ body {
 }
 
 /* Status badges */
-.badge-primary { background: var(--color-brand); color: var(--bg-main); }
-.badge-success { background: var(--color-success); color: var(--bg-main); }
-.badge-warning { background: var(--color-gold); color: var(--text-primary); }
-.badge-danger { background: var(--color-danger); color: var(--bg-main); }
+.badge-primary { background: var(--color-brand); color: #fff; }
+.badge-success { background: var(--color-success); color: #fff; }
+.badge-warning { background: var(--color-gold); color: #1A1A1A; }
+.badge-danger { background: var(--color-danger); color: #fff; }
+.badge-muted { background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-color); }
 
-.badge-muted { background: var(--bg-surface); color: var(--text-primary); }
+/* Alert banners */
+.alert-danger { background: rgba(198, 40, 40, 0.1); border: 1px solid var(--color-danger); color: var(--color-danger); padding: 0.75rem; border-radius: 0.5rem; }
+.alert-success { background: rgba(46, 125, 50, 0.1); border: 1px solid var(--color-success); color: var(--color-success); padding: 0.75rem; border-radius: 0.5rem; }
+.alert-warning { background: rgba(249, 168, 37, 0.1); border: 1px solid var(--color-warning); color: var(--color-warning); padding: 0.75rem; border-radius: 0.5rem; }
+.alert-info { background: rgba(21, 101, 192, 0.1); border: 1px solid var(--color-info); color: var(--color-info); padding: 0.75rem; border-radius: 0.5rem; }
 
-.alert-danger { background: rgba(198, 40, 40, 0.08); border: 1px solid var(--color-danger); color: var(--bg-main); padding: 0.75rem; }
-.alert-success { background: rgba(46, 125, 50, 0.08); border: 1px solid var(--color-success); color: var(--bg-main); padding: 0.75rem; }
+/* Semantic text colors */
+.text-success { color: var(--color-success) !important; }
+.text-danger { color: var(--color-danger) !important; }
+.text-warning { color: var(--color-gold) !important; }
+.text-brand { color: var(--color-brand) !important; }
+.text-muted { color: var(--text-secondary) !important; }
+
+/* Panel: surface background container */
+.panel {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+}
+
+/* Table styles */
+.table-head {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+}
+.table-row {
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Notification item */
+.notif-unread {
+  background-color: rgba(77, 136, 255, 0.08);
+  border: 1px solid rgba(77, 136, 255, 0.3);
+  border-radius: 0.5rem;
+}
+.notif-read {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+}
 
 .btn-success {
   @apply px-4 py-2 rounded-lg transition-all duration-200;

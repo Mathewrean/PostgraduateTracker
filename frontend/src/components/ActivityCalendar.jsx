@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { activityService } from '../services'
-import { useUIStore } from '../context/store'
 
 const asList = (payload) => {
   if (Array.isArray(payload)) return payload
@@ -9,7 +8,6 @@ const asList = (payload) => {
 }
 
 export const ActivityCalendar = ({ stageId }) => {
-  const isDark = useUIStore((s) => s.isDark)
   const [activities, setActivities] = useState([])
   const [loading, setLoading] = useState(true)
 

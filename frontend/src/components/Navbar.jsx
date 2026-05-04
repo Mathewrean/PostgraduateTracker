@@ -83,8 +83,7 @@ export const NavbarComponent = () => {
               <button
                 key={item.label}
                 onClick={() => item.path && navigate(item.path)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300`}
-                style={{ color: isDark ? 'var(--text-secondary)' : 'var(--text-primary)' }}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 text-text-primary hover:text-accent`}
               >
                 {item.label}
               </button>
@@ -97,7 +96,7 @@ export const NavbarComponent = () => {
               <button
                 onClick={() => navigate('/notifications')}
                 className={`relative px-3 py-2 rounded-lg text-sm`}
-                style={{ color: isDark ? 'var(--text-secondary)' : 'var(--text-primary)' }}
+                className="text-text-primary"
               >
                 Notifications
                 {unreadCount > 0 && (
@@ -129,7 +128,7 @@ export const NavbarComponent = () => {
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="md:hidden p-2 rounded-lg"
-              style={{ backgroundColor: 'transparent', color: 'var(--text-primary)' }}
+              className="text-text-primary"
             >
               {menuOpen ? 'Close' : 'Menu'}
             </button>
@@ -146,7 +145,7 @@ export const NavbarComponent = () => {
 
         {/* Mobile Menu */}
         {menuOpen && (
-          <div className={`md:hidden pb-4 flex flex-col gap-2`} style={{ borderTop: '1px solid var(--border-color)' }}>
+          <div className={`md:hidden pb-4 flex flex-col gap-2 border-t border-border-primary`}>
             {navItems.map((item) => (
               <button
                 key={item.label}
@@ -155,7 +154,7 @@ export const NavbarComponent = () => {
                   setMenuOpen(false)
                 }}
                 className={`w-full text-left px-4 py-2 rounded-lg transition-all`}
-                style={{ color: 'var(--text-primary)' }}
+                className="text-text-primary"
               >
                 {item.label}
               </button>

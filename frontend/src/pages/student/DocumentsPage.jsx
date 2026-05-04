@@ -38,24 +38,18 @@ export const DocumentsPage = () => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0]
-    if (!file) {
-      setSelectedFile(null)
-      return
-    }
-
+    if (!file) { setSelectedFile(null); return }
     const extension = file.name.split('.').pop()?.toLowerCase()
     if (!ALLOWED_EXTENSIONS.includes(extension)) {
       setMessage({ type: 'error', text: 'Only PDF, DOC, and DOCX files are allowed.' })
       e.target.value = ''
       return
     }
-
     if (file.size > MAX_SIZE) {
       setMessage({ type: 'error', text: 'File size exceeds the 10MB limit.' })
       e.target.value = ''
       return
     }
-
     setMessage({ type: '', text: '' })
     setSelectedFile(file)
   }
@@ -121,26 +115,21 @@ export const DocumentsPage = () => {
         <h1 className="text-3xl font-bold">My Documents</h1>
 
         {message.text && (
-          <div className={`p-4 rounded ${message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+          <div className={message.type === 'success' ? 'alert-success' : 'alert-danger'}>
             {message.text}
           </div>
         )}
 
         {/* Upload Form */}
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="panel">
           <h2 className="text-xl font-semibold mb-4">Upload Document</h2>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
             Current stage: {currentStage?.stage_type || user?.current_stage || 'Concept'}
           </p>
           <form onSubmit={handleUpload} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">Document Type</label>
-              <select
-                value={docType}
-                onChange={(e) => setDocType(e.target.value)}
-                required
-                className="w-full border rounded p-2"
-              >
+              <select value={docType} onChange={(e) => setDocType(e.target.value)} required className="input-field">
                 <option value="">Select type...</option>
                 <option value="MINUTES">Minutes of Presentation</option>
                 <option value="TRANSCRIPT">Academic Transcript</option>
@@ -153,19 +142,10 @@ export const DocumentsPage = () => {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">File (PDF, DOC, DOCX; max 10MB)</label>
-              <input
-                type="file"
-                accept=".pdf,.doc,.docx"
-                onChange={handleFileChange}
-                required
-                className="w-full border rounded p-2"
-              />
+              <input type="file" accept=".pdf,.doc,.docx" onChange={handleFileChange} required className="input-field" />
             </div>
-            <button
-              type="submit"
-              disabled={uploading}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded disabled:opacity-50"
-            >
+            <button type="submit" disabled={uploading} className="btn-primary"
+                    style={{ opacity: uploading ? 0.5 : 1 }}>
               {uploading ? 'Uploading...' : 'Upload'}
             </button>
           </form>
@@ -175,22 +155,21 @@ export const DocumentsPage = () => {
         <div className="grid gap-4">
           <h2 className="text-2xl font-semibold">Uploaded Documents</h2>
           {documents.length === 0 ? (
-            <p>No documents uploaded yet.</p>
+            <p style={{ color: 'var(--text-secondary)' }}>No documents uploaded yet.</p>
           ) : (
             documents.map((doc) => (
-              <div key={doc.id} className="p-4 bg-white rounded shadow flex justify-between items-center">
+              <div key={doc.id} className="panel flex justify-between items-center">
                 <div>
                   <p className="font-medium">{doc.doc_type.replace('_', ' ')}</p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                     Uploaded: {new Date(doc.uploaded_at).toLocaleDateString()} • {doc.file_size ? (doc.file_size / 1024).toFixed(1) : 0} KB
                   </p>
-                  {doc.is_verified && <span className="inline-block mt-1 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Verified</span>}
+                  {doc.is_verified && (
+                    <span className="inline-block mt-1 text-xs badge-success px-2 py-1 rounded">Verified</span>
+                  )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleDownload(doc)}
-                  className="text-blue-600 hover:underline"
-                >
+                <button type="button" onClick={() => handleDownload(doc)}
+                        className="text-sm font-medium hover:underline" style={{ color: 'var(--color-brand)' }}>
                   Download
                 </button>
               </div>

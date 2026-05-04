@@ -88,71 +88,46 @@ export const ProfilePage = () => {
         <div>
           <h1 className="text-3xl font-bold">My Profile</h1>
           {user?.profile_complete === false && (
-            <p className="text-sm text-amber-700 mt-2">
+            <p className="text-sm mt-2 alert-warning" style={{ display: 'inline-block' }}>
               Complete your project title and supervisor preference before using the student dashboard.
             </p>
           )}
         </div>
 
         {message.text && (
-          <div className={`p-4 rounded ${message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+          <div className={message.type === 'success' ? 'alert-success' : 'alert-danger'}>
             {message.text}
           </div>
         )}
 
-        <div className="bg-white p-6 rounded shadow">
+        <div className="panel">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1">First Name</label>
-                <input
-                  type="text"
-                  name="first_name"
-                  value={profile.first_name}
-                  onChange={handleChange}
-                  className="w-full border rounded p-2"
-                />
+                <input type="text" name="first_name" value={profile.first_name}
+                  onChange={handleChange} className="input-field" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Last Name</label>
-                <input
-                  type="text"
-                  name="last_name"
-                  value={profile.last_name}
-                  onChange={handleChange}
-                  className="w-full border rounded p-2"
-                />
+                <input type="text" name="last_name" value={profile.last_name}
+                  onChange={handleChange} className="input-field" />
               </div>
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={profile.email}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-              />
+              <input type="email" name="email" value={profile.email}
+                onChange={handleChange} className="input-field" />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Phone</label>
-              <input
-                type="text"
-                name="phone"
-                value={profile.phone}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-              />
+              <input type="text" name="phone" value={profile.phone}
+                onChange={handleChange} className="input-field" />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Project Title</label>
-              <input
-                type="text"
-                name="project_title"
-                value={profile.project_title}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-              />
+              <input type="text" name="project_title" value={profile.project_title}
+                onChange={handleChange} className="input-field" />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Preferred Supervisor</label>
@@ -164,7 +139,7 @@ export const ProfilePage = () => {
                   preferred_supervisor: e.target.value ? Number(e.target.value) : null,
                   preferred_supervisor_other: e.target.value ? '' : prev.preferred_supervisor_other
                 }))}
-                className="w-full border rounded p-2"
+                className="input-field"
               >
                 <option value="">Select a supervisor</option>
                 {supervisorOptions.map((option) => (
@@ -183,10 +158,10 @@ export const ProfilePage = () => {
                   preferred_supervisor: e.target.value ? null : prev.preferred_supervisor
                 }))}
                 placeholder="Or specify another preferred supervisor"
-                className="w-full border rounded p-2 mt-2"
+                className="input-field mt-2"
               />
             </div>
-            <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+            <button type="submit" className="btn-primary">
               Save Profile
             </button>
           </form>

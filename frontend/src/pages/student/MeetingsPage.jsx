@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-
 import { Layout } from '../../components/Layout'
 import { meetingService, studentService } from '../../services'
 
@@ -32,14 +31,11 @@ export const MeetingsPage = () => {
     }
   }
 
-  useEffect(() => {
-    fetchData()
-  }, [])
+  useEffect(() => { fetchData() }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setMessage({ type: '', text: '' })
-
     try {
       await meetingService.create({
         supervisor: profile?.assigned_supervisor || undefined,
@@ -55,69 +51,58 @@ export const MeetingsPage = () => {
     }
   }
 
-  if (loading) {
-    return (
-      <Layout title="Meetings">
-        <div className="flex justify-center items-center h-64"><p>Loading meetings...</p></div>
-      </Layout>
-    )
-  }
+  if (loading) return (
+    <Layout title="Meetings">
+      <div className="flex justify-center items-center h-64"><p>Loading meetings...</p></div>
+    </Layout>
+  )
 
   return (
     <Layout title="Meetings">
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Schedule Meeting</h1>
-          <p className="text-gray-600">
+          <p style={{ color: 'var(--text-secondary)' }}>
             Assigned supervisor: {profile?.assigned_supervisor_name || 'Not assigned yet'}
           </p>
         </div>
 
         {message.text && (
-          <div className={`p-4 rounded ${message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+          <div className={message.type === 'success' ? 'alert-success' : 'alert-danger'}>
             {message.text}
           </div>
         )}
 
-        <div className="bg-white p-6 rounded shadow">
+        <div className="panel">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">Scheduled Date</label>
-              <input
-                type="datetime-local"
-                value={scheduledDate}
+              <input type="datetime-local" value={scheduledDate}
                 onChange={(e) => setScheduledDate(e.target.value)}
-                className="w-full border rounded p-2"
-                required
-              />
+                className="input-field" required />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Notes</label>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={4}
-                className="w-full border rounded p-2"
-                placeholder="Add meeting agenda or context"
-              />
+              <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4}
+                className="input-field" placeholder="Add meeting agenda or context" />
             </div>
-            <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-              Request Meeting
-            </button>
+            <button type="submit" className="btn-primary">Request Meeting</button>
           </form>
         </div>
 
-        <div className="bg-white p-6 rounded shadow">
+        <div className="panel">
           <h2 className="text-2xl font-semibold mb-4">Meeting Requests</h2>
           {meetings.length === 0 ? (
-            <p>No meeting requests yet.</p>
+            <p style={{ color: 'var(--text-secondary)' }}>No meeting requests yet.</p>
           ) : (
             <div className="space-y-3">
               {meetings.map((meeting) => (
-                <div key={meeting.id} className="border rounded p-4">
+                <div key={meeting.id} className="p-4 rounded-lg" style={{ border: '1px solid var(--border-color)' }}>
                   <p className="font-semibold">{new Date(meeting.scheduled_date).toLocaleString()}</p>
-                  <p className="text-sm text-gray-600">Supervisor: {meeting.supervisor_email || 'Unassigned'}</p>
-                  <p className="text-sm text-gray-600">Status: {meeting.status}</p>
+                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    Supervisor: {meeting.supervisor_email || 'Unassigned'}
+                  </p>
+                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Status: {meeting.status}</p>
                   {meeting.notes && <p className="mt-2">{meeting.notes}</p>}
                 </div>
               ))}

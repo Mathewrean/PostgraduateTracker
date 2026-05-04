@@ -46,7 +46,7 @@ export const useUIStore = create((set) => ({
     return { isDark: newTheme }
   }),
   // Initialize the theme on load
-  initializeTheme: () => set((state) => {
+  initializeTheme: () => set((_state) => {
     // Respect saved preference first, then OS-level preference
     const saved = localStorage.getItem('pst-theme')
     let isDark

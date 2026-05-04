@@ -20,57 +20,41 @@ export const RegisterPage = () => {
   const isDark = useUIStore((state) => state.isDark)
   const toggleTheme = useUIStore((state) => state.toggleTheme)
 
-  const bgColor = isDark ? 'bg-gray-900' : 'bg-white'
-  const textColor = isDark ? 'text-white' : 'text-gray-900'
-  const inputBg = isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-200'
-  const labelColor = isDark ? 'text-gray-300' : 'text-gray-700'
-  const cardBg = isDark ? 'bg-gray-800' : 'bg-gray-50'
-
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+    setFormData(prev => ({ ...prev, [name]: value }))
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
-    // Validation
     if (!formData.email || !formData.admission_number || !formData.phone) {
       toast.error('Email, admission number, and phone are required')
       return
     }
-
     if (formData.password.length < 8) {
       toast.error('Password must be at least 8 characters')
       return
     }
-
     if (formData.password !== formData.password_confirm) {
       toast.error('Passwords do not match')
       return
     }
-
     setLoading(true)
-    
-     try {
-       await authService.register({
-         email: formData.email,
-         admission_number: formData.admission_number,
-         phone: formData.phone,
-         first_name: formData.first_name || '',
-         last_name: formData.last_name || '',
-         password: formData.password,
-         password_confirm: formData.password_confirm,
-         role: formData.role
-       })
-      
+    try {
+      await authService.register({
+        email: formData.email,
+        admission_number: formData.admission_number,
+        phone: formData.phone,
+        first_name: formData.first_name || '',
+        last_name: formData.last_name || '',
+        password: formData.password,
+        password_confirm: formData.password_confirm,
+        role: formData.role
+      })
       toast.success('Registration successful! Please login.')
       navigate('/login')
     } catch (error) {
-      const errMsg = error.response?.data?.detail || 
+      const errMsg = error.response?.data?.detail ||
                      error.response?.data?.email?.[0] ||
                      error.response?.data?.admission_number?.[0] ||
                      error.response?.data?.phone?.[0] ||
@@ -82,119 +66,75 @@ export const RegisterPage = () => {
     }
   }
 
+  const inputCls = 'input-field text-sm'
+
   return (
-    <div className={`min-h-screen ${bgColor} ${textColor} flex items-center justify-center p-4 transition-colors duration-200`}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}
+         className="flex items-center justify-center p-4 transition-colors duration-200">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">PST</span>
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center"
+                 style={{ backgroundColor: 'var(--color-brand)' }}>
+              <span className="font-bold text-lg" style={{ color: '#fff' }}>PST</span>
             </div>
             <div>
               <h1 className="text-2xl font-bold">PST</h1>
-              <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Tracker</p>
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Tracker</p>
             </div>
           </div>
-          
-          <button
-            onClick={toggleTheme}
-            className={`p-2 rounded-lg ${isDark ? 'bg-gray-800 text-yellow-400' : 'bg-gray-100 text-gray-700'} transition-colors duration-200`}
-          >
+          <button onClick={toggleTheme} className="btn-secondary text-sm">
             {isDark ? 'Light' : 'Dark'}
           </button>
         </div>
 
-        {/* Logo */}
+        {/* Title */}
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold mb-2">Create Account</h2>
-          <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Join the Postgraduate Submissions Tracker</p>
+          <p style={{ color: 'var(--text-secondary)' }}>Join the Postgraduate Submissions Tracker</p>
         </div>
 
         {/* Register Form */}
-        <form onSubmit={handleSubmit} className={`${cardBg} p-8 rounded-lg border ${isDark ? 'border-gray-700' : 'border-gray-200'} transition-colors duration-200`}>
+        <form onSubmit={handleSubmit} className="panel">
           <div className="space-y-4">
-            {/* Email */}
             <div>
-              <label className={`block ${labelColor} font-medium mb-2 text-sm`}>Email Address *</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-lg border ${inputBg} focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors text-sm`}
-                placeholder="student@university.edu"
-                required
-              />
+              <label className="block font-medium mb-2 text-sm" style={{ color: 'var(--text-primary)' }}>Email Address *</label>
+              <input type="email" name="email" value={formData.email} onChange={handleChange}
+                className={inputCls} placeholder="student@university.edu" required />
             </div>
 
-            {/* Admission Number */}
             <div>
-              <label className={`block ${labelColor} font-medium mb-2 text-sm`}>Admission Number *</label>
-              <input
-                type="text"
-                name="admission_number"
-                value={formData.admission_number}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-lg border ${inputBg} focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors text-sm`}
-                placeholder="e.g., PG/2024/001"
-                required
-              />
+              <label className="block font-medium mb-2 text-sm" style={{ color: 'var(--text-primary)' }}>Admission Number *</label>
+              <input type="text" name="admission_number" value={formData.admission_number} onChange={handleChange}
+                className={inputCls} placeholder="e.g., PG/2024/001" required />
             </div>
 
-            {/* Phone */}
             <div>
-              <label className={`block ${labelColor} font-medium mb-2 text-sm`}>Phone Number *</label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={(e) => setFormData(prev => ({...prev, phone: e.target.value.slice(0, 20)}))}
-                className={`w-full px-4 py-2 rounded-lg border ${inputBg} focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors text-sm`}
-                placeholder="+254 701 618 286 (max 20 chars)"
-                maxLength="20"
-                required
-              />
-              <p className={`text-xs mt-1 ${formData.phone.length > 15 ? 'text-orange-500' : 'text-gray-500'}`}>
+              <label className="block font-medium mb-2 text-sm" style={{ color: 'var(--text-primary)' }}>Phone Number *</label>
+              <input type="tel" name="phone" value={formData.phone}
+                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value.slice(0, 20) }))}
+                className={inputCls} placeholder="+254 701 618 286 (max 20 chars)" maxLength="20" required />
+              <p className="text-xs mt-1" style={{ color: formData.phone.length > 15 ? 'var(--color-warning)' : 'var(--text-secondary)' }}>
                 {formData.phone.length}/20 characters
               </p>
             </div>
 
-            {/* First Name */}
             <div>
-              <label className={`block ${labelColor} font-medium mb-2 text-sm`}>First Name</label>
-              <input
-                type="text"
-                name="first_name"
-                value={formData.first_name}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-lg border ${inputBg} focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors text-sm`}
-                placeholder="John"
-              />
+              <label className="block font-medium mb-2 text-sm" style={{ color: 'var(--text-primary)' }}>First Name</label>
+              <input type="text" name="first_name" value={formData.first_name} onChange={handleChange}
+                className={inputCls} placeholder="John" />
             </div>
 
-            {/* Last Name */}
             <div>
-              <label className={`block ${labelColor} font-medium mb-2 text-sm`}>Last Name</label>
-              <input
-                type="text"
-                name="last_name"
-                value={formData.last_name}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-lg border ${inputBg} focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors text-sm`}
-                placeholder="Doe"
-              />
+              <label className="block font-medium mb-2 text-sm" style={{ color: 'var(--text-primary)' }}>Last Name</label>
+              <input type="text" name="last_name" value={formData.last_name} onChange={handleChange}
+                className={inputCls} placeholder="Doe" />
             </div>
 
-            {/* Password */}
             <div>
-              <label className={`block ${labelColor} font-medium mb-2 text-sm`}>Role *</label>
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-lg border ${inputBg} focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors text-sm`}
-              >
+              <label className="block font-medium mb-2 text-sm" style={{ color: 'var(--text-primary)' }}>Role *</label>
+              <select name="role" value={formData.role} onChange={handleChange} className={inputCls}>
                 <option value="student">Student</option>
                 <option value="supervisor">Supervisor</option>
                 <option value="coordinator">Coordinator</option>
@@ -204,55 +144,34 @@ export const RegisterPage = () => {
               </select>
             </div>
 
-            {/* Password */}
             <div>
-              <label className={`block ${labelColor} font-medium mb-2 text-sm`}>Password (min 8 chars) *</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-lg border ${inputBg} focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors text-sm`}
-                placeholder="Enter secure password"
-                required
-              />
-              <p className={`text-xs mt-1 ${formData.password.length < 8 ? 'text-red-500' : 'text-green-500'}`}>
+              <label className="block font-medium mb-2 text-sm" style={{ color: 'var(--text-primary)' }}>Password (min 8 chars) *</label>
+              <input type="password" name="password" value={formData.password} onChange={handleChange}
+                className={inputCls} placeholder="Enter secure password" required />
+              <p className="text-xs mt-1" style={{ color: formData.password.length < 8 ? 'var(--color-danger)' : 'var(--color-success)' }}>
                 {formData.password.length < 8 ? `${8 - formData.password.length} more characters needed` : 'Password length requirement met'}
               </p>
             </div>
 
-            {/* Confirm Password */}
             <div>
-              <label className={`block ${labelColor} font-medium mb-2 text-sm`}>Confirm Password *</label>
-              <input
-                type="password"
-                name="password_confirm"
-                value={formData.password_confirm}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-lg border ${inputBg} focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors text-sm`}
-                placeholder="Confirm password"
-                required
-              />
-              <p className={`text-xs mt-1 ${formData.password !== formData.password_confirm && formData.password_confirm ? 'text-red-500' : 'text-green-500'}`}>
+              <label className="block font-medium mb-2 text-sm" style={{ color: 'var(--text-primary)' }}>Confirm Password *</label>
+              <input type="password" name="password_confirm" value={formData.password_confirm} onChange={handleChange}
+                className={inputCls} placeholder="Confirm password" required />
+              <p className="text-xs mt-1" style={{ color: formData.password !== formData.password_confirm && formData.password_confirm ? 'var(--color-danger)' : 'var(--color-success)' }}>
                 {formData.password !== formData.password_confirm && formData.password_confirm ? 'Passwords do not match' : 'Passwords match'}
               </p>
             </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-2.5 rounded-lg font-semibold transition-colors duration-200 mt-6"
-            >
+            <button type="submit" disabled={loading} className="w-full btn-primary font-semibold mt-6"
+                    style={{ opacity: loading ? 0.6 : 1 }}>
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </div>
 
-          {/* Login Link */}
-          <div className="text-center mt-6 pt-6 border-t border-gray-300 dark:border-gray-600">
-            <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>
+          <div className="text-center mt-6 pt-6" style={{ borderTop: '1px solid var(--border-color)' }}>
+            <p style={{ color: 'var(--text-secondary)' }}>
               Already have an account?{' '}
-              <Link to="/login" className="text-blue-600 hover:text-blue-700 font-semibold">
+              <Link to="/login" className="font-semibold" style={{ color: 'var(--color-brand)' }}>
                 Sign In
               </Link>
             </p>
@@ -260,8 +179,8 @@ export const RegisterPage = () => {
         </form>
 
         {/* Info */}
-        <div className={`mt-6 p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-blue-50'} border ${isDark ? 'border-gray-700' : 'border-blue-200'}`}>
-          <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+        <div className="mt-6 panel">
+          <p className="text-sm" style={{ color: 'var(--text-primary)' }}>
             <strong>Note:</strong> You'll need an admission number to register. Contact your institution if you don't have one.
           </p>
         </div>

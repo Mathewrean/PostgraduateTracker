@@ -34,7 +34,7 @@ export const NotificationsPage = () => {
   if (loading) return (
     <Layout title="Notifications">
       <div className="flex justify-center items-center h-64">
-        <p>Loading notifications...</p>
+        <p className="text-text-primary">Loading notifications...</p>
       </div>
     </Layout>
   )
@@ -42,30 +42,30 @@ export const NotificationsPage = () => {
   return (
     <Layout title="Notifications">
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold">Notifications</h1>
+        <h1 className="text-3xl font-bold text-text-primary">Notifications</h1>
         {notifications.length === 0 ? (
-          <p className="text-gray-500">No notifications.</p>
+          <p className="text-text-muted">No notifications.</p>
         ) : (
           <div className="space-y-3">
             {notifications.map((notif) => (
               <div
                 key={notif.id}
-                className={`p-4 rounded-lg border ${notif.is_read ? 'bg-gray-50 border-gray-200' : 'bg-blue-50 border-blue-200'}`}
+                className={`p-4 rounded-lg border panel ${notif.is_read ? 'bg-bg-secondary border-border-primary' : 'bg-accent/10 border-accent'}`}
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="font-medium">{notif.message}</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="font-medium text-text-primary">{notif.message}</p>
+                    <p className="text-sm text-text-muted">
                       {new Date(notif.created_at).toLocaleString()}
                     </p>
                     {notif.link && (
-                      <a href={notif.link} className="text-blue-600 text-sm hover:underline">View details</a>
+                      <a href={notif.link} className="text-accent text-sm hover:underline">View details</a>
                     )}
                   </div>
                   {!notif.is_read && (
                     <button
                       onClick={() => markAsRead(notif.id)}
-                      className="text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded"
+                      className="text-sm bg-accent hover:bg-accent/90 text-text-primary px-3 py-1 rounded"
                     >
                       Mark read
                     </button>

@@ -20,7 +20,6 @@ export const DocumentUpload = ({ stageId, onSuccess }) => {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const isDark = false
 
   const validateFile = (file) => {
     if (!file) return 'Please select a file'

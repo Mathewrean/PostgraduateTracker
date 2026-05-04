@@ -25,26 +25,24 @@ export const Card = ({
       className={`${
         isDark
           ? 'bg-gray-800 border-gray-700 hover:border-gray-600'
-          import React from 'react'
-          import { useUIStore } from '../context/store'
-
-          const COLOR_VARS = {
-            blue: 'var(--color-brand)',
-            green: 'var(--color-success)',
-            purple: 'var(--color-info)',
-            red: 'var(--color-danger)'
-          }
-
-          export const Card = ({ title, description, icon, children, onClick, className = '', headerColor = 'blue' }) => {
-            const color = COLOR_VARS[headerColor] || COLOR_VARS.blue
-
-            return (
-              <div className={`card ${onClick ? 'cursor-pointer hover:shadow-lg' : ''} ${className}`} onClick={onClick}>
-                {(title || icon) && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)', borderLeft: `4px solid ${color}`, paddingLeft: '0.75rem', backgroundColor: 'transparent' }}>
-                    {icon && <span style={{ fontSize: '1.5rem' }}>{icon}</span>}
-                    {title && <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)' }}>{title}</h3>}
-                  </div>
+          : 'bg-white border-gray-200 hover:border-gray-300'
+      } border rounded-lg p-6 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md ${className}`}
+    >
+      <div
+        className={`flex items-center justify-between mb-4 p-3 rounded-lg ${headerColors[headerColor]}`}
+      >
+        <div>
+          <h3 className="font-semibold text-lg text-text-primary">{title}</h3>
+          {description && <p className="text-sm text-text-secondary mt-1">{description}</p>}
+        </div>
+        {icon && (
+          <div className="text-2xl">
+            {icon}
+          </div>
+        )}
+      </div>
+      {children}
+    </div>
                 )}
 
                 {description && <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{description}</p>}

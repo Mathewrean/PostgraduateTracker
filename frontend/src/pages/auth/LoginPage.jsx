@@ -15,15 +15,9 @@ export const LoginPage = () => {
   const isDark = useUIStore((state) => state.isDark)
   const toggleTheme = useUIStore((state) => state.toggleTheme)
 
-  const bgColor = isDark ? 'bg-gray-900' : 'bg-white'
-  const textColor = isDark ? 'text-white' : 'text-gray-900'
-  const inputBg = isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-200'
-  const labelColor = isDark ? 'text-gray-300' : 'text-gray-700'
-
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    
     try {
       const response = await authService.login(email, password)
       setCookie('pst_access_token', response.data.access)
@@ -40,79 +34,80 @@ export const LoginPage = () => {
   }
 
   return (
-    <div className={`min-h-screen ${bgColor} ${textColor} flex items-center justify-center p-4 transition-colors duration-200`}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}
+         className="flex items-center justify-center p-4 transition-colors duration-200">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">PST</span>
+          <div className="w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-4"
+               style={{ backgroundColor: 'var(--color-brand)' }}>
+            <span className="font-bold text-2xl" style={{ color: '#fff' }}>PST</span>
           </div>
           <h1 className="text-3xl font-bold mb-2">Sign In</h1>
-          <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Postgraduate Submissions Tracker</p>
+          <p style={{ color: 'var(--text-secondary)' }}>Postgraduate Submissions Tracker</p>
         </div>
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit} className={`${isDark ? 'bg-gray-800' : 'bg-gray-50'} p-8 rounded-lg border ${isDark ? 'border-gray-700' : 'border-gray-200'} transition-colors duration-200`}>
-          <div className="space-y-5">
-            <div>
-              <label className={`block ${labelColor} font-medium mb-2`}>Email Address</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={`w-full px-4 py-2 rounded-lg border ${inputBg} focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors`}
-                placeholder="your@email.com"
-                required
-              />
-            </div>
-            
-            <div>
-              <label className={`block ${labelColor} font-medium mb-2`}>Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`w-full px-4 py-2 rounded-lg border ${inputBg} focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors`}
-                placeholder="Enter your password"
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-2 rounded-lg font-semibold transition-colors duration-200"
-            >
-              {loading ? 'Signing in...' : 'Sign In'}
-            </button>
+        <form onSubmit={handleSubmit} className="panel space-y-5">
+          <div>
+            <label className="block font-medium mb-2" style={{ color: 'var(--text-primary)' }}>Email Address</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="input-field"
+              placeholder="your@email.com"
+              required
+            />
           </div>
+
+          <div>
+            <label className="block font-medium mb-2" style={{ color: 'var(--text-primary)' }}>Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="input-field"
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full btn-primary font-semibold"
+            style={{ opacity: loading ? 0.6 : 1 }}
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
         </form>
 
         {/* Registration Link */}
-        <div className={`mt-6 p-4 rounded-lg ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-blue-50 border-blue-200'} border text-center`}>
-          <p className={isDark ? 'text-gray-300' : 'text-gray-700'}>
+        <div className="mt-6 panel text-center">
+          <p style={{ color: 'var(--text-primary)' }}>
             Don't have an account?{' '}
-            <Link to="/register" className="text-blue-600 hover:text-blue-700 font-semibold">
+            <Link to="/register" className="font-semibold" style={{ color: 'var(--color-brand)' }}>
               Create one here
             </Link>
           </p>
         </div>
 
         {/* Test Credentials */}
-        <div className={`mt-6 p-4 rounded-lg ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} border`}>
+        <div className="mt-6 panel">
           <p className="font-semibold mb-3 text-sm">Demo Credentials:</p>
           <div className="space-y-2 text-sm">
             <div>
-              <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Student</p>
-              <p className={`font-mono text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>student@test.com / student123</p>
+              <p style={{ color: 'var(--text-secondary)' }}>Student</p>
+              <p className="font-mono text-xs" style={{ color: 'var(--text-primary)' }}>student@test.com / student123</p>
             </div>
             <div>
-              <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Supervisor</p>
-              <p className={`font-mono text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>supervisor@test.com / supervisor123</p>
+              <p style={{ color: 'var(--text-secondary)' }}>Supervisor</p>
+              <p className="font-mono text-xs" style={{ color: 'var(--text-primary)' }}>supervisor@test.com / supervisor123</p>
             </div>
             <div>
-              <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Coordinator</p>
-              <p className={`font-mono text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>coordinator@test.com / coordinator123</p>
+              <p style={{ color: 'var(--text-secondary)' }}>Coordinator</p>
+              <p className="font-mono text-xs" style={{ color: 'var(--text-primary)' }}>coordinator@test.com / coordinator123</p>
             </div>
           </div>
         </div>
@@ -121,9 +116,9 @@ export const LoginPage = () => {
         <div className="mt-6 text-center">
           <button
             onClick={toggleTheme}
-            className={`px-4 py-2 rounded-lg ${isDark ? 'bg-gray-800 text-yellow-400 border-gray-700' : 'bg-gray-100 text-gray-700 border-gray-200'} border transition-colors duration-200 text-sm`}
+            className="btn-secondary text-sm"
           >
-            {isDark ? 'Light Mode' : 'Dark Mode'}
+            {isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           </button>
         </div>
       </div>

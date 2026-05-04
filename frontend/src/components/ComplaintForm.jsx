@@ -1,9 +1,7 @@
 import React, { useState } from 'react'
 import { complaintService } from '../services'
-import { useUIStore } from '../context/store'
 
 export const ComplaintForm = ({ onSuccess }) => {
-  const isDark = useUIStore((s) => s.isDark)
   const [content, setContent] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
