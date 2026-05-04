@@ -743,6 +743,7 @@ class TestSuite:
 
         if failed > 0:
             for failure in self.test_results['failed']:
+                print(f"❌ {failure}")
 
         categories = {
             'Authentication': self.test_results['passed'][:3],
@@ -762,9 +763,12 @@ class TestSuite:
         for category, tests in categories.items():
             if tests:
                 for test in tests:
+                    print(f"✅ {test}")
 
         if success_rate >= 80:
+            print(f"\n🎉 SUCCESS: {success_rate:.1f}% tests passed!")
         else:
+            print(f"\n❌ FAILURE: Only {success_rate:.1f}% tests passed!")
 
 
 if __name__ == '__main__':

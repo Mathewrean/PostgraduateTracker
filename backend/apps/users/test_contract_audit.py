@@ -61,7 +61,8 @@ class ContractAuditTests(APITestCase):
 
         self.student = Student.objects.get(user=self.student_user)
         self.student.project_title = 'Contract Audit Project'
-        self.student.preferred_supervisor = 'Dr. Willy Kangojo (Coordinator)'
+        self.student.preferred_supervisor = None  # Fixed: was assigning string to FK
+        self.student.preferred_supervisor_other = 'Dr. Willy Kangojo (Coordinator)'
         self.student.profile_complete = True
         self.student.assigned_supervisor = self.supervisor_user
         self.student.save()
