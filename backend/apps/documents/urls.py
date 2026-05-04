@@ -16,6 +16,10 @@ minutes_download = MinutesViewSet.as_view({'get': 'download'})
 
 urlpatterns = [
     path('', document_list, name='document-list'),
+    path('documents/', document_list, name='document-list-alias'),
+    path('documents/<int:pk>/', document_detail, name='document-detail-alias'),
+    path('documents/<int:pk>/verify/', document_verify, name='document-verify-alias'),
+    path('documents/<int:pk>/download/', document_download, name='document-download-alias'),
     path('<int:pk>/', document_detail, name='document-detail'),
     path('<int:pk>/verify/', document_verify, name='document-verify'),
     path('<int:pk>/download/', document_download, name='document-download'),
