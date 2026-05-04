@@ -52,8 +52,8 @@ function PrivateRoute({ children, allowedRoles }) {
 
   if (!initialized && token) {
     return (
-      <div className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center">
-        <p className="text-lg">Loading dashboard...</p>
+      <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ fontSize: '1.125rem' }}>Loading dashboard...</p>
       </div>
     )
   }

@@ -25,96 +25,51 @@ export const Card = ({
       className={`${
         isDark
           ? 'bg-gray-800 border-gray-700 hover:border-gray-600'
-          : 'bg-white border-gray-200 hover:border-gray-300'
-      } border rounded-xl p-6 transition-all duration-300 ${onClick ? 'cursor-pointer hover:shadow-lg' : ''} ${className}`}
-    >
-      {/* Header */}
-      {(title || icon) && (
-        <div
-          className={`flex items-center gap-3 mb-4 pb-4 border-b ${
-            headerColors[headerColor]
-          }`}
-        >
-          {icon && <span className="text-3xl">{icon}</span>}
-          {title && (
-            <h3
-              className={`text-lg font-bold ${
-                isDark ? 'text-white' : 'text-gray-900'
-              }`}
-            >
-              {title}
-            </h3>
-          )}
-        </div>
-      )}
+          import React from 'react'
+          import { useUIStore } from '../context/store'
 
-      {/* Description */}
-      {description && (
-        <p
-          className={`mb-4 text-sm ${
-            isDark ? 'text-gray-400' : 'text-gray-600'
-          }`}
-        >
-          {description}
-        </p>
-      )}
+          const COLOR_VARS = {
+            blue: 'var(--color-brand)',
+            green: 'var(--color-success)',
+            purple: 'var(--color-info)',
+            red: 'var(--color-danger)'
+          }
 
-      {/* Content */}
-      {children && <div className="mt-4">{children}</div>}
-    </div>
-  )
-}
+          export const Card = ({ title, description, icon, children, onClick, className = '', headerColor = 'blue' }) => {
+            const color = COLOR_VARS[headerColor] || COLOR_VARS.blue
 
-export const StatCard = ({ label, value, unit = '', icon, color = 'blue' }) => {
-  const isDark = useUIStore((state) => state.isDark)
+            return (
+              <div className={`card ${onClick ? 'cursor-pointer hover:shadow-lg' : ''} ${className}`} onClick={onClick}>
+                {(title || icon) && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)', borderLeft: `4px solid ${color}`, paddingLeft: '0.75rem', backgroundColor: 'transparent' }}>
+                    {icon && <span style={{ fontSize: '1.5rem' }}>{icon}</span>}
+                    {title && <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)' }}>{title}</h3>}
+                  </div>
+                )}
 
-  const colorClasses = {
-    blue: isDark ? 'text-blue-400 bg-blue-900/20' : 'text-blue-600 bg-blue-50',
-    green: isDark ? 'text-green-400 bg-green-900/20' : 'text-green-600 bg-green-50',
-    purple: isDark ? 'text-purple-400 bg-purple-900/20' : 'text-purple-600 bg-purple-50',
+                {description && <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{description}</p>}
+
+                {children && <div style={{ marginTop: '1rem' }}>{children}</div>}
+              </div>
+            )
+          }
+
+          export const StatCard = ({ label, value, unit = '', icon, color = 'blue' }) => {
+            const colorVar = COLOR_VARS[color] || COLOR_VARS.blue
+
+            return (
+              <div className="card">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <p style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{label}</p>
+                    <p style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginTop: '0.5rem' }}>
+                      <span style={{ fontSize: '1.5rem', fontWeight: 700, color: colorVar }}>{value}</span>
+                      {unit && <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{unit}</span>}
+                    </p>
+                  </div>
+                  {icon && <div style={{ padding: '0.75rem', borderRadius: '0.5rem', fontSize: '1.25rem', backgroundColor: colorVar, color: 'var(--bg-main)' }}>{icon}</div>}
+                </div>
+              </div>
+            )
+          }
     red: isDark ? 'text-red-400 bg-red-900/20' : 'text-red-600 bg-red-50',
-  }
-
-  return (
-    <div
-      className={`${
-        isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-      } border rounded-lg p-6 transition-all duration-300`}
-    >
-      <div className="flex items-center justify-between">
-        <div>
-          <p
-            className={`text-sm font-medium ${
-              isDark ? 'text-gray-400' : 'text-gray-600'
-            }`}
-          >
-            {label}
-          </p>
-          <p className="flex items-baseline gap-2 mt-2">
-            <span
-              className={`text-3xl font-bold ${colorClasses[color].split(' ')[0]}`}
-            >
-              {value}
-            </span>
-            {unit && (
-              <span
-                className={`text-sm ${
-                  isDark ? 'text-gray-500' : 'text-gray-400'
-                }`}
-              >
-                {unit}
-              </span>
-            )}
-          </p>
-        </div>
-        {icon && (
-          <div
-            className={`p-4 rounded-lg text-3xl ${colorClasses[color]}`}
-          >
-            {icon}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}

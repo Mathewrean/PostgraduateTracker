@@ -66,8 +66,8 @@ export const ActivitiesPage = () => {
 
   if (loading) return (
     <Layout title="Activities">
-      <div className="flex justify-center items-center h-64">
-        <p>Loading activities...</p>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '16rem' }}>
+        <p style={{ color: 'var(--text-secondary)' }}>Loading activities...</p>
       </div>
     </Layout>
   )
@@ -76,62 +76,36 @@ export const ActivitiesPage = () => {
     <Layout title="Activities">
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">My Activities</h1>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
-          >
-            {showForm ? 'Cancel' : 'Add Activity'}
-          </button>
+          <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>My Activities</h1>
+          <button onClick={() => setShowForm(!showForm)} className="btn-primary" style={{ padding: '0.5rem 1rem' }}>{showForm ? 'Cancel' : 'Add Activity'}</button>
         </div>
 
         {message.text && (
-          <div className={`p-4 rounded ${message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+          <div className={`p-4 rounded ${message.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
             {message.text}
           </div>
         )}
 
         {showForm && (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-4">New Activity</h2>
-            <p className="text-sm text-gray-500 mb-4">
+          <div style={{ backgroundColor: 'var(--bg-surface)', padding: '1.5rem', borderRadius: '0.5rem', boxShadow: 'var(--shadow)' }}>
+            <h2 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--text-primary)' }}>New Activity</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
               Current stage: {currentStage?.stage_type || user?.current_stage || 'Concept'}
             </p>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Title</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={newActivity.title}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full border rounded p-2"
-                />
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Title</label>
+                <input type="text" name="title" value={newActivity.title} onChange={handleInputChange} required className="w-full" style={{ border: '1px solid var(--border-color)', padding: '0.5rem', borderRadius: '6px' }} />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
-                <textarea
-                  name="description"
-                  value={newActivity.description}
-                  onChange={handleInputChange}
-                  className="w-full border rounded p-2"
-                />
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Description</label>
+                <textarea name="description" value={newActivity.description} onChange={handleInputChange} className="w-full" style={{ border: '1px solid var(--border-color)', padding: '0.5rem', borderRadius: '6px' }} />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Planned Date</label>
-                <input
-                  type="datetime-local"
-                  name="planned_date"
-                  value={newActivity.planned_date}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full border rounded p-2"
-                />
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Planned Date</label>
+                <input type="datetime-local" name="planned_date" value={newActivity.planned_date} onChange={handleInputChange} required className="w-full" style={{ border: '1px solid var(--border-color)', padding: '0.5rem', borderRadius: '6px' }} />
               </div>
-              <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
-                Create Activity
-              </button>
+              <button type="submit" className="btn-success" style={{ padding: '0.5rem 1rem' }}>Create Activity</button>
             </form>
           </div>
         )}
@@ -142,29 +116,24 @@ export const ActivitiesPage = () => {
 
         <div className="grid gap-4">
           {activities.length === 0 ? (
-            <p className="text-gray-500">No activities found.</p>
+            <p style={{ color: 'var(--text-secondary)' }}>No activities found.</p>
           ) : (
             activities.map((activity) => (
-              <div key={activity.id} className={`p-4 rounded-lg border ${activity.status === 'COMPLETED' ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'}`}>
+              <div key={activity.id} className="p-4 rounded-lg border" style={{ backgroundColor: activity.status === 'COMPLETED' ? 'rgba(46,125,50,0.04)' : 'var(--bg-main)', borderColor: 'var(--border-color)' }}>
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-semibold text-lg">{activity.title}</h3>
-                    <p className="text-gray-600 text-sm">{activity.description}</p>
-                    <p className="text-xs text-gray-500 mt-2">
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{activity.description}</p>
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
                       Planned: {new Date(activity.planned_date).toLocaleString()}
                     </p>
-                    <p className="text-xs">Status: <span className={`font-semibold ${activity.status === 'COMPLETED' ? 'text-green-600' : 'text-yellow-600'}`}>{activity.status}</span></p>
+                    <p className="text-xs">Status: <span className={`font-semibold`} style={{ color: activity.status === 'COMPLETED' ? 'var(--color-success)' : 'var(--color-warning)' }}>{activity.status}</span></p>
                     {activity.created_by_email && (
-                      <p className="text-xs text-gray-500">Created by: {activity.created_by_email}</p>
+                      <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Created by: {activity.created_by_email}</p>
                     )}
                   </div>
                   {activity.status !== 'COMPLETED' && (
-                    <button
-                      onClick={() => handleMarkDone(activity.id)}
-                      className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
-                    >
-                      Mark Done
-                    </button>
+                    <button onClick={() => handleMarkDone(activity.id)} className="btn-success" style={{ padding: '0.25rem 0.5rem' }}>Mark Done</button>
                   )}
                 </div>
               </div>

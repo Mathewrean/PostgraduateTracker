@@ -10,75 +10,40 @@ const STAGE_LABELS = {
 }
 
 const STAGE_COLORS = {
-  CONCEPT: 'bg-blue-500',
-  PROPOSAL: 'bg-purple-500',
-  THESIS: 'bg-orange-500',
-  COMPLETED: 'bg-green-500',
+  CONCEPT: 'badge-primary',
+  PROPOSAL: 'badge-info',
+  THESIS: 'badge-warning',
+  COMPLETED: 'badge-success',
 }
 
-export const StageIndicator = ({ currentStage, isDark = false }) => {
+export const StageIndicator = ({ currentStage }) => {
   const currentIndex = STAGE_ORDER.indexOf(currentStage) || 0
-  
-  const bgColor = isDark ? 'bg-gray-800' : 'bg-white'
-  const borderColor = isDark ? 'border-gray-700' : 'border-gray-200'
-  const textColor = isDark ? 'text-gray-300' : 'text-gray-600'
-
   return (
-    <div className={`${bgColor} p-4 rounded-lg border ${borderColor}`}>
-      <h3 className={`text-sm font-semibold ${textColor} mb-3`}>Progress</h3>
-      
+    <div style={{ padding: '1rem', borderRadius: '0.5rem', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}>
+      <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>Progress</h3>
       <div className="flex items-center justify-between">
         {STAGE_ORDER.map((stage, index) => {
           const isCompleted = index <= currentIndex
           const isCurrent = index === currentIndex
-          
+          const badgeClass = isCompleted ? STAGE_COLORS[stage] : 'badge-muted'
+
           return (
             <React.Fragment key={stage}>
-              {/* Stage Dot */}
               <div className="flex flex-col items-center">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                    isCompleted
-                      ? STAGE_COLORS[stage]
-                      : isDark
-                      ? 'bg-gray-700'
-                      : 'bg-gray-200'
-                  } ${isCurrent ? 'ring-2 ring-offset-2 ring-blue-500' : ''}`}
-                >
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${badgeClass}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {isCompleted ? (
-                    <svg
-                      className="w-4 h-4 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--bg-main)' }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   ) : (
-                    <span className="text-xs text-gray-500">{index + 1}</span>
+                    <span style={{ fontSize: '0.625rem', color: 'var(--text-secondary)' }}>{index + 1}</span>
                   )}
                 </div>
-                <span className={`text-xs mt-1 ${textColor} ${isCurrent ? 'font-semibold' : ''}`}>
-                  {STAGE_LABELS[stage]}
-                </span>
+                <span style={{ fontSize: '0.625rem', marginTop: '0.25rem', color: isCurrent ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: isCurrent ? 600 : 400 }}>{STAGE_LABELS[stage]}</span>
               </div>
-              
-              {/* Connector Line */}
+
               {index < STAGE_ORDER.length - 1 && (
-                <div
-                  className={`flex-1 h-1 mx-2 rounded ${
-                    index < currentIndex
-                      ? 'bg-blue-500'
-                      : isDark
-                      ? 'bg-gray-700'
-                      : 'bg-gray-200'
-                  }`}
-                />
+                <div style={{ flex: 1, height: '6px', margin: '0 0.5rem', borderRadius: '9999px', backgroundColor: index < currentIndex ? 'var(--color-brand)' : 'var(--border-color)' }} />
               )}
             </React.Fragment>
           )

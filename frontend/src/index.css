@@ -136,6 +136,11 @@ body {
 .badge-warning { background: var(--color-gold); color: var(--text-primary); }
 .badge-danger { background: var(--color-danger); color: var(--bg-main); }
 
+.badge-muted { background: var(--bg-surface); color: var(--text-primary); }
+
+.alert-danger { background: rgba(198, 40, 40, 0.08); border: 1px solid var(--color-danger); color: var(--bg-main); padding: 0.75rem; }
+.alert-success { background: rgba(46, 125, 50, 0.08); border: 1px solid var(--color-success); color: var(--bg-main); padding: 0.75rem; }
+
 .btn-success {
   @apply px-4 py-2 rounded-lg transition-all duration-200;
   background-color: var(--color-success);
@@ -157,6 +162,16 @@ body {
   border-color: var(--border-color);
 }
 .btn-outline:hover { background-color: var(--bg-surface); }
+
+.btn-outline-brand {
+  @apply px-4 py-2 rounded-lg transition-all duration-200 border-2;
+  background: transparent;
+  color: var(--color-brand);
+  border-color: var(--color-brand);
+}
+.btn-outline-brand:hover { background-color: var(--color-brand); color: var(--bg-main); }
+
+.chip { background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-color); padding: 0.25rem 0.5rem; border-radius: 6px; }
 
 /* Ensure smooth transitions for theme changes */
 * {

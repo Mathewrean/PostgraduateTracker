@@ -83,11 +83,8 @@ export const NavbarComponent = () => {
               <button
                 key={item.label}
                 onClick={() => item.path && navigate(item.path)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
-                  isDark
-                    ? 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
-                }`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300`}
+                style={{ color: isDark ? 'var(--text-secondary)' : 'var(--text-primary)' }}
               >
                 {item.label}
               </button>
@@ -99,9 +96,8 @@ export const NavbarComponent = () => {
             {user && (
               <button
                 onClick={() => navigate('/notifications')}
-                className={`relative px-3 py-2 rounded-lg text-sm ${
-                  isDark ? 'hover:bg-gray-800 text-gray-300' : 'hover:bg-gray-100 text-gray-700'
-                }`}
+                className={`relative px-3 py-2 rounded-lg text-sm`}
+                style={{ color: isDark ? 'var(--text-secondary)' : 'var(--text-primary)' }}
               >
                 Notifications
                 {unreadCount > 0 && (
@@ -150,11 +146,7 @@ export const NavbarComponent = () => {
 
         {/* Mobile Menu */}
         {menuOpen && (
-          <div
-            className={`md:hidden pb-4 flex flex-col gap-2 ${
-              isDark ? 'border-gray-800' : 'border-gray-200'
-            }`}
-          >
+          <div className={`md:hidden pb-4 flex flex-col gap-2`} style={{ borderTop: '1px solid var(--border-color)' }}>
             {navItems.map((item) => (
               <button
                 key={item.label}
