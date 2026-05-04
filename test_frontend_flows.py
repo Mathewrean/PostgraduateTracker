@@ -350,6 +350,58 @@ class FrontendFlowTester:
             self.log("Supervisor Dashboard Flow", "FAIL", f"Error: {str(e)}")
             return False
     
+    def test_supervisor_login_dashboard_redirect(self):
+        """Acceptance test: Supervisor login should redirect to supervisor dashboard"""
+        print("\n" + "="*70)
+        print("SUPERVISOR LOGIN -> DASHBOARD REDIRECT TEST")
+        print("="*70)
+        
+        try:
+            # Step 1: Login as supervisor
+            login_response = self.session.post(
+                f"{BASE_URL}/auth/login/",
+                json={
+                    "email": TEST_USERS["supervisor"]["email"],
+                    "password": TEST_USERS["supervisor"]["password"]
+                },
+                headers={"Content-Type": "application/json"}
+            )
+            
+            if login_response.status_code != 200:
+                self.log("Supervisor Login Redirect", "FAIL", f"Login failed: {login_response.status_code}")
+                return False
+            
+            login_data = login_response.json()
+            token = login_data["access"]
+            user_data = login_data["user"]
+            
+            # Verify role is supervisor
+            if user_data.get("role") != "supervisor":
+                self.log("Supervisor Login Redirect", "FAIL", f"Wrong role returned: {user_data.get('role')}")
+                return False
+            
+            self.log("Supervisor Login Redirect", "PASS", "Login successful, role verified as supervisor")
+            
+            # Step 2: Test dashboard access (simulating frontend redirect)
+            dashboard_response = self.session.get(
+                f"{BASE_URL}/supervisors/students/",
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": "application/json"
+                }
+            )
+            
+            if dashboard_response.status_code == 200:
+                self.log("Supervisor Login Redirect", "PASS", "Dashboard access successful after login")
+                return True
+            else:
+                self.log("Supervisor Login Redirect", "FAIL", f"Dashboard access failed: {dashboard_response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log("Supervisor Login Redirect", "FAIL", f"Error: {str(e)}")
+            return False
+    
     def test_coordinator_dashboard_flow(self):
         """Test coordinator/admin dashboard access"""
         print("\n" + "="*70)
@@ -503,6 +555,9 @@ class FrontendFlowTester:
         time.sleep(0.3)
         
         self.test_supervisor_dashboard_flow()
+        time.sleep(0.3)
+        
+        self.test_supervisor_login_dashboard_redirect()
         time.sleep(0.3)
         
         self.test_coordinator_dashboard_flow()
