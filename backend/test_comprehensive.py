@@ -22,8 +22,9 @@ import sys
 import json
 from io import BytesIO
 
-# Setup Django
+# Setup Django with DEBUG enabled for testing
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pst_project.settings')
+os.environ['DEBUG'] = 'true'
 
 django.setup()
 
@@ -55,6 +56,7 @@ class TestSuite:
                 defaults={
                     'admission_number': 'ADMIN001',
                     'phone': '+254700000000',
+                    'role': 'dean',
                     'is_superuser': True,
                     'is_staff': True
                 }
@@ -64,6 +66,10 @@ class TestSuite:
                 self.users['admin'].save()
         except BaseException:
             self.users['admin'] = User.objects.get(email='admin@test.com')
+            # Ensure role is set correctly
+            if not self.users['admin'].role:
+                self.users['admin'].role = 'dean'
+                self.users['admin'].save()
 
         # Create or get student
         try:
@@ -212,14 +218,16 @@ class TestSuite:
     def run_authentication_tests(self):
         """Test authentication endpoints"""
 
-        # Register new user
+        # Register new user with unique email
+        import time
+        unique_email = f'newuser_{int(time.time())}@test.com'
         response = self.test_endpoint(
             "POST Register User",
             "POST",
             "/api/users/register/",
             data={
-                'email': 'newuser@test.com',
-                'admission_number': 'NEW001',
+                'email': unique_email,
+                'admission_number': f'NEW{int(time.time())}',
                 'phone': '+254700000004',
                 'first_name': 'New',
                 'last_name': 'User',
@@ -602,7 +610,7 @@ class TestSuite:
             "GET Login History Report",
             "GET",
             "/api/reports/login_history/",
-            user_type='admin',
+            user_type='coordinator',
             expected_status=200
         )
 
