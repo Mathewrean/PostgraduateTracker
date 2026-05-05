@@ -10,15 +10,7 @@ from apps.students.models import Student
 from apps.users.models import User
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
-import django
 import os
-import sys
-import unittest
-
-# Setup Django FIRST before any imports
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pst_project.settings')
-
-django.setup()
 
 
 class AuthenticationTests(APITestCase):
@@ -362,7 +354,7 @@ class NotificationTests(APITestCase):
     def test_mark_notification_read(self):
         """Test marking notification as read"""
         response = self.client.post(
-            f'/api/notifications/{self.notification.id}/mark_as_read/'
+            f'/api/notifications/notifications/{self.notification.id}/mark_as_read/'
         )
         # Handle potential redirect
         if response.status_code == 301:
@@ -439,8 +431,8 @@ class ReportTests(APITestCase):
         if response.status_code == 301:
             response = self.client.get(response['Location'])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('total_students', response.data)
-        self.assertIn('stages', response.data)
+        self.assertIn('completed_counts', response.data)
+        self.assertIn('current_stage_students', response.data)
 
     def test_complaint_report(self):
         """Test complaint statistics report"""
@@ -449,7 +441,8 @@ class ReportTests(APITestCase):
         if response.status_code == 301:
             response = self.client.get(response['Location'])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('total', response.data)
+        self.assertIn('summary', response.data)
+        self.assertIn('items', response.data)
 
 
 def run_all_tests():
