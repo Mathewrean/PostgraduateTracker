@@ -21,7 +21,7 @@ html {
   --bg-surface: #F5F5F5;
   --text-primary: #1A1A1A;
   --text-secondary: #595959;
-  --color-brand: #003366;
+  --color-brand: #2E7D32;
   --color-gold: #CC9900;
   --border-color: #E0E0E0;
   --shadow: rgba(0, 0, 0, 0.1);
@@ -31,6 +31,10 @@ html {
   --color-warning: #F9A825;
   --color-danger: #C62828;
   --color-info: #1565C0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-brand);
 }
 
 [data-theme="dark"] {
