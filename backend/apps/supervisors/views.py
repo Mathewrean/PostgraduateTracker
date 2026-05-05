@@ -64,72 +64,30 @@ class SupervisorViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get', 'patch'])
     def profile(self, request):
         """Get or update supervisor profile"""
-        from rest_framework.permissions import BasePermission
+        if request.user.role_key != 'supervisor':
+            raise PermissionDenied('Only supervisors can access this endpoint.')
 
-        class IsSupervisorOnly(BasePermission):
-            def has_permission(self, request, view):
-                return request.user and request.user.role_key == 'supervisor'
+        from apps.supervisors.models import Supervisor
+        from apps.supervisors.serializers import SupervisorProfileSerializer
+
+        supervisor_profile, _ = Supervisor.objects.get_or_create(
+            user=request.user,
+            defaults={'department': '', 'specialisation': ''}
+        )
 
         if request.method == 'GET':
-            # Return 403 for non-supervisor roles
-            if request.user.role_key != 'supervisor':
-                from rest_framework.exceptions import PermissionDenied as DRFDenied
-                raise DRFDenied('Only supervisors can access this endpoint.')
-
-            from apps.users.serializers import UserSerializer
-            from apps.supervisors.models import Supervisor
-
-            serializer = UserSerializer(request.user, context={'request': request})
-            data = serializer.data
-
-            # Get assigned student IDs
-            assigned_students = Student.objects.filter(
-                assigned_supervisor=request.user
-            ).values_list('id', flat=True)
-            data['assigned_student_ids'] = list(assigned_students)
-
-            # Add supervisor-specific fields
-            try:
-                supervisor_profile = request.user.supervisor_profile
-                data['department'] = supervisor_profile.department
-                data['specialisation'] = supervisor_profile.specialisation
-            except Exception:
-                data['department'] = ''
-                data['specialisation'] = ''
-
-            # Add supervisor count to indicate this is a supervisor
-            data['supervisor_count'] = Student.objects.filter(
-                assigned_supervisor=request.user
-            ).count()
-
-            return Response(data)
-
-        elif request.method == 'PATCH':
-            # Only supervisors can update their profile
-            if request.user.role_key != 'supervisor':
-                from rest_framework.exceptions import PermissionDenied as DRFDenied
-                raise DRFDenied('Only supervisors can update their profile.')
-
-            from apps.supervisors.models import Supervisor
-            from apps.supervisors.serializers import SupervisorProfileSerializer
-
-            # Update User fields
-            user_serializable = ['email', 'phone', 'first_name', 'last_name']
-            for field in user_serializable:
-                if field in request.data:
-                    setattr(request.user, field, request.data[field])
-            request.user.save()
-
-            # Update or create Supervisor profile
-            supervisor_profile, created = Supervisor.objects.get_or_create(
-                user=request.user,
-                defaults={'department': '', 'specialisation': ''}
+            serializer = SupervisorProfileSerializer(
+                supervisor_profile,
+                context={'request': request}
             )
+            return Response(serializer.data)
 
-            supervisor_serializer = SupervisorProfileSerializer(
-                supervisor_profile, data=request.data, partial=True
-            )
-            if supervisor_serializer.is_valid():
-                supervisor_serializer.save()
-
-            return Response(UserSerializer(request.user, context={'request': request}).data)
+        serializer = SupervisorProfileSerializer(
+            supervisor_profile,
+            data=request.data,
+            partial=True,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)

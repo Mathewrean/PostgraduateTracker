@@ -116,6 +116,18 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'role': {'required': False},
         }
 
+    def validate_email(self, value):
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError(
+                'A user with this email already exists.')
+        return value
+
+    def validate_admission_number(self, value):
+        if User.objects.filter(admission_number__iexact=value).exists():
+            raise serializers.ValidationError(
+                'A user with this admission number already exists.')
+        return value
+
     def validate(self, attrs):
         if attrs['password'] != attrs.pop('password_confirm'):
             raise serializers.ValidationError(
