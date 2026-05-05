@@ -1,18 +1,10 @@
 import React from 'react'
-import { useUIStore } from '../context/store'
 
 const headerColors = {
-  blue: 'border-blue-200 bg-blue-50',
-  green: 'border-green-200 bg-green-50',
-  purple: 'border-purple-200 bg-purple-50',
-  red: 'border-red-200 bg-red-50',
-}
-
-const darkHeaderColors = {
-  blue: 'border-blue-500 bg-blue-900/20',
-  green: 'border-green-500 bg-green-900/20',
-  purple: 'border-purple-500 bg-purple-900/20',
-  red: 'border-red-500 bg-red-900/20',
+  blue: 'badge-info',
+  green: 'badge-success',
+  purple: 'badge-primary',
+  red: 'badge-danger',
 }
 
 const COLOR_VARS = {
@@ -32,25 +24,18 @@ export const Card = ({
   className = '',
   headerColor = 'blue',
 }) => {
-  const isDark = useUIStore((state) => state.isDark)
-  const colors = isDark ? darkHeaderColors : headerColors
-
   return (
     <div
       onClick={onClick}
-      className={`${
-        isDark
-          ? 'bg-gray-800 border-gray-700 hover:border-gray-600'
-          : 'bg-white border-gray-200 hover:border-gray-300'
-      } border rounded-lg p-6 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md ${className}`}
+      className={`card ${onClick ? 'cursor-pointer' : ''} ${className}`}
     >
-      <div className={`flex items-center justify-between mb-4 p-3 rounded-lg ${colors[headerColor]}`}>
+      <div className="flex items-start justify-between gap-4 mb-4">
         <div>
           <h3 className="font-semibold text-lg text-text-primary">{title}</h3>
           {description && <p className="text-sm text-text-secondary mt-1">{description}</p>}
         </div>
         {icon && (
-          <div className="text-2xl">
+          <div className={`text-sm ${headerColors[headerColor] || headerColors.blue}`}>
             {icon}
           </div>
         )}

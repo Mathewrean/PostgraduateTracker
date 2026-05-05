@@ -179,10 +179,11 @@ export const App = () => {
             transform: 'translateX(-50%)',
             zIndex: 1000,
             width: 'min(95%, 420px)',
-            borderRadius: '16px',
-            boxShadow: '0 16px 32px rgba(22, 74, 65, 0.18)',
-            background: 'linear-gradient(135deg, rgba(22, 74, 65, 0.98), rgba(46, 125, 50, 0.95))',
-            color: '#FFFFFF',
+            borderRadius: 'var(--radius-lg)',
+            boxShadow: 'var(--shadow-md)',
+            background: 'var(--bg-elevated)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-color)',
             padding: '1rem 1.25rem',
             display: 'flex',
             alignItems: 'center',
@@ -191,7 +192,7 @@ export const App = () => {
           }}>
             <div>
               <strong style={{ display: 'block', fontSize: '1rem', marginBottom: '0.25rem' }}>Install PST</strong>
-              <span style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.88)' }}>
+              <span style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
                 {isIos
                   ? 'Open Safari, tap Share, then Add to Home Screen to install PST.'
                   : 'Add the app to your home screen for a native experience.'}
@@ -200,10 +201,10 @@ export const App = () => {
             <button
               onClick={handleInstall}
               style={{
-                background: '#F4C430',
-                color: '#112619',
+                background: 'var(--color-primary)',
+                color: 'var(--text-inverse)',
                 border: 'none',
-                borderRadius: '999px',
+                borderRadius: 'var(--radius-md)',
                 padding: '0.75rem 1rem',
                 fontWeight: 700,
                 cursor: 'pointer'

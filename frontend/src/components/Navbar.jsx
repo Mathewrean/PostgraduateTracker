@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../context/store'
 import { useUIStore } from '../context/store'
 import { authService, notificationService } from '../services'
@@ -7,6 +7,7 @@ import { getCookie } from '../services/api'
 
 export const NavbarComponent = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const isDark = useUIStore((state) => state.isDark)
   const toggleTheme = useUIStore((state) => state.toggleTheme)
   const user = useAuthStore((state) => state.user)
@@ -83,7 +84,7 @@ export const NavbarComponent = () => {
               <button
                 key={item.label}
                 onClick={() => item.path && navigate(item.path)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 text-text-primary hover:text-accent`}
+                className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold ${location.pathname === item.path ? 'bg-bg-tertiary text-brand' : ''}`}
               >
                 {item.label}
               </button>
@@ -95,7 +96,7 @@ export const NavbarComponent = () => {
             {user && (
               <button
                 onClick={() => navigate('/notifications')}
-                className="relative px-3 py-2 rounded-lg text-sm text-text-primary"
+                className="relative px-3 py-2 text-sm font-semibold"
               >
                 Notifications
                 {unreadCount > 0 && (
@@ -126,7 +127,7 @@ export const NavbarComponent = () => {
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden p-2 rounded-lg text-text-primary"
+              className="btn-secondary md:hidden"
             >
               {menuOpen ? 'Close' : 'Menu'}
             </button>
@@ -134,7 +135,7 @@ export const NavbarComponent = () => {
             {/* Logout Button */}
             <button
               onClick={handleLogout}
-              className="px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 btn-danger"
+              className="btn-danger"
             >
               Logout
             </button>
@@ -151,7 +152,7 @@ export const NavbarComponent = () => {
                   item.path && navigate(item.path)
                   setMenuOpen(false)
                 }}
-                className="w-full text-left px-4 py-2 rounded-lg transition-all text-text-primary"
+                className="w-full text-left px-4 py-2 transition-all"
               >
                 {item.label}
               </button>

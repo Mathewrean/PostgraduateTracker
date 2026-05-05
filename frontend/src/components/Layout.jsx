@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { HeaderComponent } from './Header'
 import { NavbarComponent } from './Navbar'
 import { StageIndicator } from './StageIndicator'
@@ -40,7 +41,7 @@ export const Layout = ({ children, title = 'PST Application', stage = null, user
   }, [effectiveUser, stage])
 
   return (
-    <div className="min-h-screen transition-colors duration-300 bg-bg-primary text-text-primary">
+    <div className="min-h-screen bg-bg-primary text-text-primary">
       {/* Header */}
       <HeaderComponent title={title} stage={currentStage} user={effectiveUser} />
 
@@ -48,7 +49,7 @@ export const Layout = ({ children, title = 'PST Application', stage = null, user
       <NavbarComponent />
 
       {/* Main Content Area */}
-      <main className="min-h-[calc(100vh-140px)] bg-bg-primary">
+      <main className="min-h-[calc(100vh-140px)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {effectiveUser?.role === 'student' && currentStage && (
             <div className="mb-6">
@@ -60,7 +61,7 @@ export const Layout = ({ children, title = 'PST Application', stage = null, user
       </main>
 
       {/* Footer */}
-      <footer className="mt-12 border-t border-border-primary bg-bg-primary text-text-secondary">
+      <footer className="mt-12 border-t border-border-primary text-text-secondary">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
@@ -72,9 +73,9 @@ export const Layout = ({ children, title = 'PST Application', stage = null, user
             <div>
               <h4 className="font-bold mb-3 text-text-primary">Quick Links</h4>
               <ul className="text-sm space-y-2 text-text-secondary">
-                <li><a href="#" className="hover:opacity-90">Dashboard</a></li>
-                <li><a href="#" className="hover:opacity-90">Documents</a></li>
-                <li><a href="#" className="hover:opacity-90">Reports</a></li>
+                <li><Link to="/dashboard">Dashboard</Link></li>
+                <li><Link to="/documents">Documents</Link></li>
+                <li><Link to="/coordinator/reports">Reports</Link></li>
               </ul>
             </div>
             <div>

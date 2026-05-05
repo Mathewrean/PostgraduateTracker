@@ -14,9 +14,11 @@ export const Button = ({
   const variants = {
     primary: 'btn-primary',
     secondary: 'btn-secondary',
+    ghost: 'btn-ghost',
     success: 'btn-success',
     danger: 'btn-danger',
     outline: 'btn-outline',
+    icon: 'btn-icon',
   }
 
   const sizes = {
@@ -30,7 +32,6 @@ export const Button = ({
       onClick={onClick}
       disabled={disabled || loading}
       className={`
-        font-semibold rounded-lg transition-all duration-300
         ${variants[variant]}
         ${sizes[size]}
         ${disabled || loading ? 'opacity-50 cursor-not-allowed' : ''}

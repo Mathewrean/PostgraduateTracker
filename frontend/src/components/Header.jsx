@@ -10,15 +10,15 @@ export const HeaderComponent = ({ title = 'PST Application', stage = null, user 
   }, [])
 
   return (
-    <header className={`sticky top-0 z-50 transition-all duration-300 bg-bg-primary border-b border-border-primary ${scrolled ? 'shadow-lg' : ''}`}>
+    <header className={`app-header ${scrolled ? 'is-scrolled' : ''}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Left: Title & Stage */}
           <div className="flex-1">
-            <h1 className="text-xl font-extrabold text-brand">{title}</h1>
+            <h1 className="app-title">{title}</h1>
             {stage && (
-              <p className="text-sm mt-1 text-text-secondary">
-                Current Stage: <span className="font-bold text-brand">{stage}</span>
+              <p className="app-stage-pill">
+                Current Stage: <strong>{stage}</strong>
               </p>
             )}
           </div>
@@ -28,7 +28,7 @@ export const HeaderComponent = ({ title = 'PST Application', stage = null, user 
             {user && (
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-bold text-text-primary">{user.first_name || 'User'}</p>
-                <p className="text-xs text-text-secondary opacity-85">{user.role}</p>
+                <p className="chip mt-1">{user.role}</p>
               </div>
             )}
           </div>
