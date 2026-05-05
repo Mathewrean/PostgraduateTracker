@@ -156,7 +156,7 @@ class FrontendFlowTester:
             
             # Step 2: Verify token works with protected request
             verify_response = self.session.get(
-                f"{BASE_URL}/users/me/",
+                f"{BASE_URL}/auth/profile/",
                 headers={
                     "Authorization": f"Bearer {token}",
                     "Origin": FRONTEND_URL

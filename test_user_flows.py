@@ -226,9 +226,9 @@ class UserFlowTester:
             return False
         
         try:
-            # Test accessing user profile endpoint
+            # Test accessing auth profile endpoint
             response = self.session.get(
-                f"{BASE_URL}/users/profile/",
+                f"{BASE_URL}/auth/profile/",
                 headers={
                     "Authorization": f"Bearer {token}",
                     "Origin": FRONTEND_URL
@@ -306,7 +306,7 @@ class UserFlowTester:
         endpoints = [
             ("/supervisors/profile/", "Supervisor Profile"),
             ("/supervisors/students/", "Supervised Students"),
-            ("/supervisors/activities/", "Supervised Activities"),
+            ("/supervisors/approvals/", "Pending Approvals"),
         ]
         
         for endpoint, name in endpoints:
@@ -341,7 +341,7 @@ class UserFlowTester:
         endpoints = [
             ("/users/", "All Users"),
             ("/students/", "All Students"),
-            ("/reports/dashboard/", "Reports Dashboard"),
+            ("/reports/student_progress/", "Student Progress Report"),
         ]
         
         for endpoint, name in endpoints:
