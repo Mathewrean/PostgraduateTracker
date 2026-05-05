@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Layout } from '../../components/Layout'
 import { notificationService } from '../../services'
-import { useAuthStore } from '../../context/store'
-import { getNotificationAppPath } from '../../utils/navigation'
 
 export const NotificationsPage = () => {
-  const navigate = useNavigate()
-  const user = useAuthStore((state) => state.user)
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -27,26 +22,28 @@ export const NotificationsPage = () => {
     }
   }
 
-  const markAsRead = async (id) => {
+  const handleMarkAsRead = async (id) => {
     try {
       await notificationService.markAsRead(id)
-      setNotifications(notifications.map(n => n.id === id ? { ...n, is_read: true } : n))
+      setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n))
     } catch (error) {
-      console.error('Failed to mark as read:', error)
+      console.error('Failed to mark notification as read:', error)
     }
   }
 
-  const openNotification = async (notif) => {
-    if (!notif.is_read) {
-      await markAsRead(notif.id)
+  const handleMarkAllAsRead = async () => {
+    try {
+      await notificationService.markAllAsRead()
+      setNotifications(notifications.map(n => ({ ...n, read: true })))
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error)
     }
-    navigate(getNotificationAppPath(notif.link, user?.role))
   }
 
   if (loading) return (
     <Layout title="Notifications">
       <div className="flex justify-center items-center h-64">
-        <p className="text-text-primary">Loading notifications...</p>
+        <p>Loading notifications...</p>
       </div>
     </Layout>
   )
@@ -54,38 +51,36 @@ export const NotificationsPage = () => {
   return (
     <Layout title="Notifications">
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-text-primary">Notifications</h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Notifications</h1>
+          {notifications.some(n => !n.read) && (
+            <button onClick={handleMarkAllAsRead} className="btn-secondary">
+              Mark All as Read
+            </button>
+          )}
+        </div>
+
         {notifications.length === 0 ? (
-          <p className="text-text-muted">No notifications.</p>
+          <p style={{ color: 'var(--text-secondary)' }}>No notifications yet.</p>
         ) : (
-          <div className="space-y-3">
-            {notifications.map((notif) => (
-              <div
-                key={notif.id}
-                className={`p-4 rounded-lg border panel ${notif.is_read ? 'bg-bg-secondary border-border-primary' : 'bg-accent/10 border-accent'}`}
-              >
+          <div className="space-y-4">
+            {notifications.map((notification) => (
+              <div key={notification.id} className={`p-4 rounded-lg border ${notification.read ? 'opacity-60' : ''}`}
+                style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="font-medium text-text-primary">{notif.message}</p>
-                    <p className="text-sm text-text-muted">
-                      {new Date(notif.created_at).toLocaleString()}
+                    <p className="font-medium">{notification.message}</p>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                      {new Date(notification.created_at).toLocaleString()}
                     </p>
-                    {notif.link && (
-                      <button
-                        type="button"
-                        onClick={() => openNotification(notif)}
-                        className="mt-2 text-accent text-sm font-medium hover:underline"
-                      >
-                        View details
-                      </button>
-                    )}
                   </div>
-                  {!notif.is_read && (
+                  {!notification.read && (
                     <button
-                      onClick={() => markAsRead(notif.id)}
-                      className="text-sm bg-accent hover:bg-accent/90 text-text-primary px-3 py-1 rounded"
+                      onClick={() => handleMarkAsRead(notification.id)}
+                      className="text-sm"
+                      style={{ color: 'var(--color-brand)' }}
                     >
-                      Mark read
+                      Mark as Read
                     </button>
                   )}
                 </div>

@@ -12,41 +12,59 @@ This repository is configured for local development and can be production-ready 
 
 ## Quick Start
 
+### Prerequisites
+- Python 3.10+
+- Node.js 18+ and npm
+- Git
+
 ### Backend
-1. Navigate to the backend folder:
+1. Navigate to the project root and activate the virtual environment:
    ```bash
    cd backend
+   source .venv/bin/activate  # or create one: python -m venv .venv
    ```
-2. Activate the virtual environment:
-   ```bash
-   source .venv/bin/activate
-   ```
-3. Install dependencies:
+2. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-4. Run database migrations:
+3. Run database migrations:
    ```bash
    python manage.py migrate
+   ```
+4. Create demo users (optional):
+   ```bash
+   python create_test_users.py
    ```
 5. Start the backend server:
    ```bash
    python manage.py runserver
    ```
+   The API will be available at http://localhost:8000
 
 ### Frontend
-1. Navigate to the frontend folder:
+1. In a new terminal, navigate to the frontend folder:
    ```bash
-   cd ../frontend
+   cd frontend
    ```
 2. Install dependencies:
    ```bash
    npm install
    ```
-3. Start the frontend server:
+3. Start the frontend development server:
    ```bash
-   npm run dev
+   npm run dev -- --host
    ```
+   The app will be available at http://localhost:5173
+
+### Running Both Servers
+For development, you need both servers running:
+```bash
+# Terminal 1 - Backend
+cd backend && source .venv/bin/activate && python manage.py runserver
+
+# Terminal 2 - Frontend
+cd frontend && npm run dev -- --host
+```
 
 ### Environment configuration
 - Copy `.env.example` to `.env` in both the `backend/` and `frontend/` directories.
@@ -55,15 +73,20 @@ This repository is configured for local development and can be production-ready 
 ## Authentication & Role-Based Dashboard Flow
 The application supports user registration and role-based login. After login, users are routed to the correct dashboard based on the selected role.
 
-### Supported roles
-- `student`
-- `supervisor`
-- `coordinator`
-- `dean`
-- `cod`
-- `director_bps`
+### Registration Flow
+1. Users register at `/register` selecting their role (student, supervisor, coordinator, dean, cod, director_bps)
+2. Upon successful registration, users are automatically logged in and redirected to their role-based dashboard
+3. Role-specific profiles are automatically created (Student profile or Supervisor profile)
 
-### Example demo accounts
+### Supported roles
+- `student` - Can view/upload documents, track stages, submit complaints
+- `supervisor` - Can view assigned students, approve stages and documents
+- `coordinator` - Can view all students, assign supervisors, generate reports
+- `dean` - Full administrative access
+- `cod` - Administrative access
+- `director_bps` - Administrative access
+
+### Demo accounts
 | Role | Email | Password |
 |------|-------|----------|
 | Student | student@test.com | student123 |
@@ -77,12 +100,16 @@ The application supports user registration and role-based login. After login, us
 - `POST /api/auth/logout/` — logout
 - `GET /api/health/` — health check
 
-## Cleanup and Local Artifacts
-Local development artifacts such as `db.sqlite3`, `venv/`, and `backend/venv/` are not required for production and should be removed before packaging the project.
+## Key Features
+- **Role-based access control** - Each role has specific permissions and dashboard views
+- **Document management** - Students can upload documents, supervisors can verify
+- **Stage workflow** - Students progress through CONCEPT → PROPOSAL → THESIS stages
+- **Activity tracking** - Track research activities and milestones
+- **Complaint system** - Students can submit complaints, coordinators can respond
+- **Audit logging** - All actions are logged for accountability
 
 ## Notes
-- After registering, users should login and be redirected to the correct dashboard based on their selected role.
-- Supervisor users should be able to access supervisor-specific pages such as `My Students` and `Pending Approvals` without full page reloads.
-
----
+- Ensure both backend (port 8000) and frontend (port 5173) servers are running
+- The frontend proxy automatically forwards `/api/` requests to the backend
+- After registering, users are automatically logged in and redirected to their dashboard
 *Last updated: May 2026*
