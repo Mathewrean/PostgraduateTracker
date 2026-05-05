@@ -1,0 +1,21 @@
+{
+  "name": "PST — Postgraduate Submissions Tracker",
+  "short_name": "PST",
+  "description": "Manage postgraduate submissions, supervisor reviews, and academic progress with a JOOUST-branded PWA experience.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#EDF6F2",
+  "theme_color": "#164A41",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#164A41"/>
+  <circle cx="256" cy="192" r="88" fill="#F4C430" opacity="0.95"/>
+  <path d="M186 360c0-44 34-80 76-80s76 36 76 80v18H186v-18z" fill="#D9E7DD"/>
+  <text x="256" y="280" fill="#164A41" font-family="Merriweather, Georgia, serif" font-size="96" font-weight="700" text-anchor="middle">P</text>
+</svg>

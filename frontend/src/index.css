@@ -9,43 +9,47 @@ html {
 }
 
 :root {
-  /* Brand */
-  --color-primary: #003366;
-  --color-primary-dark: #002244;
-  --color-primary-dark-mode: #4D88FF;
-  --color-accent: #CC9900;
-  --color-accent-dark-mode: #FFD700;
+  /* JOOUST brand palette */
+  --color-primary: #164A41;
+  --color-primary-dark: #0F3B34;
+  --color-primary-light: #6EBE8B;
+  --color-accent: #F4C430;
+  --color-accent-dark: #D4A30F;
+  --color-brand: #164A41;
 
   /* Light Mode Defaults */
-  --bg-main: #FFFFFF;
-  --bg-surface: #F5F5F5;
-  --text-primary: #1A1A1A;
-  --text-secondary: #595959;
-  --color-brand: #2E7D32;
-  --color-gold: #CC9900;
-  --border-color: #E0E0E0;
-  --shadow: rgba(0, 0, 0, 0.1);
+  --bg-main: #F6F7F4;
+  --bg-surface: #FFFFFF;
+  --bg-muted: #EBF2EE;
+  --text-primary: #112619;
+  --text-secondary: #4A5A4E;
+  --text-muted: #6A7B73;
+  --border-color: #D8E2D5;
+  --shadow: rgba(22, 74, 65, 0.12);
 
   /* Status */
   --color-success: #2E7D32;
-  --color-warning: #F9A825;
-  --color-danger: #C62828;
-  --color-info: #1565C0;
+  --color-warning: #F4C430;
+  --color-danger: #B71C1C;
+  --color-info: #155D8B;
 }
 
 h1, h2, h3, h4, h5, h6 {
   color: var(--color-brand);
+  letter-spacing: -0.02em;
 }
 
 [data-theme="dark"] {
-  --bg-main: #121212;
-  --bg-surface: #1E1E1E;
-  --text-primary: #E0E0E0;
-  --text-secondary: #A0A0A0;
-  --color-brand: #4D88FF;
-  --color-gold: #FFD700;
-  --border-color: #2E2E2E;
-  --shadow: none;
+  --bg-main: #101816;
+  --bg-surface: #182421;
+  --bg-muted: #22332B;
+  --text-primary: #E6F2E6;
+  --text-secondary: #A2B6A7;
+  --text-muted: #8AA190;
+  --color-brand: #74C18A;
+  --color-accent: #F4C430;
+  --border-color: #2F3F38;
+  --shadow: rgba(0, 0, 0, 0.24);
 }
 
 body {
