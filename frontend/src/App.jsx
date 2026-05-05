@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './context/store'
 import { useUIStore } from './context/store'
 import { authService } from './services'
 import { ErrorBoundary } from './components/ErrorBoundary'
-import { Toaster } from 'react-hot-toast'
+import { toast, Toaster } from 'react-hot-toast'
 import { getHomePath } from './utils/navigation'
 
 // Pages
@@ -78,9 +78,20 @@ export const App = () => {
   const setInitialized = useAuthStore((state) => state.setInitialized)
   const initializeTheme = useUIStore((state) => state.initializeTheme)
 
+  const [installPrompt, setInstallPrompt] = useState(null)
+  const [showInstallBanner, setShowInstallBanner] = useState(false)
+  const [isIos, setIsIos] = useState(false)
+
   useEffect(() => {
     initializeTheme()
   }, [initializeTheme])
+
+  useEffect(() => {
+    const userAgent = window.navigator.userAgent.toLowerCase()
+    const iosDevice = /iphone|ipad|ipod/.test(userAgent)
+    const inStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches
+    setIsIos(iosDevice && !inStandalone)
+  }, [])
 
   useEffect(() => {
     let ignore = false
@@ -107,9 +118,95 @@ export const App = () => {
     return () => { ignore = true }
   }, [setUser, setToken, setInitialized, token])
 
+  useEffect(() => {
+    const beforeInstallHandler = (event) => {
+      event.preventDefault()
+      setInstallPrompt(event)
+      setShowInstallBanner(true)
+    }
+
+    const appInstalledHandler = () => {
+      setInstallPrompt(null)
+      setShowInstallBanner(false)
+    }
+
+    window.addEventListener('beforeinstallprompt', beforeInstallHandler)
+    window.addEventListener('appinstalled', appInstalledHandler)
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', beforeInstallHandler)
+      window.removeEventListener('appinstalled', appInstalledHandler)
+    }
+  }, [])
+
+  const handleInstall = async () => {
+    if (isIos) {
+      toast('Open Safari, tap Share, then Add to Home Screen to install PST.')
+      return
+    }
+
+    if (!installPrompt) {
+      toast('Install option is not available right now.')
+      return
+    }
+
+    installPrompt.prompt()
+    const choiceResult = await installPrompt.userChoice
+    if (choiceResult.outcome === 'accepted') {
+      toast.success('PST is ready to install. Add it to your home screen!')
+    } else {
+      toast('Install dismissed. You can still add PST later from browser options.')
+    }
+
+    setInstallPrompt(null)
+    setShowInstallBanner(false)
+  }
+
   return (
     <ErrorBoundary>
       <BrowserRouter>
+        {(showInstallBanner || isIos) && (
+          <div style={{
+            position: 'fixed',
+            bottom: 24,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 1000,
+            width: 'min(95%, 420px)',
+            borderRadius: '16px',
+            boxShadow: '0 16px 32px rgba(22, 74, 65, 0.18)',
+            background: 'linear-gradient(135deg, rgba(22, 74, 65, 0.98), rgba(46, 125, 50, 0.95))',
+            color: '#FFFFFF',
+            padding: '1rem 1.25rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '1rem',
+          }}>
+            <div>
+              <strong style={{ display: 'block', fontSize: '1rem', marginBottom: '0.25rem' }}>Install PST</strong>
+              <span style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.88)' }}>
+                {isIos
+                  ? 'Open Safari, tap Share, then Add to Home Screen to install PST.'
+                  : 'Add the app to your home screen for a native experience.'}
+              </span>
+            </div>
+            <button
+              onClick={handleInstall}
+              style={{
+                background: '#F4C430',
+                color: '#112619',
+                border: 'none',
+                borderRadius: '999px',
+                padding: '0.75rem 1rem',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              {isIos ? 'How to install' : 'Install'}
+            </button>
+          </div>
+        )}
         <Routes>
           <Route path="/" element={token ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
           <Route path="/login" element={token ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
