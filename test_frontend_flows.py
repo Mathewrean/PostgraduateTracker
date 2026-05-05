@@ -7,6 +7,7 @@ Tests the actual user flows as they would happen in the browser
 import requests
 import json
 import time
+import uuid
 from typing import Dict, Any
 
 BASE_URL = "http://localhost:8000/api"
@@ -47,8 +48,9 @@ class FrontendFlowTester:
         print("REGISTRATION FLOW TEST")
         print("="*70)
         
+        import uuid
         new_user = {
-            "email": f"testuser_{int(time.time())}@test.com",
+            "email": f"testuser_{uuid.uuid4().hex[:8]}@test.com",
             "password": "TestPass123!",
             "first_name": "Test",
             "last_name": "User",
