@@ -28,3 +28,18 @@ export const getDashboardComponent = (role, user) => {
       return '/unauthorized'
   }
 }
+
+export const getRoleBasedDashboard = (role) => {
+  switch (role?.toString().toLowerCase()) {
+    case 'supervisor':
+      return '/supervisor/dashboard'
+    case 'coordinator':
+    case 'dean':
+    case 'cod':
+    case 'director_bps':
+      return '/dashboard'
+    case 'student':
+    default:
+      return '/dashboard'
+  }
+}

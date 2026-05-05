@@ -46,8 +46,7 @@ export const useUIStore = create((set) => ({
     return { isDark: newTheme }
   }),
   // Initialize the theme on load
-  initializeTheme: () => set((_state) => {
-    // Respect saved preference first, then OS-level preference
+  initializeTheme: () => {
     const saved = localStorage.getItem('pst-theme')
     let isDark
     if (saved === 'dark') {
@@ -61,6 +60,6 @@ export const useUIStore = create((set) => ({
       if (isDark) document.documentElement.setAttribute('data-theme', 'dark')
       else document.documentElement.removeAttribute('data-theme')
     }
-    return { isDark }
-  })
+    set({ isDark })
+  }
 }))

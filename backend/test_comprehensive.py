@@ -3,6 +3,18 @@
 Comprehensive Endpoint & Functionality Testing Suite for PST
 Tests all 40+ endpoints with full coverage of features and RBAC
 """
+import os
+import sys
+import django
+
+# Setup Django with DEBUG enabled for testing
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pst_project.settings')
+os.environ['DEBUG'] = 'true'
+
+# Add backend to path for imports
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+django.setup()
+
 from apps.audit.models import AuditLog
 from apps.notifications.models import Notification
 from apps.complaints.models import Complaint
@@ -16,17 +28,8 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
-import django
-import os
-import sys
 import json
 from io import BytesIO
-
-# Setup Django with DEBUG enabled for testing
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pst_project.settings')
-os.environ['DEBUG'] = 'true'
-
-django.setup()
 
 
 class TestSuite:

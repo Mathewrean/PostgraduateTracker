@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { authService } from '../../services'
-import { useUIStore } from '../../context/store'
+import { useAuthStore, useUIStore } from '../../context/store'
+import { setCookie } from '../../services/api'
+import { getHomePath } from '../../utils/navigation'
 import toast from 'react-hot-toast'
 
 export const RegisterPage = () => {
@@ -17,6 +19,8 @@ export const RegisterPage = () => {
   })
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const setToken = useAuthStore((state) => state.setToken)
+  const setUser = useAuthStore((state) => state.setUser)
   const isDark = useUIStore((state) => state.isDark)
   const toggleTheme = useUIStore((state) => state.toggleTheme)
 
@@ -41,7 +45,7 @@ export const RegisterPage = () => {
     }
     setLoading(true)
     try {
-      await authService.register({
+      const response = await authService.register({
         email: formData.email,
         admission_number: formData.admission_number,
         phone: formData.phone,
@@ -51,8 +55,13 @@ export const RegisterPage = () => {
         password_confirm: formData.password_confirm,
         role: formData.role
       })
-      toast.success('Registration successful! Please login.')
-      navigate('/login')
+      setCookie('pst_access_token', response.data.access)
+      setCookie('pst_refresh_token', response.data.refresh)
+      setToken(response.data.access)
+      setUser(response.data.user)
+      toast.success('Registration successful! Redirecting to dashboard...')
+      const destination = getHomePath(response.data.user?.role)
+      navigate(destination, { replace: true })
     } catch (error) {
       const errMsg = error.response?.data?.detail ||
                      error.response?.data?.email?.[0] ||
