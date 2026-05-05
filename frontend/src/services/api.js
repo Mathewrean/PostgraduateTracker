@@ -19,7 +19,7 @@ export const clearCookie = (name) => {
 }
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
 })
 
 // Add token to requests
@@ -35,7 +35,11 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const requestUrl = error.config?.url || ''
+    const isAuthAttempt = requestUrl.includes('/auth/login/') || requestUrl.includes('/users/register/')
+    const hadAuthHeader = Boolean(error.config?.headers?.Authorization)
+
+    if (error.response?.status === 401 && !isAuthAttempt && hadAuthHeader) {
       clearCookie('pst_access_token')
       clearCookie('pst_refresh_token')
       window.location.href = '/login'
