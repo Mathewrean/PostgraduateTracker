@@ -6,10 +6,10 @@ import { useAuthStore } from '../../context/store'
 
 export const ActivitiesPage = () => {
   const user = useAuthStore((state) => state.user)
-  const [activities, setActivities] = useState([])
   const [loading, setLoading] = useState(true)
   const [currentStage, setCurrentStage] = useState(null)
   const [showForm, setShowForm] = useState(false)
+  const [calendarRefreshKey, setCalendarRefreshKey] = useState(0)
   const [newActivity, setNewActivity] = useState({
     title: '',
     description: '',
@@ -23,13 +23,8 @@ export const ActivitiesPage = () => {
 
   const fetchActivities = async () => {
     try {
-      const [stageResponse, response] = await Promise.all([
-        stageService.getCurrentStage(),
-        activityService.getAll()
-      ])
+      const stageResponse = await stageService.getCurrentStage()
       setCurrentStage(stageResponse.data)
-      const data = Array.isArray(response.data) ? response.data : response.data.results || []
-      setActivities(data)
     } catch (error) {
       console.error('Failed to fetch activities:', error)
     } finally {
@@ -49,18 +44,10 @@ export const ActivitiesPage = () => {
       setMessage({ type: 'success', text: 'Activity created successfully' })
       setShowForm(false)
       setNewActivity({ title: '', description: '', planned_date: '' })
+      setCalendarRefreshKey((key) => key + 1)
       fetchActivities()
     } catch (error) {
       setMessage({ type: 'error', text: error.response?.data?.error || 'Failed to create activity' })
-    }
-  }
-
-  const handleMarkDone = async (activityId) => {
-    try {
-      await activityService.markDone(activityId)
-      fetchActivities()
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Failed to mark activity as done' })
     }
   }
 
@@ -111,35 +98,8 @@ export const ActivitiesPage = () => {
         )}
 
         {currentStage?.id && (
-          <ActivityCalendar stageId={currentStage.id} />
+          <ActivityCalendar stageId={currentStage.id} refreshKey={calendarRefreshKey} />
         )}
-
-        <div className="grid gap-4">
-          {activities.length === 0 ? (
-            <p style={{ color: 'var(--text-secondary)' }}>No activities found.</p>
-          ) : (
-            activities.map((activity) => (
-              <div key={activity.id} className="p-4 rounded-lg border" style={{ backgroundColor: activity.status === 'COMPLETED' ? 'rgba(46,125,50,0.04)' : 'var(--bg-main)', borderColor: 'var(--border-color)' }}>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-semibold text-lg">{activity.title}</h3>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{activity.description}</p>
-                    <p className="text-xs" style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-                      Planned: {new Date(activity.planned_date).toLocaleString()}
-                    </p>
-                    <p className="text-xs">Status: <span className={`font-semibold`} style={{ color: activity.status === 'COMPLETED' ? 'var(--color-success)' : 'var(--color-warning)' }}>{activity.status}</span></p>
-                    {activity.created_by_email && (
-                      <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Created by: {activity.created_by_email}</p>
-                    )}
-                  </div>
-                  {activity.status !== 'COMPLETED' && (
-                    <button onClick={() => handleMarkDone(activity.id)} className="btn-success" style={{ padding: '0.25rem 0.5rem' }}>Mark Done</button>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
       </div>
     </Layout>
   )

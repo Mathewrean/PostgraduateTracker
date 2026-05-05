@@ -20,6 +20,26 @@ urlpatterns = [
         notification_list,
         name='notification-list'),
     path(
+        '<int:pk>/',
+        notification_detail,
+        name='notification-detail'),
+    path(
+        '<int:pk>/read/',
+        notification_read,
+        name='notification-read'),
+    path(
+        '<int:pk>/mark_as_read/',
+        notification_mark_as_read,
+        name='notification-mark-as-read'),
+    path(
+        'mark_all_as_read/',
+        notification_mark_all,
+        name='notification-mark-all'),
+    path(
+        'unread_count/',
+        notification_unread_count,
+        name='notification-unread-count'),
+    path(
         'notifications/',
         notification_list,
         name='notification-list-alias'),
