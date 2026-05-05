@@ -69,7 +69,7 @@ class ActivityViewSet(viewsets.ModelViewSet):
                     recipient=stage.student.user,
                     message=f'New activity assigned by {request.user.email}: {activity.title}',
                     notification_type='ACTIVITY_REMINDER',
-                    link=f'/api/activities/{activity.id}/',
+                    link='/activities',
                 )
 
             serializer = self.get_serializer(activity)
@@ -110,12 +110,12 @@ class ActivityViewSet(viewsets.ModelViewSet):
         if activity.stage.student.assigned_supervisor_id and request.user.role_key == 'student':
             notify(
                 recipient=activity.stage.student.assigned_supervisor,
-                message=f'{
-                    activity.stage.student.user.email} marked activity "{
-                    activity.title}" as completed.',
+                message=(
+                    f'{activity.stage.student.user.email} marked activity '
+                    f'"{activity.title}" as completed.'
+                ),
                 notification_type='ACTIVITY_REMINDER',
-                link=f'/api/activities/{
-                    activity.id}/',
+                link='/supervisor/students',
             )
 
         serializer = self.get_serializer(activity)

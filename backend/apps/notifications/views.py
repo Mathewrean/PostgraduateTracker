@@ -99,7 +99,7 @@ class MeetingViewSet(viewsets.ModelViewSet):
             recipient=supervisor,
             message=f'Meeting request from {request.user.email}',
             notification_type='MEETING_REQUEST',
-            link=f'/api/notifications/meetings/{meeting.id}/'
+            link='/supervisor/students'
         )
 
         serializer = self.get_serializer(meeting)

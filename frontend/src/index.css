@@ -16,6 +16,7 @@ html {
   --color-accent: #F4C430;
   --color-accent-dark: #D4A30F;
   --color-brand: #164A41;
+  --color-gold: #F4C430;
 
   /* Light Mode Defaults */
   --bg-main: #F6F7F4;
@@ -65,9 +66,14 @@ body {
   color: var(--bg-main);
   border-bottom: 1px solid var(--border-color);
 }
+.app-nav button,
 .app-nav .nav-link {
   color: var(--bg-main);
 }
+.app-nav .nav-link {
+  color: var(--bg-main);
+}
+.app-nav button:hover,
 .app-nav .nav-link:hover {
   color: var(--bg-main);
   opacity: 0.9;
@@ -141,7 +147,7 @@ body {
 /* Status badges */
 .badge-primary { background: var(--color-brand); color: #fff; }
 .badge-success { background: var(--color-success); color: #fff; }
-.badge-warning { background: var(--color-gold); color: #1A1A1A; }
+.badge-warning { background: var(--color-warning); color: #1A1A1A; }
 .badge-danger { background: var(--color-danger); color: #fff; }
 .badge-muted { background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-color); }
 
@@ -154,7 +160,7 @@ body {
 /* Semantic text colors */
 .text-success { color: var(--color-success) !important; }
 .text-danger { color: var(--color-danger) !important; }
-.text-warning { color: var(--color-gold) !important; }
+.text-warning { color: var(--color-warning) !important; }
 .text-brand { color: var(--color-brand) !important; }
 .text-muted { color: var(--text-secondary) !important; }
 

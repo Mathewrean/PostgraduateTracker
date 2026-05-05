@@ -163,13 +163,13 @@ class DocumentViewSet(BaseStageFileViewSet):
         if stage.student.assigned_supervisor:
             notify(
                 recipient=stage.student.assigned_supervisor,
-                message=f'{
-                    stage.student.user.email} uploaded {
-                    document.get_doc_type_display()} for the {
-                    stage.get_stage_type_display()} stage.',
+                message=(
+                    f'{stage.student.user.email} uploaded '
+                    f'{document.get_doc_type_display()} for the '
+                    f'{stage.get_stage_type_display()} stage.'
+                ),
                 notification_type='DOCUMENT_UPLOAD',
-                link=f'/api/documents/{
-                    document.id}/',
+                link='/supervisor/approvals',
             )
 
         log_audit_event(
@@ -304,12 +304,12 @@ class MinutesViewSet(BaseStageFileViewSet):
         if stage.student.assigned_supervisor:
             notify(
                 recipient=stage.student.assigned_supervisor,
-                message=f'{
-                    stage.student.user.email} uploaded Minutes of Presentation for the {
-                    stage.get_stage_type_display()} stage.',
+                message=(
+                    f'{stage.student.user.email} uploaded Minutes of '
+                    f'Presentation for the {stage.get_stage_type_display()} stage.'
+                ),
                 notification_type='DOCUMENT_UPLOAD',
-                link=f'/api/minutes/{
-                    minutes.id}/',
+                link='/supervisor/approvals',
             )
 
         log_audit_event(
@@ -347,7 +347,7 @@ class MinutesViewSet(BaseStageFileViewSet):
             recipient=minutes.student.user,
             message='Your Minutes of Presentation have been approved.',
             notification_type='MINUTES_APPROVAL',
-            link=f'/api/stages/{minutes.stage.id}/',
+            link='/dashboard',
         )
 
         log_audit_event(

@@ -134,7 +134,7 @@ class StageViewSet(viewsets.ModelViewSet):
             recipient=stage.student.user,
             message=f'Your {stage.get_stage_type_display()} stage has been approved by the assigned supervisor.',
             notification_type='SUPERVISOR_APPROVAL',
-            link=f'/api/stages/{stage.id}/'
+            link='/dashboard'
         )
 
         # Create next stage if applicable (not for THESIS which is final)

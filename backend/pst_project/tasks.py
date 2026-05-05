@@ -55,7 +55,7 @@ def check_thesis_submission_timer():
                 recipient=stage.student.assigned_supervisor,
                 message=f'3-month waiting period for {stage.student.user.email}\'s thesis is complete. You can now approve.',
                 notification_type='SUPERVISOR_APPROVAL',
-                link=f'/api/stages/{stage.id}/approve/'
+                link='/supervisor/approvals'
             )
 
         logger.info(
@@ -116,7 +116,7 @@ def send_activity_reminders():
             recipient=activity.stage.student.user,
             message=f'Reminder: {activity.title} is scheduled for tomorrow',
             notification_type='ACTIVITY_REMINDER',
-            link=f'/api/activities/{activity.id}/'
+            link='/activities'
         )
 
         logger.info(f'Activity reminder sent for {activity.id}')

@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Layout } from '../../components/Layout'
 import { notificationService } from '../../services'
+import { useAuthStore } from '../../context/store'
+import { getNotificationAppPath } from '../../utils/navigation'
 
 export const NotificationsPage = () => {
+  const navigate = useNavigate()
+  const user = useAuthStore((state) => state.user)
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -29,6 +34,13 @@ export const NotificationsPage = () => {
     } catch (error) {
       console.error('Failed to mark as read:', error)
     }
+  }
+
+  const openNotification = async (notif) => {
+    if (!notif.is_read) {
+      await markAsRead(notif.id)
+    }
+    navigate(getNotificationAppPath(notif.link, user?.role))
   }
 
   if (loading) return (
@@ -59,7 +71,13 @@ export const NotificationsPage = () => {
                       {new Date(notif.created_at).toLocaleString()}
                     </p>
                     {notif.link && (
-                      <a href={notif.link} className="text-accent text-sm hover:underline">View details</a>
+                      <button
+                        type="button"
+                        onClick={() => openNotification(notif)}
+                        className="mt-2 text-accent text-sm font-medium hover:underline"
+                      >
+                        View details
+                      </button>
                     )}
                   </div>
                   {!notif.is_read && (

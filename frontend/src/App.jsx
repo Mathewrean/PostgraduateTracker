@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from './context/store'
 import { useUIStore } from './context/store'
 import { authService } from './services'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { toast, Toaster } from 'react-hot-toast'
-import { getHomePath } from './utils/navigation'
+import { getHomePath, getNotificationAppPath } from './utils/navigation'
 
 // Pages
 import { LoginPage } from './pages/auth/LoginPage'
@@ -68,6 +68,12 @@ function StudentHomeRoute({ user }) {
     return <Navigate to="/profile" replace />
   }
   return <StudentDashboard />
+}
+
+function LegacyApiRedirect() {
+  const user = useAuthStore((state) => state.user)
+  const location = useLocation()
+  return <Navigate to={getNotificationAppPath(location.pathname, user?.role)} replace />
 }
 
 export const App = () => {
@@ -246,6 +252,13 @@ export const App = () => {
           <Route path="/student/profile" element={<PrivateRoute allowedRoles={['student']}><ProfilePage /></PrivateRoute>} />
           <Route path="/meetings" element={<PrivateRoute allowedRoles={['student']}><MeetingsPage /></PrivateRoute>} />
           <Route path="/student/meetings" element={<PrivateRoute allowedRoles={['student']}><MeetingsPage /></PrivateRoute>} />
+
+          {/* Legacy API notification links opened in the browser should stay in the app. */}
+          <Route path="/api/documents/:id/*" element={<PrivateRoute><LegacyApiRedirect /></PrivateRoute>} />
+          <Route path="/api/minutes/:id/*" element={<PrivateRoute><LegacyApiRedirect /></PrivateRoute>} />
+          <Route path="/api/activities/:id/*" element={<PrivateRoute><LegacyApiRedirect /></PrivateRoute>} />
+          <Route path="/api/stages/:id/*" element={<PrivateRoute><LegacyApiRedirect /></PrivateRoute>} />
+          <Route path="/api/notifications/meetings/:id/*" element={<PrivateRoute><LegacyApiRedirect /></PrivateRoute>} />
 
           {/* Supervisor Routes */}
           <Route path="/supervisor/students" element={<PrivateRoute allowedRoles={['supervisor']}><MyStudentsPage /></PrivateRoute>} />
