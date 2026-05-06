@@ -14,7 +14,9 @@ export const NotificationsPage = () => {
     try {
       const response = await notificationService.getAll()
       const data = Array.isArray(response.data) ? response.data : response.data.results || []
-      setNotifications(data)
+      // Sort by updated_at (most recently updated first)
+      const sorted = data.sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at))
+      setNotifications(sorted)
     } catch (error) {
       console.error('Failed to fetch notifications:', error)
     } finally {
@@ -71,7 +73,7 @@ export const NotificationsPage = () => {
                   <div>
                     <p className="font-medium">{notification.message}</p>
                     <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      {new Date(notification.created_at).toLocaleString()}
+                      {new Date(notification.updated_at || notification.created_at).toLocaleString()}
                     </p>
                   </div>
                   {!notification.read && (

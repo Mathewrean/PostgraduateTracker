@@ -15,7 +15,13 @@ export const MessagesPage = () => {
     try {
       const response = await complaintService.getAll()
       const data = Array.isArray(response.data) ? response.data : response.data.results || []
-      setComplaints(data)
+      // Sort by responded_at or updated_at or created_at (most recent first)
+      const sorted = data.sort((a, b) => {
+        const aTime = new Date(b.responded_at || b.updated_at || b.submitted_at || b.created_at)
+        const bTime = new Date(a.responded_at || a.updated_at || a.submitted_at || a.created_at)
+        return aTime - bTime
+      })
+      setComplaints(sorted)
     } catch (error) {
       console.error('Failed to fetch complaints:', error)
     } finally {
