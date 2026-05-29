@@ -1,5 +1,7 @@
 import axios from 'axios'
 
+const CACHE_PREFIX = 'pst-cache:'
+
 export const getCookie = (name) => {
   if (typeof document === 'undefined') return null
   const cookies = document.cookie ? document.cookie.split('; ') : []
@@ -22,6 +24,13 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
 })
 
+const getCacheKey = (config) => {
+  const method = (config?.method || 'get').toLowerCase()
+  if (method !== 'get') return null
+  const params = config.params ? JSON.stringify(config.params) : ''
+  return `${CACHE_PREFIX}${config.url || ''}:${params}`
+}
+
 // Add token to requests
 api.interceptors.request.use((config) => {
   const token = getCookie('pst_access_token')
@@ -33,11 +42,37 @@ api.interceptors.request.use((config) => {
 
 // Handle 401 responses
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const cacheKey = getCacheKey(response.config)
+    if (cacheKey && typeof localStorage !== 'undefined') {
+      localStorage.setItem(cacheKey, JSON.stringify({
+        data: response.data,
+        cached_at: new Date().toISOString(),
+      }))
+    }
+    return response
+  },
   (error) => {
     const requestUrl = error.config?.url || ''
     const isAuthAttempt = requestUrl.includes('/auth/login/') || requestUrl.includes('/users/register/')
     const hadAuthHeader = Boolean(error.config?.headers?.Authorization)
+    const cacheKey = getCacheKey(error.config)
+
+    if (!error.response && cacheKey && typeof localStorage !== 'undefined') {
+      const cached = localStorage.getItem(cacheKey)
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        return Promise.resolve({
+          data: parsed.data,
+          status: 200,
+          statusText: 'Offline Cache',
+          headers: {},
+          config: error.config,
+          request: error.request,
+          offline: true,
+        })
+      }
+    }
 
     if (error.response?.status === 401 && !isAuthAttempt && hadAuthHeader) {
       clearCookie('pst_access_token')
