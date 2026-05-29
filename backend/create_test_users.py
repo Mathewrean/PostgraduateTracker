@@ -71,6 +71,14 @@ test_users = [
         'admission_number': 'COD001'
     },
     {
+        'email': 'admin@test.com',
+        'password': 'admin123',
+        'first_name': 'Admin',
+        'last_name': 'User',
+        'role': 'dean',
+        'admission_number': 'ADMIN001'
+    },
+    {
         'email': 'director@test.com',
         'password': 'director123',
         'first_name': 'Director',
