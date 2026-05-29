@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 from datetime import timedelta
 from decouple import config, Csv
@@ -103,7 +104,7 @@ DATABASES = {
 }
 
 # Use PostgreSQL in production
-if not DEBUG:
+if not DEBUG and 'test' not in sys.argv:
     import dj_database_url
     DATABASES['default'] = dj_database_url.config(
         default=config('DATABASE_URL'),
