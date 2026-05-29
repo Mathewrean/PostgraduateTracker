@@ -141,7 +141,7 @@ export const LandingPage = () => {
                 { role: 'Student', email: 'student@example.com', pass: 'password123' },
                 { role: 'Supervisor', email: 'supervisor@test.com', pass: 'supervisor123' },
                 { role: 'Coordinator', email: 'coordinator@test.com', pass: 'coordinator123' },
-                { role: 'Admin', email: 'admin@pst.com', pass: 'admin123' },
+                { role: 'Admin', email: 'admin@test.com', pass: 'admin123' },
               ].map((account, idx) => (
                 <div key={idx} className="p-4 rounded-lg border" style={cardStyle}>
                   <p className="text-sm font-semibold w-fit px-2 py-1 rounded mb-2" style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}>{account.role}</p>

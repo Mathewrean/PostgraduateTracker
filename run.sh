@@ -28,6 +28,7 @@ run_backend() {
     echo "Starting Backend Server (in foreground)..."
     cd "$BACKEND_DIR" || { echo "❌ Failed to change directory to $BACKEND_DIR"; exit 1; }
 
+    export DEBUG=True
     echo "If backend fails to start, ensure dependencies are installed: pip install -r requirements.txt"
     echo "Running Django development server..."
     python manage.py runserver 0.0.0.0:8000
@@ -90,6 +91,7 @@ setup_env_and_deps() {
     echo "✅ Backend dependencies installed."
 
     echo "Running Django migrations..."
+    export DEBUG=True
     python manage.py makemigrations
     python manage.py migrate
     if [ $? -ne 0 ]; then
@@ -97,6 +99,14 @@ setup_env_and_deps() {
         exit 1
     fi
     echo "✅ Django migrations complete."
+
+    echo "Seeding demo users and resetting demo passwords..."
+    python create_test_users.py
+    if [ $? -ne 0 ]; then
+        echo "❌ Demo user setup failed."
+        exit 1
+    fi
+    echo "✅ Demo users ready."
     cd "$PROJECT_ROOT"
 
     echo "Installing frontend dependencies..."
