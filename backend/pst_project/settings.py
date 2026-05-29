@@ -280,7 +280,7 @@ COMPLAINT_RESPONSE_DEADLINE_DAYS = config(
     'COMPLAINT_RESPONSE_DEADLINE_DAYS', default=14, cast=int)
 
 # Security Settings
-if not DEBUG:
+if not DEBUG and 'test' not in sys.argv:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
