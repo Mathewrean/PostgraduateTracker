@@ -29,6 +29,7 @@ class Complaint(models.Model):
         null=True,
         blank=True,
         related_name='responded_complaints')
+    approval_trail = models.JSONField(default=list, blank=True)
     is_overdue = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -51,3 +52,18 @@ class Complaint(models.Model):
                 self.save()
                 return True
         return False
+
+    def append_trail(self, actor, action, signature='', comment=''):
+        role = getattr(actor, 'role_key', None) if actor else 'system'
+        name = actor.get_full_name() or actor.email if actor else 'System'
+        entry = {
+            'actor_name': name,
+            'actor_role': role,
+            'action': action,
+            'timestamp': timezone.now().isoformat(),
+            'signature': signature,
+            'comment': comment,
+        }
+        self.approval_trail = [*self.approval_trail, entry]
+        self.save(update_fields=['approval_trail', 'updated_at'])
+        return entry

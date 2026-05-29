@@ -3,12 +3,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
-from .models import Student
-from .serializers import StudentSerializer, StudentProfileSerializer
+from .models import Student, SupervisorOption
+from .serializers import (
+    StudentSerializer,
+    StudentProfileSerializer,
+    SupervisorOptionSerializer,
+)
 from apps.activities.models import Activity
 from apps.documents.models import Document
 from apps.stages.models import Stage
-from apps.users.models import User
 from apps.activities.serializers import ActivitySerializer
 from apps.documents.serializers import DocumentSerializer
 
@@ -85,17 +88,10 @@ class StudentViewSet(viewsets.ModelViewSet):
                 student = Student.objects.get(user=request.user)
                 serializer = StudentSerializer(student, context={'request': request})
                 data = serializer.data
-                data['preferred_supervisor_options'] = [
-                    {
-                        'id': candidate.id,
-                        'full_name': candidate.get_full_name() or candidate.email,
-                        'email': candidate.email,
-                        'role': candidate.role_key,
-                    }
-                    for candidate in User.objects.filter(
-                        role__in=['supervisor', 'coordinator', 'dean', 'cod', 'director_bps']
-                    ).order_by('first_name', 'last_name', 'email')
-                ]
+                data['preferred_supervisor_options'] = (
+                    SupervisorOptionSerializer(
+                        SupervisorOption.objects.select_related('linked_user'),
+                        many=True).data)
                 return Response(data)
             except Student.DoesNotExist:
                 return Response(
@@ -114,7 +110,9 @@ class StudentViewSet(viewsets.ModelViewSet):
             if serializer.is_valid():
                 profile = serializer.save()
                 profile.profile_complete = bool(profile.project_title and (
-                    profile.preferred_supervisor or profile.preferred_supervisor_other))
+                    profile.preferred_supervisor or
+                    profile.preferred_supervisor_option or
+                    profile.preferred_supervisor_other))
                 profile.save()
                 return Response(StudentSerializer(profile).data)
             return Response(

@@ -15,8 +15,8 @@ export const AllStudentsPage = () => {
       const response = await studentService.getAll()
       const data = Array.isArray(response.data) ? response.data : response.data.results || []
       setStudents(data)
-    } catch (error) {
-      console.error('Failed to fetch students:', error)
+    } catch {
+      setStudents([])
     } finally {
       setLoading(false)
     }

@@ -86,15 +86,28 @@ export const RegisterPage = () => {
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center"
                  style={{ backgroundColor: 'var(--color-brand)' }}>
-              <span className="font-bold text-lg" style={{ color: '#fff' }}>PST</span>
+              <span className="font-bold text-lg text-text-inverse">PST</span>
             </div>
             <div>
               <h1 className="text-2xl font-bold">PST</h1>
               <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Tracker</p>
             </div>
           </div>
-          <button onClick={toggleTheme} className="btn-secondary text-sm">
-            {isDark ? 'Light' : 'Dark'}
+          <button
+            onClick={toggleTheme}
+            className="theme-toggle"
+            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {isDark ? (
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />
+              </svg>
+            )}
           </button>
         </div>
 

@@ -246,7 +246,9 @@ export const App = () => {
           <Route path="/documents" element={<PrivateRoute allowedRoles={['student']}><DocumentsPage /></PrivateRoute>} />
           <Route path="/student/documents" element={<PrivateRoute allowedRoles={['student']}><DocumentsPage /></PrivateRoute>} />
           <Route path="/notifications" element={<PrivateRoute allowedRoles={['student', 'supervisor', 'coordinator', 'dean', 'cod', 'director_bps']}><NotificationsPage /></PrivateRoute>} />
+          <Route path="/notifications/:notificationId" element={<PrivateRoute allowedRoles={['student', 'supervisor', 'coordinator', 'dean', 'cod', 'director_bps']}><NotificationsPage /></PrivateRoute>} />
           <Route path="/student/notifications" element={<PrivateRoute allowedRoles={['student']}><NotificationsPage /></PrivateRoute>} />
+          <Route path="/student/notifications/:notificationId" element={<PrivateRoute allowedRoles={['student']}><NotificationsPage /></PrivateRoute>} />
           <Route path="/messages" element={<PrivateRoute allowedRoles={['student']}><MessagesPage /></PrivateRoute>} />
           <Route path="/student/messages" element={<PrivateRoute allowedRoles={['student']}><MessagesPage /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute allowedRoles={['student']}><ProfilePage /></PrivateRoute>} />

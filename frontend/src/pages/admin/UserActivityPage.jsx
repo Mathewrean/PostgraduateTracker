@@ -15,8 +15,8 @@ export const UserActivityPage = () => {
       const response = await reportService.loginHistory()
       const data = Array.isArray(response.data) ? response.data : response.data.results || []
       setLogData(data)
-    } catch (error) {
-      console.error('Failed to fetch login history:', error)
+    } catch {
+      setLogData([])
     } finally {
       setLoading(false)
     }

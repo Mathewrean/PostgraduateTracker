@@ -69,8 +69,8 @@ export const ReportsPage = ({ isDark = false }) => {
       link.click()
       link.remove()
       window.URL.revokeObjectURL(url)
-    } catch (err) {
-      console.error('Export failed:', err)
+    } catch {
+      setError('Export failed')
     }
   }
 

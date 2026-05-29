@@ -23,6 +23,7 @@ export default {
         'text-primary': 'var(--text-primary)',
         'text-secondary': 'var(--text-secondary)',
         'text-muted': 'var(--text-muted)',
+        'text-inverse': 'var(--text-inverse)',
         'border-primary': 'var(--border-color)',
         'border-secondary': 'var(--border-color)',
         'success': 'var(--color-success)',

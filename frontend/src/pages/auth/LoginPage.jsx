@@ -43,7 +43,7 @@ export const LoginPage = () => {
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-4"
                style={{ backgroundColor: 'var(--color-brand)' }}>
-            <span className="font-bold text-2xl" style={{ color: '#fff' }}>PST</span>
+            <span className="font-bold text-2xl text-text-inverse">PST</span>
           </div>
           <h1 className="text-3xl font-bold mb-2">Sign In</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Postgraduate Submissions Tracker</p>
@@ -118,9 +118,19 @@ export const LoginPage = () => {
         <div className="mt-6 text-center">
           <button
             onClick={toggleTheme}
-            className="btn-secondary text-sm"
+            className="theme-toggle mx-auto"
+            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
           >
-            {isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            {isDark ? (
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />
+              </svg>
+            )}
           </button>
         </div>
       </div>

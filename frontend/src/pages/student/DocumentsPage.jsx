@@ -29,8 +29,8 @@ export const DocumentsPage = () => {
       setCurrentStage(stageResponse.data)
       const data = Array.isArray(response.data) ? response.data : response.data.results || []
       setDocuments(data)
-    } catch (error) {
-      console.error('Failed to fetch documents:', error)
+    } catch {
+      setMessage({ type: 'error', text: 'Failed to fetch documents' })
     } finally {
       setLoading(false)
     }

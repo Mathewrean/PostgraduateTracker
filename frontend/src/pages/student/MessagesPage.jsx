@@ -23,7 +23,7 @@ export const MessagesPage = () => {
       })
       setComplaints(sorted)
     } catch (error) {
-      console.error('Failed to fetch complaints:', error)
+      setMessage({ type: 'error', text: 'Failed to fetch complaints' })
     } finally {
       setLoading(false)
     }
@@ -83,12 +83,12 @@ export const MessagesPage = () => {
         <div className="space-y-4">
           <h2 className="text-2xl font-semibold">Conversation History</h2>
           {complaints.length === 0 ? (
-            <p style={{ color: 'var(--text-secondary)' }}>No complaints submitted.</p>
+            <p className="text-text-secondary">No complaints submitted.</p>
           ) : (
             complaints.map((c) => (
               <div key={c.id} className="panel">
-                <div className="pb-3 mb-3" style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                <div className="pb-3 mb-3 border-b border-border-primary">
+                  <p className="text-sm text-text-secondary">
                     Submitted: {new Date(c.submitted_at).toLocaleString()}
                   </p>
                   <p className="font-semibold mt-1">
@@ -100,12 +100,28 @@ export const MessagesPage = () => {
                   <p className="mt-2">{c.content}</p>
                 </div>
                 {c.response_content && (
-                  <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-color)' }}>
-                    <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Department Response:</p>
+                  <div className="p-4 rounded-lg bg-bg-primary border border-border-primary">
+                    <p className="text-sm font-medium text-text-secondary">Department Response:</p>
                     <p>{c.response_content}</p>
-                    <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }}>
+                    <p className="text-xs mt-2 text-text-secondary">
                       Responded at: {new Date(c.responded_at).toLocaleString()}
                     </p>
+                  </div>
+                )}
+                {Array.isArray(c.approval_trail) && c.approval_trail.length > 0 && (
+                  <div className="mt-4 space-y-3">
+                    <h3 className="text-lg font-semibold">Approval Trail</h3>
+                    {c.approval_trail.map((entry, index) => (
+                      <div key={`${c.id}-${index}`} className="border-l-2 border-border-strong pl-3">
+                        <p className="font-semibold capitalize">{entry.action}</p>
+                        <p className="text-sm text-text-secondary">
+                          {entry.actor_role} - {new Date(entry.timestamp).toLocaleString()}
+                        </p>
+                        {entry.signature && (
+                          <p className="text-sm text-text-secondary">Signed: {entry.signature}</p>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

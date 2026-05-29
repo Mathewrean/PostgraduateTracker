@@ -27,8 +27,9 @@ export const SupervisorDashboard = () => {
         total: studentsList.length,
         pending: approvals.length
       })
-    } catch (error) {
-      console.error('Failed to fetch supervisor data:', error)
+    } catch {
+      setStudents([])
+      setStats({ total: 0, pending: 0 })
     } finally {
       setLoading(false)
     }

@@ -42,6 +42,7 @@ class ComplaintViewSet(viewsets.ModelViewSet):
 
             complaint = Complaint.objects.create(
                 student=student, content=content)
+            complaint.append_trail(None, 'received')
 
             recipients = User.objects.filter(
                 role__in=[
@@ -87,8 +88,13 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         # Accept both 'response_content' and 'response_text' field names
         response_content = request.data.get(
             'response_content') or request.data.get('response_text')
+        signature = request.data.get('signature') or request.data.get(
+            'typed_signature') or ''
         if not response_content:
             return Response({'error': 'Response content is required'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if not signature:
+            return Response({'error': 'An e-signature is required'},
                             status=status.HTTP_400_BAD_REQUEST)
 
         complaint.response_content = response_content
@@ -101,6 +107,11 @@ class ComplaintViewSet(viewsets.ModelViewSet):
                 'responded_at',
                 'responded_by',
                 'status'])
+        complaint.append_trail(
+            request.user,
+            'responded',
+            signature=signature,
+            comment=response_content)
 
         # Send notification to student
         notify(
@@ -111,11 +122,14 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         )
 
         log_audit_event(
-            user=request.user, action='COMPLAINT_RESPONSE', description=f'{
-                request.user.email} responded to complaint {
-                complaint.id}.', ip_address=getattr(
-                request, 'client_ip', None), extra_data={
-                    'complaint_id': complaint.id}, )
+            user=request.user,
+            action='COMPLAINT_RESPONSE',
+            description=(
+                f'{request.user.email} responded to complaint '
+                f'{complaint.id}.'),
+            ip_address=getattr(request, 'client_ip', None),
+            extra_data={'complaint_id': complaint.id},
+        )
 
         serializer = self.get_serializer(complaint)
         return Response(serializer.data)

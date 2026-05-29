@@ -20,6 +20,13 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
         return Notification.objects.filter(
             recipient=self.request.user).order_by('-created_at')
 
+    def retrieve(self, request, *args, **kwargs):
+        notification = self.get_object()
+        if not notification.is_read:
+            notification.is_read = True
+            notification.save(update_fields=['is_read', 'updated_at'])
+        return Response(self.get_serializer(notification).data)
+
     @action(detail=True, methods=['post'])
     def mark_as_read(self, request, pk=None):
         notification = self.get_object()

@@ -86,8 +86,7 @@ export const ActivityCalendar = ({ stageId, refreshKey = 0 }) => {
       )
       setActivities(data)
       setMessage('')
-    } catch (error) {
-      console.error('Failed to fetch activities:', error)
+    } catch {
       setMessage('Activities could not be loaded right now.')
     } finally {
       setLoading(false)

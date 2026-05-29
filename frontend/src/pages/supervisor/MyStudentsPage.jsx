@@ -16,8 +16,8 @@ export const MyStudentsPage = () => {
       const response = await supervisorService.getStudents()
       const data = Array.isArray(response.data) ? response.data : response.data.results || []
       setStudents(data)
-    } catch (error) {
-      console.error('Failed to fetch students:', error)
+    } catch {
+      setStudents([])
     } finally {
       setLoading(false)
     }

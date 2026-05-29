@@ -25,8 +25,8 @@ export const ActivitiesPage = () => {
     try {
       const stageResponse = await stageService.getCurrentStage()
       setCurrentStage(stageResponse.data)
-    } catch (error) {
-      console.error('Failed to fetch activities:', error)
+    } catch {
+      setMessage({ type: 'error', text: 'Failed to fetch activities' })
     } finally {
       setLoading(false)
     }

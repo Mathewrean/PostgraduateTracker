@@ -35,8 +35,10 @@ export const StudentDashboard = () => {
         setActivities(asList(activitiesRes.data))
         setDocuments(asList(docsRes.data))
         setStudentProfile(profileRes.data)
-      } catch (error) {
-        console.error('Failed to fetch data:', error)
+      } catch {
+        setStage(null)
+        setActivities([])
+        setDocuments([])
       } finally {
         setLoading(false)
       }

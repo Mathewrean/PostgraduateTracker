@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import User
+from apps.students.models import SupervisorOption
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -7,6 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
     project_title = serializers.SerializerMethodField()
     profile_complete = serializers.SerializerMethodField()
     preferred_supervisor = serializers.SerializerMethodField()
+    preferred_supervisor_option = serializers.SerializerMethodField()
     preferred_supervisor_other = serializers.SerializerMethodField()
     preferred_supervisor_name = serializers.SerializerMethodField()
     assigned_supervisor_id = serializers.SerializerMethodField()
@@ -30,6 +32,7 @@ class UserSerializer(serializers.ModelSerializer):
             'project_title',
             'profile_complete',
             'preferred_supervisor',
+            'preferred_supervisor_option',
             'preferred_supervisor_name',
             'preferred_supervisor_other',
             'assigned_supervisor_id',
@@ -60,6 +63,12 @@ class UserSerializer(serializers.ModelSerializer):
             return student.preferred_supervisor.id
         return None
 
+    def get_preferred_supervisor_option(self, obj):
+        student = self._get_student_profile(obj)
+        if student and student.preferred_supervisor_option_id:
+            return student.preferred_supervisor_option_id
+        return None
+
     def get_preferred_supervisor_other(self, obj):
         student = self._get_student_profile(obj)
         return student.preferred_supervisor_other if student else ''
@@ -68,6 +77,10 @@ class UserSerializer(serializers.ModelSerializer):
         student = self._get_student_profile(obj)
         if student and student.preferred_supervisor:
             return student.preferred_supervisor.get_full_name() or student.preferred_supervisor.email
+        if student and student.preferred_supervisor_option:
+            return student.preferred_supervisor_option.display_name
+        if student and student.preferred_supervisor_other:
+            return student.preferred_supervisor_other
         return None
 
     def get_assigned_supervisor_id(self, obj):
@@ -167,6 +180,10 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
             role__in=['supervisor', 'coordinator', 'dean', 'cod', 'director_bps']),
         required=False,
         allow_null=True)
+    preferred_supervisor_option = serializers.PrimaryKeyRelatedField(
+        queryset=SupervisorOption.objects.all(),
+        required=False,
+        allow_null=True)
     preferred_supervisor_other = serializers.CharField(
         required=False, allow_blank=True)
 
@@ -179,11 +196,14 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
             'phone',
             'project_title',
             'preferred_supervisor',
+            'preferred_supervisor_option',
             'preferred_supervisor_other']
 
     def update(self, instance, validated_data):
         project_title = validated_data.pop('project_title', None)
         preferred_supervisor = validated_data.pop('preferred_supervisor', None)
+        preferred_supervisor_option = validated_data.pop(
+            'preferred_supervisor_option', None)
         preferred_supervisor_other = validated_data.pop(
             'preferred_supervisor_other', None)
 
@@ -197,14 +217,29 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
                 student.project_title = project_title
             if preferred_supervisor is not None:
                 student.preferred_supervisor = preferred_supervisor
+                student.preferred_supervisor_option = None
                 if preferred_supervisor:
+                    student.preferred_supervisor_other = ''
+            if preferred_supervisor_option is not None:
+                student.preferred_supervisor_option = preferred_supervisor_option
+                if preferred_supervisor_option.is_other:
+                    student.preferred_supervisor = None
+                else:
+                    student.preferred_supervisor = preferred_supervisor_option.linked_user
                     student.preferred_supervisor_other = ''
             if preferred_supervisor_other is not None:
                 student.preferred_supervisor_other = preferred_supervisor_other.strip()
                 if student.preferred_supervisor_other:
                     student.preferred_supervisor = None
-            student.profile_complete = bool(student.project_title and (
-                student.preferred_supervisor or student.preferred_supervisor_other))
+                    if not (
+                            student.preferred_supervisor_option and
+                            student.preferred_supervisor_option.is_other):
+                        student.preferred_supervisor_option = None
+            student.profile_complete = bool(
+                student.project_title and (
+                    student.preferred_supervisor or
+                    student.preferred_supervisor_option or
+                    student.preferred_supervisor_other))
             student.save()
 
         return instance

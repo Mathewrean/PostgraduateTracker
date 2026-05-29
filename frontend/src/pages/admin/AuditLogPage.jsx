@@ -15,8 +15,8 @@ export const AuditLogPage = () => {
       const response = await auditService.getLogs()
       const data = Array.isArray(response.data) ? response.data : response.data.results || []
       setLogs(data)
-    } catch (error) {
-      console.error('Failed to fetch audit logs:', error)
+    } catch {
+      setLogs([])
     } finally {
       setLoading(false)
     }

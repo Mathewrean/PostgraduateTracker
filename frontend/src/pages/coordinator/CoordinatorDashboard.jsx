@@ -29,8 +29,8 @@ export const CoordinatorDashboard = () => {
           complaints: complaints.data,
           transitions: transitions.data
         })
-      } catch (error) {
-        console.error('Failed to fetch reports:', error)
+      } catch {
+        setReports({})
       } finally {
         setLoading(false)
       }

@@ -16,8 +16,8 @@ export const PendingApprovalsPage = () => {
       const response = await supervisorService.getApprovals()
       const data = Array.isArray(response.data) ? response.data : response.data.results || []
       setStages(data.filter(s => s.status === 'ACTIVE'))
-    } catch (error) {
-      console.error('Failed to fetch stages:', error)
+    } catch {
+      setStages([])
     } finally {
       setLoading(false)
     }

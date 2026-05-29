@@ -6,6 +6,7 @@ export const ComplaintsPage = () => {
   const [complaints, setComplaints] = useState([])
   const [loading, setLoading] = useState(true)
   const [responseText, setResponseText] = useState({})
+  const [signatureText, setSignatureText] = useState({})
   const [responded, setResponded] = useState({})
   const [message, setMessage] = useState({ type: '', text: '' })
 
@@ -19,7 +20,7 @@ export const ComplaintsPage = () => {
       const data = Array.isArray(response.data) ? response.data : response.data.results || []
       setComplaints(data)
     } catch (error) {
-      console.error('Failed to fetch complaints:', error)
+      setMessage({ type: 'error', text: 'Failed to fetch complaints' })
     } finally {
       setLoading(false)
     }
@@ -27,12 +28,17 @@ export const ComplaintsPage = () => {
 
   const handleRespond = async (complaintId) => {
     const text = responseText[complaintId]
-    if (!text) return
+    const signature = signatureText[complaintId]
+    if (!text || !signature) {
+      setMessage({ type: 'error', text: 'Response and e-signature are required' })
+      return
+    }
     try {
-      await complaintService.respond(complaintId, text)
+      await complaintService.respond(complaintId, text, signature)
       setMessage({ type: 'success', text: 'Response sent' })
       setResponded({ ...responded, [complaintId]: true })
       setResponseText({ ...responseText, [complaintId]: '' })
+      setSignatureText({ ...signatureText, [complaintId]: '' })
       fetchComplaints()
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to send response' })
@@ -50,7 +56,7 @@ export const ComplaintsPage = () => {
       <div className="space-y-6">
         <h1 className="text-3xl font-bold">Complaints</h1>
         {message.text && (
-          <div className={`p-4 rounded ${message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+          <div className={message.type === 'success' ? 'alert-success' : 'alert-danger'}>
             {message.text}
           </div>
         )}
@@ -59,21 +65,21 @@ export const ComplaintsPage = () => {
         ) : (
           <div className="space-y-4">
             {complaints.map((c) => (
-              <div key={c.id} className="bg-white p-6 rounded shadow">
-                <div className="border-b pb-3 mb-3">
+              <div key={c.id} className="panel">
+                <div className="border-b border-border-primary pb-3 mb-3">
                   <div className="flex justify-between">
-                    <p className="text-sm text-gray-500">From: {c.student_email || c.student?.user?.email}</p>
-                    <p className="text-sm text-gray-500">{new Date(c.submitted_at).toLocaleString()}</p>
+                    <p className="text-sm text-text-secondary">From: {c.student_email || c.student?.user?.email}</p>
+                    <p className="text-sm text-text-secondary">{new Date(c.submitted_at).toLocaleString()}</p>
                   </div>
                   <p className="font-semibold mt-2">
-                    Status: <span className={`capitalize ${c.status === 'RESOLVED' ? 'text-green-600' : 'text-yellow-600'}`}>{c.status}</span>
-                    {c.is_overdue && <span className="ml-2 bg-red-100 text-red-800 text-xs px-2 py-1 rounded">Overdue</span>}
+                    Status: <span className={`capitalize ${c.status === 'RESOLVED' ? 'text-success' : 'text-warning'}`}>{c.status}</span>
+                    {c.is_overdue && <span className="ml-2 badge-danger">Overdue</span>}
                   </p>
                   <p className="mt-3">{c.content}</p>
                 </div>
                 {c.response_content ? (
-                  <div className="bg-gray-50 p-4 rounded">
-                    <p className="text-sm font-medium text-gray-600">Response ({new Date(c.responded_at).toLocaleString()}):</p>
+                  <div className="panel">
+                    <p className="text-sm font-medium text-text-secondary">Response ({new Date(c.responded_at).toLocaleString()}):</p>
                     <p>{c.response_content}</p>
                   </div>
                 ) : (
@@ -83,17 +89,36 @@ export const ComplaintsPage = () => {
                         value={responseText[c.id] || ''}
                         onChange={(e) => setResponseText({ ...responseText, [c.id]: e.target.value })}
                         placeholder="Write your response..."
-                        className="w-full border rounded p-2 mb-2"
+                        className="input-field mb-2"
                         rows={3}
+                      />
+                      <input
+                        value={signatureText[c.id] || ''}
+                        onChange={(e) => setSignatureText({ ...signatureText, [c.id]: e.target.value })}
+                        placeholder="Type your e-signature"
+                        className="input-field mb-2"
                       />
                       <button
                         onClick={() => handleRespond(c.id)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                        className="btn-primary"
                       >
                         Send Response
                       </button>
                     </div>
                   )
+                )}
+                {Array.isArray(c.approval_trail) && c.approval_trail.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <h2 className="text-lg font-semibold">Approval Trail</h2>
+                    {c.approval_trail.map((entry, index) => (
+                      <div key={`${c.id}-${index}`} className="border-l-2 border-border-strong pl-3">
+                        <p className="font-semibold capitalize">{entry.action}</p>
+                        <p className="text-sm text-text-secondary">
+                          {entry.actor_role} - {new Date(entry.timestamp).toLocaleString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             ))}

@@ -103,13 +103,19 @@ export const complaintService = {
   getAll: () =>
     api.get('/complaints/'),
   
-  respond: (complaintId, responseContent) =>
-    api.post(`/complaints/${complaintId}/respond/`, { response_content: responseContent }),
+  respond: (complaintId, responseContent, signature) =>
+    api.post(`/complaints/${complaintId}/respond/`, {
+      response_content: responseContent,
+      typed_signature: signature
+    }),
 }
 
 export const notificationService = {
   getAll: () =>
     api.get('/notifications/'),
+
+  getById: (notificationId) =>
+    api.get(`/notifications/${notificationId}/`),
   
   markAsRead: (notificationId) =>
     api.post(`/notifications/${notificationId}/read/`),
@@ -167,4 +173,23 @@ export const meetingService = {
     api.post('/meetings/', data),
   getAll: () =>
     api.get('/meetings/'),
+}
+
+export const consultationService = {
+  create: (data) =>
+    api.post('/consultations/', data),
+  getAll: (params = {}) =>
+    api.get('/consultations/', { params }),
+  getById: (id) =>
+    api.get(`/consultations/${id}/`),
+  submit: (id) =>
+    api.post(`/consultations/${id}/submit/`),
+  approve: (id, signature) =>
+    api.post(`/consultations/${id}/approve/`, { typed_signature: signature }),
+  reject: (id, comment) =>
+    api.post(`/consultations/${id}/reject/`, { comment }),
+  uploadMinutes: (id, data) =>
+    api.post(`/consultations/${id}/upload-minutes/`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
 }

@@ -20,7 +20,6 @@ export const useCurrentUser = () => {
         setStoredUser(response.data)
         setUser(response.data)
       } catch (error) {
-        console.error('Failed to fetch user:', error)
         setUser(storedUser)
       } finally {
         setLoading(false)

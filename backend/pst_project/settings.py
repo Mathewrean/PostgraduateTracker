@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'apps.activities',
     'apps.documents',
     'apps.complaints',
+    'apps.consultations',
     'apps.notifications',
     'apps.reports',
     'apps.audit',

@@ -11,6 +11,7 @@ export const ProfilePage = () => {
   const [profile, setProfile] = useState({
     project_title: '',
     preferred_supervisor: null,
+    preferred_supervisor_option: null,
     preferred_supervisor_other: '',
     email: user?.email || '',
     phone: '',
@@ -33,6 +34,7 @@ export const ProfilePage = () => {
         ...prev,
         project_title: response.data.project_title || '',
         preferred_supervisor: response.data.preferred_supervisor || null,
+        preferred_supervisor_option: response.data.preferred_supervisor_option || null,
         preferred_supervisor_other: response.data.preferred_supervisor_other || '',
         email: user?.email || '',
         phone: user?.phone || '',
@@ -41,7 +43,7 @@ export const ProfilePage = () => {
       }))
       setSupervisorOptions(response.data.preferred_supervisor_options || [])
     } catch (error) {
-      console.error('Failed to fetch profile:', error)
+      setMessage({ type: 'error', text: 'Failed to load profile' })
     } finally {
       setLoading(false)
     }
@@ -61,6 +63,7 @@ export const ProfilePage = () => {
         last_name: profile.last_name,
         project_title: profile.project_title,
         preferred_supervisor: profile.preferred_supervisor || null,
+        preferred_supervisor_option: profile.preferred_supervisor_option || null,
         preferred_supervisor_other: profile.preferred_supervisor_other,
         phone: profile.phone
       })
@@ -133,33 +136,40 @@ export const ProfilePage = () => {
               <label className="block text-sm font-medium mb-1">Preferred Supervisor</label>
               <select
                 name="preferred_supervisor"
-                value={profile.preferred_supervisor || ''}
+                value={profile.preferred_supervisor_option || ''}
                 onChange={(e) => setProfile((prev) => ({
                   ...prev,
-                  preferred_supervisor: e.target.value ? Number(e.target.value) : null,
-                  preferred_supervisor_other: e.target.value ? '' : prev.preferred_supervisor_other
+                  preferred_supervisor: null,
+                  preferred_supervisor_option: e.target.value ? Number(e.target.value) : null,
+                  preferred_supervisor_other: supervisorOptions.find(
+                    option => option.id === Number(e.target.value)
+                  )?.is_other ? prev.preferred_supervisor_other : ''
                 }))}
                 className="input-field"
               >
                 <option value="">Select a supervisor</option>
                 {supervisorOptions.map((option) => (
                   <option key={option.id} value={option.id}>
-                    {option.full_name} ({option.role.replace('_', ' ')})
+                    {option.display_name}
                   </option>
                 ))}
               </select>
-              <input
-                type="text"
-                name="preferred_supervisor_other"
-                value={profile.preferred_supervisor_other}
-                onChange={(e) => setProfile((prev) => ({
-                  ...prev,
-                  preferred_supervisor_other: e.target.value,
-                  preferred_supervisor: e.target.value ? null : prev.preferred_supervisor
-                }))}
-                placeholder="Or specify another preferred supervisor"
-                className="input-field mt-2"
-              />
+              {supervisorOptions.find(
+                option => option.id === Number(profile.preferred_supervisor_option)
+              )?.is_other && (
+                <input
+                  type="text"
+                  name="preferred_supervisor_other"
+                  value={profile.preferred_supervisor_other}
+                  onChange={(e) => setProfile((prev) => ({
+                    ...prev,
+                    preferred_supervisor_other: e.target.value,
+                    preferred_supervisor: null
+                  }))}
+                  placeholder="Enter the preferred supervisor name"
+                  className="input-field mt-2"
+                />
+              )}
             </div>
             <button type="submit" className="btn-primary">
               Save Profile
