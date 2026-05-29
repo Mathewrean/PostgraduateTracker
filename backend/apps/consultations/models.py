@@ -61,9 +61,13 @@ class ConsultationForm(models.Model):
         db_table = 'consultation_forms'
         ordering = ['-consultation_date', '-created_at']
         indexes = [
-            models.Index(fields=['student', 'stage']),
-            models.Index(fields=['supervisor', 'status']),
-            models.Index(fields=['status']),
+            models.Index(
+                fields=['student', 'stage'],
+                name='consultatio_student_74d560_idx'),
+            models.Index(
+                fields=['supervisor', 'status'],
+                name='consultatio_supervi_e14c55_idx'),
+            models.Index(fields=['status'], name='consultatio_status_90dccd_idx'),
         ]
 
     def __str__(self):

@@ -93,8 +93,10 @@ class SupervisorOption(models.Model):
         db_table = 'supervisor_options'
         ordering = ['display_order']
         indexes = [
-            models.Index(fields=['display_order']),
-            models.Index(fields=['role']),
+            models.Index(
+                fields=['display_order'],
+                name='supervisor__display_6f646c_idx'),
+            models.Index(fields=['role'], name='supervisor__role_bebd30_idx'),
         ]
 
     def __str__(self):
