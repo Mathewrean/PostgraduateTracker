@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { TopbarBrand } from './TopbarBrand'
 
 export const HeaderComponent = ({ title = 'PST Application', stage = null, user = null }) => {
   const [scrolled, setScrolled] = useState(false)
@@ -12,18 +13,19 @@ export const HeaderComponent = ({ title = 'PST Application', stage = null, user 
   return (
     <header className={`app-header ${scrolled ? 'is-scrolled' : ''}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Left: Title & Stage */}
-          <div className="flex-1">
-            <h1 className="app-title">{title}</h1>
-            {stage && (
-              <p className="app-stage-pill">
-                Current Stage: <strong>{stage}</strong>
-              </p>
-            )}
+        <div className="flex justify-between items-center h-16 gap-4">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            <TopbarBrand compact />
+            <div className="min-w-0">
+              <h1 className="app-title truncate">{title}</h1>
+              {stage && (
+                <p className="app-stage-pill">
+                  Current Stage: <strong>{stage}</strong>
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Right: User */}
           <div className="flex items-center gap-4">
             {user && (
               <div className="text-right hidden sm:block">

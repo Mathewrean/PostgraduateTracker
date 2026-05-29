@@ -1,6 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUIStore } from '../context/store'
+import { TopbarBrand } from '../components/TopbarBrand'
 
 export const LandingPage = () => {
   const navigate = useNavigate()
@@ -14,16 +15,8 @@ export const LandingPage = () => {
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)', transition: 'background-color 0.2s ease, color 0.2s ease' }}>
       {/* Header */}
       <header style={{ borderBottom: '1px solid var(--border-color)' }}>
-        <div className="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--color-brand)' }}>
-              <span style={{ color: 'var(--bg-main)', fontWeight: 700, fontSize: '1.125rem' }}>PST</span>
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>PST</h1>
-              <p className="text-sm" style={secondaryTextStyle}>Postgraduate Submissions Tracker</p>
-            </div>
-          </div>
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+          <TopbarBrand />
           
           <button
             onClick={toggleTheme}

@@ -4,6 +4,7 @@ import { authService } from '../../services'
 import { useAuthStore, useUIStore } from '../../context/store'
 import { setCookie } from '../../services/api'
 import { getHomePath } from '../../utils/navigation'
+import { TopbarBrand } from '../../components/TopbarBrand'
 import toast from 'react-hot-toast'
 
 export const RegisterPage = () => {
@@ -79,39 +80,27 @@ export const RegisterPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}
-         className="flex items-center justify-center p-4 transition-colors duration-200">
+         className="relative flex items-center justify-center p-4 pt-20 transition-colors duration-200">
+      <header className="auth-topbar">
+        <TopbarBrand />
+        <button
+          onClick={toggleTheme}
+          className="theme-toggle"
+          aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {isDark ? (
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />
+            </svg>
+          )}
+        </button>
+      </header>
       <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center"
-                 style={{ backgroundColor: 'var(--color-brand)' }}>
-              <span className="font-bold text-lg text-text-inverse">PST</span>
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold">PST</h1>
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Tracker</p>
-            </div>
-          </div>
-          <button
-            onClick={toggleTheme}
-            className="theme-toggle"
-            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {isDark ? (
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="12" cy="12" r="4" />
-                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />
-              </svg>
-            )}
-          </button>
-        </div>
-
-        {/* Title */}
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold mb-2">Create Account</h2>
           <p style={{ color: 'var(--text-secondary)' }}>Join the Postgraduate Submissions Tracker</p>
