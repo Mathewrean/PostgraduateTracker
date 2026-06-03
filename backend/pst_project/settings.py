@@ -151,6 +151,7 @@ AUTHENTICATION_BACKENDS = [
 
 # Django REST Framework
 REST_FRAMEWORK = {
+    'URL_FORMAT_OVERRIDE': None,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
