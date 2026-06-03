@@ -41,11 +41,13 @@ class AuthenticationTests(APITestCase):
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertIn('access', response.data)
-        self.assertIn('refresh', response.data)
+        self.assertIn('message', response.data)
         self.assertEqual(
             response.data['user']['email'],
             self.user_data['email'])
+        self.assertFalse(response.data['user']['is_active'])
+        user = User.objects.get(email=self.user_data['email'])
+        self.assertTrue(hasattr(user, 'email_otp'))
 
     def test_jwt_token_obtain(self):
         """Test JWT token endpoint"""
