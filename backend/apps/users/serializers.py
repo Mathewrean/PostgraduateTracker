@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import User, normalize_role_value
 from apps.students.models import SupervisorOption
 
 
@@ -102,6 +102,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
     password = serializers.CharField(
         write_only=True,
         min_length=8,
@@ -113,6 +114,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'email',
+            'full_name',
             'admission_number',
             'phone',
             'first_name',
@@ -122,7 +124,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'password_confirm']
         extra_kwargs = {
             'email': {'required': True},
-            'admission_number': {'required': True},
+            'admission_number': {'required': False, 'allow_blank': True, 'allow_null': True},
             'phone': {'required': True},
             'first_name': {'required': False},
             'last_name': {'required': False},
@@ -133,10 +135,16 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         if User.objects.filter(email__iexact=value).exists():
             raise serializers.ValidationError(
                 'A user with this email already exists.')
+        return User.objects.normalize_email(value)
+
+    def validate_phone(self, value):
+        if User.objects.filter(phone__iexact=value).exists():
+            raise serializers.ValidationError(
+                'A user with this phone number already exists.')
         return value
 
     def validate_admission_number(self, value):
-        if User.objects.filter(admission_number__iexact=value).exists():
+        if value and User.objects.filter(admission_number__iexact=value).exists():
             raise serializers.ValidationError(
                 'A user with this admission number already exists.')
         return value
@@ -145,13 +153,28 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         if attrs['password'] != attrs.pop('password_confirm'):
             raise serializers.ValidationError(
                 {'password': 'Passwords do not match'})
+        role = normalize_role_value(attrs.get('role', 'student'))
+        attrs['role'] = role
+        admission_number = attrs.get('admission_number')
+        if role == 'student' and not admission_number:
+            raise serializers.ValidationError(
+                {'admission_number': 'Admission number is required for students.'})
+        if role == 'supervisor':
+            attrs['admission_number'] = None
         return attrs
 
     def create(self, validated_data):
+        full_name = validated_data.pop('full_name', '').strip()
+        if full_name and not (
+                validated_data.get('first_name') or validated_data.get('last_name')):
+            parts = full_name.split()
+            validated_data['first_name'] = parts[0]
+            validated_data['last_name'] = ' '.join(parts[1:])
         # Set defaults for optional fields
         validated_data.setdefault('first_name', '')
         validated_data.setdefault('last_name', '')
         validated_data.setdefault('role', 'student')
+        validated_data['is_active'] = False
         return User.objects.create_user(**validated_data)
 
 

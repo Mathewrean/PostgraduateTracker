@@ -6,6 +6,7 @@ export const ReportsPage = ({ isDark = false }) => {
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [loading, setLoading] = useState(false)
+  const [exportLoading, setExportLoading] = useState(false)
   const [reportData, setReportData] = useState(null)
   const [reportType, setReportType] = useState('students')
   const [error, setError] = useState('')
@@ -36,9 +37,6 @@ export const ReportsPage = ({ isDark = false }) => {
         case 'users':
           response = await reportService.getUserReport(params)
           break
-        case 'stage_transition':
-          response = await reportService.getStageTransitionReport()
-          break
         default:
           response = await reportService.getStudentProgress(params)
       }
@@ -50,27 +48,30 @@ export const ReportsPage = ({ isDark = false }) => {
     }
   }
 
-  const handleExport = async (format) => {
+  const handleExport = async (type, format) => {
+    setExportLoading(true)
+    setError('')
     try {
       const params = {}
       if (dateFrom) params.from = dateFrom
       if (dateTo) params.to = dateTo
       params.format = format
       
-      const response = await reportService.export(reportType, params)
+      const response = await reportService.export(type, params)
       
-      // Create blob and trigger download
       const blob = new Blob([response.data], { type: format === 'csv' ? 'text/csv' : 'application/pdf' })
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.setAttribute('download', `report_${reportType}_${new Date().toISOString().split('T')[0]}.${format}`)
+      link.setAttribute('download', `${type}_report.${format}`)
       document.body.appendChild(link)
       link.click()
       link.remove()
       window.URL.revokeObjectURL(url)
-    } catch {
-      setError('Export failed')
+    } catch (err) {
+      setError(err.response?.data?.error || 'Export failed')
+    } finally {
+      setExportLoading(false)
     }
   }
 
@@ -100,7 +101,6 @@ export const ReportsPage = ({ isDark = false }) => {
                 <option value="users">User Activity</option>
                 <option value="supervisors">Supervisor Activity</option>
                 <option value="complaints">Complaint Statistics</option>
-                <option value="stage_transition">Stage Transitions</option>
               </select>
             </div>
 
@@ -142,22 +142,28 @@ export const ReportsPage = ({ isDark = false }) => {
               {loading ? 'Generating...' : 'Generate Report'}
             </button>
             
-            {reportData && (
-              <>
-                <button
-                  onClick={() => handleExport('csv')}
-                  className="py-2 px-4 rounded-md font-medium bg-green-500 text-white hover:bg-green-600 transition-colors"
-                >
-                  Export CSV
-                </button>
-                <button
-                  onClick={() => handleExport('pdf')}
-                  className="py-2 px-4 rounded-md font-medium bg-red-500 text-white hover:bg-red-600 transition-colors"
-                >
-                  Export PDF
-                </button>
-              </>
-            )}
+            <button
+              onClick={() => handleExport(reportType, 'csv')}
+              disabled={loading || exportLoading}
+              className={`py-2 px-4 rounded-md font-medium transition-colors ${
+                loading || exportLoading
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-green-500 text-white hover:bg-green-600'
+              }`}
+            >
+              Export CSV
+            </button>
+            <button
+              onClick={() => handleExport(reportType, 'pdf')}
+              disabled={loading || exportLoading}
+              className={`py-2 px-4 rounded-md font-medium transition-colors ${
+                loading || exportLoading
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-red-500 text-white hover:bg-red-600'
+              }`}
+            >
+              Export PDF
+            </button>
           </div>
         </div>
 

@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
+from django.db.models import Q
 from django.utils import timezone
 from .models import Activity
 from .serializers import ActivitySerializer
@@ -33,10 +34,42 @@ class ActivityViewSet(viewsets.ModelViewSet):
 
         stage_id = self.request.query_params.get('stage')
         if stage_id:
-            queryset = queryset.filter(stage_id=stage_id)
+            if str(stage_id).isdigit():
+                queryset = queryset.filter(stage_id=stage_id)
+            else:
+                queryset = queryset.filter(stage__stage_type__iexact=stage_id)
+
+        student_name = self.request.query_params.get('student')
+        if student_name:
+            queryset = queryset.filter(
+                Q(stage__student__user__first_name__icontains=student_name)
+                | Q(stage__student__user__last_name__icontains=student_name)
+                | Q(stage__student__user__email__icontains=student_name)
+            )
+
+        supervisor_name = self.request.query_params.get('supervisor')
+        if supervisor_name:
+            queryset = queryset.filter(
+                Q(stage__student__assigned_supervisor__first_name__icontains=supervisor_name)
+                | Q(stage__student__assigned_supervisor__last_name__icontains=supervisor_name)
+                | Q(stage__student__assigned_supervisor__email__icontains=supervisor_name)
+            )
+
+        status_filter = self.request.query_params.get('status')
+        if status_filter:
+            queryset = queryset.filter(status__iexact=status_filter)
+
+        from_date = self.request.query_params.get('from')
+        if from_date:
+            queryset = queryset.filter(planned_date__date__gte=from_date)
+
+        to_date = self.request.query_params.get('to')
+        if to_date:
+            queryset = queryset.filter(planned_date__date__lte=to_date)
 
         return queryset.select_related(
             'stage__student__user',
+            'stage__student__assigned_supervisor',
             'created_by',
             'marked_done_by')
 

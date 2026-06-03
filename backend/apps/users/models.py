@@ -1,11 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils import timezone
+from datetime import timedelta
 
 
 ROLE_NORMALIZATION_MAP = {
     'student': 'student',
     'supervisor': 'supervisor',
+    'lecturer': 'supervisor',
     'coordinator': 'coordinator',
     'dean': 'dean',
     'cod': 'cod',
@@ -13,6 +15,7 @@ ROLE_NORMALIZATION_MAP = {
     'director bps': 'director_bps',
     'STUDENT': 'student',
     'SUPERVISOR': 'supervisor',
+    'LECTURER': 'supervisor',
     'COORDINATOR': 'coordinator',
     'DEAN': 'dean',
     'COD': 'cod',
@@ -34,12 +37,14 @@ class UserManager(BaseUserManager):
     def create_user(
             self,
             email,
-            admission_number,
-            phone,
+            admission_number=None,
+            phone=None,
             password=None,
             **extra_fields):
         if not email:
             raise ValueError('Email is required')
+        if not phone:
+            raise ValueError('Phone number is required')
         email = self.normalize_email(email)
         extra_fields['role'] = normalize_role_value(
             extra_fields.get('role', 'student'))
@@ -71,8 +76,8 @@ class UserManager(BaseUserManager):
     def create_superuser(
             self,
             email,
-            admission_number,
-            phone,
+            admission_number=None,
+            phone=None,
             password=None,
             **extra_fields):
         extra_fields.setdefault('is_staff', True)
@@ -97,9 +102,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
 
     email = models.EmailField(unique=True)
-    admission_number = models.CharField(max_length=50, unique=True)
+    admission_number = models.CharField(
+        max_length=50,
+        unique=True,
+        blank=True,
+        null=True)
     # Allow formatted numbers like +254 701 618 286
-    phone = models.CharField(max_length=20)
+    phone = models.CharField(max_length=20, unique=True)
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
     role = models.CharField(
@@ -117,7 +126,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['admission_number', 'phone']
+    REQUIRED_FIELDS = ['phone']
 
     class Meta:
         db_table = 'users'
@@ -145,3 +154,29 @@ class User(AbstractBaseUser, PermissionsMixin):
     def save(self, *args, **kwargs):
         self.role = normalize_role_value(self.role)
         super().save(*args, **kwargs)
+
+
+class EmailOTP(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='email_otp')
+    code = models.CharField(max_length=6)
+    expires_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'email_otps'
+        indexes = [
+            models.Index(fields=['code']),
+            models.Index(fields=['expires_at']),
+        ]
+
+    @classmethod
+    def expiry_time(cls):
+        return timezone.now() + timedelta(minutes=10)
+
+    @property
+    def is_expired(self):
+        return timezone.now() > self.expires_at

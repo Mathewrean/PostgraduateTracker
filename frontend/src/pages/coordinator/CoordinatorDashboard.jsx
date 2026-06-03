@@ -1,12 +1,22 @@
 import React, { useEffect, useState } from 'react'
 import { Layout } from '../../components/Layout'
-import { reportService } from '../../services'
+import { activityService, reportService } from '../../services'
 import { useUIStore, useAuthStore } from '../../context/store'
 
 export const CoordinatorDashboard = () => {
   const isDark = useUIStore((state) => state.isDark)
   const user = useAuthStore((state) => state.user)
   const [reports, setReports] = useState({})
+  const [activities, setActivities] = useState([])
+  const [activityFilters, setActivityFilters] = useState({
+    student: '',
+    supervisor: '',
+    stage: '',
+    status: '',
+    from: '',
+    to: ''
+  })
+  const [expandedActivityId, setExpandedActivityId] = useState(null)
   const [loading, setLoading] = useState(true)
 
   const cardBg = isDark ? 'bg-gray-800' : 'bg-white'
@@ -16,11 +26,12 @@ export const CoordinatorDashboard = () => {
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const [progress, supervisor, complaints, transitions] = await Promise.all([
+        const [progress, supervisor, complaints, transitions, activityList] = await Promise.all([
           reportService.getStudentProgress(),
           reportService.getSupervisorReport(),
           reportService.getComplaintReport(),
-          reportService.getStageTransitionReport()
+          reportService.getStageTransitionReport(),
+          activityService.getAll()
         ])
         
         setReports({
@@ -29,8 +40,10 @@ export const CoordinatorDashboard = () => {
           complaints: complaints.data,
           transitions: transitions.data
         })
+        setActivities(activityList.data?.results || activityList.data || [])
       } catch {
         setReports({})
+        setActivities([])
       } finally {
         setLoading(false)
       }
@@ -46,6 +59,26 @@ export const CoordinatorDashboard = () => {
       </div>
     </Layout>
   )
+
+  const filteredActivities = activities.filter((activity) => {
+    const student = (activity.student_name || activity.student_email || '').toLowerCase()
+    const supervisor = (activity.supervisor_name || activity.supervisor_email || '').toLowerCase()
+    const stage = (activity.stage_type || '').toLowerCase()
+    const status = (activity.status || '').toLowerCase()
+    const plannedDate = activity.planned_date ? activity.planned_date.slice(0, 10) : ''
+
+    if (activityFilters.student && !student.includes(activityFilters.student.toLowerCase())) return false
+    if (activityFilters.supervisor && !supervisor.includes(activityFilters.supervisor.toLowerCase())) return false
+    if (activityFilters.stage && stage !== activityFilters.stage.toLowerCase()) return false
+    if (activityFilters.status && status !== activityFilters.status.toLowerCase()) return false
+    if (activityFilters.from && plannedDate < activityFilters.from) return false
+    if (activityFilters.to && plannedDate > activityFilters.to) return false
+    return true
+  })
+
+  const updateActivityFilter = (name, value) => {
+    setActivityFilters((prev) => ({ ...prev, [name]: value }))
+  }
 
   return (
     <Layout title="Coordinator Dashboard" user={user}>
@@ -110,6 +143,118 @@ export const CoordinatorDashboard = () => {
             <p>Thesis Completed: <span className="font-bold">{reports.transitions?.thesis_completion}</span></p>
           </div>
         </div>
+
+        <section className="card">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between mb-4">
+            <div>
+              <h3 className="text-xl font-bold">Student-Supervisor Activities</h3>
+              <p className={textColor}>All planned and completed research workflow activities</p>
+            </div>
+            <p className="text-sm font-semibold" style={{ color: 'var(--color-brand)' }}>{filteredActivities.length} shown</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
+            <input
+              type="search"
+              value={activityFilters.student}
+              onChange={(event) => updateActivityFilter('student', event.target.value)}
+              className="input-field"
+              placeholder="Student name"
+            />
+            <input
+              type="search"
+              value={activityFilters.supervisor}
+              onChange={(event) => updateActivityFilter('supervisor', event.target.value)}
+              className="input-field"
+              placeholder="Supervisor name"
+            />
+            <select
+              value={activityFilters.stage}
+              onChange={(event) => updateActivityFilter('stage', event.target.value)}
+              className="input-field"
+            >
+              <option value="">All stages</option>
+              <option value="CONCEPT">Concept</option>
+              <option value="PROPOSAL">Proposal</option>
+              <option value="THESIS">Thesis</option>
+              <option value="COMPLETED">Completed</option>
+            </select>
+            <select
+              value={activityFilters.status}
+              onChange={(event) => updateActivityFilter('status', event.target.value)}
+              className="input-field"
+            >
+              <option value="">All statuses</option>
+              <option value="PLANNED">Planned</option>
+              <option value="COMPLETED">Completed</option>
+            </select>
+            <input
+              type="date"
+              value={activityFilters.from}
+              onChange={(event) => updateActivityFilter('from', event.target.value)}
+              className="input-field"
+            />
+            <input
+              type="date"
+              value={activityFilters.to}
+              onChange={(event) => updateActivityFilter('to', event.target.value)}
+              className="input-field"
+            />
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left" style={{ color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-color)' }}>
+                  <th className="py-3 pr-4">Student</th>
+                  <th className="py-3 pr-4">Supervisor</th>
+                  <th className="py-3 pr-4">Stage</th>
+                  <th className="py-3 pr-4">Activity</th>
+                  <th className="py-3 pr-4">Planned Date</th>
+                  <th className="py-3 pr-4">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredActivities.map((activity) => {
+                  const isExpanded = expandedActivityId === activity.id
+                  return (
+                    <React.Fragment key={activity.id}>
+                      <tr
+                        onClick={() => setExpandedActivityId(isExpanded ? null : activity.id)}
+                        className="cursor-pointer"
+                        style={{ borderBottom: '1px solid var(--border-color)' }}
+                      >
+                        <td className="py-3 pr-4">{activity.student_name || activity.student_email || 'Unassigned'}</td>
+                        <td className="py-3 pr-4">{activity.supervisor_name || activity.supervisor_email || 'Unassigned'}</td>
+                        <td className="py-3 pr-4">{activity.stage_type}</td>
+                        <td className="py-3 pr-4 font-medium">{activity.title}</td>
+                        <td className="py-3 pr-4">{activity.planned_date ? new Date(activity.planned_date).toLocaleDateString() : '-'}</td>
+                        <td className="py-3 pr-4">{activity.status === 'COMPLETED' ? 'Completed' : 'Planned'}</td>
+                      </tr>
+                      {isExpanded && (
+                        <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
+                          <td colSpan="6" className="py-3 pr-4">
+                            <div className="space-y-2" style={{ color: 'var(--text-secondary)' }}>
+                              <p>{activity.description || 'No description provided.'}</p>
+                              <p>{activity.notes || 'No notes recorded.'}</p>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  )
+                })}
+                {filteredActivities.length === 0 && (
+                  <tr>
+                    <td colSpan="6" className="py-6 text-center" style={{ color: 'var(--text-secondary)' }}>
+                      No activities match the current filters.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
       </div>
     </Layout>
   )

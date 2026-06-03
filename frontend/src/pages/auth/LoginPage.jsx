@@ -8,7 +8,7 @@ import { TopbarBrand } from '../../components/TopbarBrand'
 import toast from 'react-hot-toast'
 
 export const LoginPage = () => {
-  const [email, setEmail] = useState('')
+  const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
@@ -21,7 +21,7 @@ export const LoginPage = () => {
     e.preventDefault()
     setLoading(true)
     try {
-      const response = await authService.login(email, password)
+      const response = await authService.login(identifier, password)
       setCookie('pst_access_token', response.data.access)
       setCookie('pst_refresh_token', response.data.refresh)
       setToken(response.data.access)
@@ -67,13 +67,13 @@ export const LoginPage = () => {
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="panel space-y-5">
           <div>
-            <label className="block font-medium mb-2" style={{ color: 'var(--text-primary)' }}>Email Address</label>
+            <label className="block font-medium mb-2" style={{ color: 'var(--text-primary)' }}>Email or Phone Number</label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
               className="input-field"
-              placeholder="your@email.com"
+              placeholder="your@email.com or +254 701 618 286"
               required
             />
           </div>

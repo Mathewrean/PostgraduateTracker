@@ -1,14 +1,16 @@
 import csv
 import io
+import json
 from datetime import timedelta
 
 from django.db.models import Q
 from django.http import HttpResponse
 from django.utils import timezone
-from rest_framework import viewsets
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.audit.models import AuditLog
 from apps.audit.services import log_audit_event
@@ -18,59 +20,37 @@ from apps.students.models import Student
 from apps.users.models import User
 
 
-def build_minimal_pdf(lines):
-    escaped_lines = [line.replace('\\', '\\\\').replace(
-        '(', '\\(').replace(')', '\\)') for line in lines]
-    text_commands = ['BT /F1 10 Tf 50 780 Td 14 TL']
-    for index, line in enumerate(escaped_lines):
-        operator = 'Tj' if index == 0 else "'"
-        text_commands.append(f'({line}) {operator}')
-    text_commands.append('ET')
-    content = '\n'.join(text_commands).encode('latin-1', errors='replace')
+ADMIN_REPORT_ROLES = ['coordinator', 'dean', 'cod', 'director_bps']
+EXPORT_REPORT_TYPES = ['students', 'users', 'supervisors', 'complaints']
+EXPORT_FORMATS = ['csv', 'pdf']
 
-    objects = []
-    objects.append(b'1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n')
-    objects.append(
-        b'2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj\n')
-    objects.append(
-        b'3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >> endobj\n')
-    objects.append(
-        f'4 0 obj << /Length {
-            len(content)} >> stream\n'.encode('latin-1') +
-        content +
-        b'\nendstream endobj\n')
-    objects.append(
-        b'5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj\n')
 
-    pdf = bytearray(b'%PDF-1.4\n')
-    offsets = [0]
-    for obj in objects:
-        offsets.append(len(pdf))
-        pdf.extend(obj)
-
-    xref_offset = len(pdf)
-    pdf.extend(f'xref\n0 {len(offsets)}\n'.encode('latin-1'))
-    pdf.extend(b'0000000000 65535 f \n')
-    for offset in offsets[1:]:
-        pdf.extend(f'{offset:010d} 00000 n \n'.encode('latin-1'))
-    pdf.extend(
-        f'trailer << /Size {len(offsets)} /Root 1 0 R >>\nstartxref\n{xref_offset}\n%%EOF'.encode('latin-1')
-    )
-    return bytes(pdf)
+class IsReportAdmin(BasePermission):
+    def has_permission(self, request, view):
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.role_key in ADMIN_REPORT_ROLES
+        )
 
 
 class ReportViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
-        from rest_framework.permissions import BasePermission
+        return [IsReportAdmin()]
 
-        class IsCoordinatorOrSeniorAdmin(BasePermission):
-            def has_permission(self, request, view):
-                return request.user and request.user.role_key in [
-                    'coordinator', 'dean', 'cod', 'director_bps']
-
-        return [IsCoordinatorOrSeniorAdmin()]
+    def _parse_date(self, value, end_of_day=False):
+        if not value:
+            return None
+        parsed = timezone.datetime.fromisoformat(value)
+        if len(value) == 10:
+            time_args = {'hour': 23, 'minute': 59, 'second': 59, 'microsecond': 999999} if end_of_day else {
+                'hour': 0, 'minute': 0, 'second': 0, 'microsecond': 0}
+            parsed = parsed.replace(**time_args)
+        if timezone.is_naive(parsed):
+            parsed = timezone.make_aware(parsed)
+        return parsed
 
     def _get_date_window(self, request):
         range_type = request.query_params.get('range')
@@ -97,9 +77,13 @@ class ReportViewSet(viewsets.ViewSet):
 
     def _filter_queryset_by_date(self, queryset, field_name, request):
         start_date = self._get_date_window(request)
-        if not start_date:
-            return queryset
-        return queryset.filter(**{f'{field_name}__gte': start_date})
+        end_date = self._parse_date(
+            request.query_params.get('to'), end_of_day=True)
+        if start_date:
+            queryset = queryset.filter(**{f'{field_name}__gte': start_date})
+        if end_date:
+            queryset = queryset.filter(**{f'{field_name}__lte': end_date})
+        return queryset
 
     def _student_report_payload(self, request):
         students = Student.objects.select_related(
@@ -340,88 +324,97 @@ class ReportViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'], url_path='export')
     def export(self, request):
-        report_type = request.query_params.get('type', 'students')
-        format_type = request.query_params.get('format', 'csv')
+        return ExportReportView().get(request)
 
-        report_mapping = {
-            'students': self._student_report_payload(request),
-            'users': self._user_report_payload(request),
-            'supervisors': self._supervisor_report_payload(request),
-            'complaints': self._complaint_report_payload(request),
-            'stage_transition': {
-                'concept_to_proposal': Stage.objects.filter(
-                    stage_type='CONCEPT',
-                    status='COMPLETED').count(),
-                'proposal_to_thesis': Stage.objects.filter(
-                    stage_type='PROPOSAL',
-                    status='COMPLETED').count(),
-                'thesis_completion': Stage.objects.filter(
-                    stage_type='THESIS',
-                    status='COMPLETED').count(),
-            },
-            'student_progress': self._student_report_payload(request),
-            'supervisor_report': self._supervisor_report_payload(request),
-            'complaint_report': self._complaint_report_payload(request),
+
+class ExportReportView(APIView):
+    permission_classes = [IsReportAdmin]
+
+    def get(self, request):
+        report_type = request.query_params.get('type')
+        format_type = request.query_params.get('format')
+
+        if report_type not in EXPORT_REPORT_TYPES:
+            return Response(
+                {'error': f'Invalid report type. Accepted types: {", ".join(EXPORT_REPORT_TYPES)}'},
+                status=status.HTTP_400_BAD_REQUEST)
+        if format_type not in EXPORT_FORMATS:
+            return Response(
+                {'error': 'Invalid or missing format. Accepted formats: csv, pdf'},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        report_view = ReportViewSet()
+        report_view.request = request
+        payload_getters = {
+            'students': report_view._student_report_payload,
+            'users': report_view._user_report_payload,
+            'supervisors': report_view._supervisor_report_payload,
+            'complaints': report_view._complaint_report_payload,
         }
-
-        if report_type not in report_mapping:
-            return Response({'error': 'Invalid report type'}, status=400)
-
-        data = report_mapping[report_type]
+        data = payload_getters[report_type](request)
+        generated_date = timezone.now().date().isoformat()
+        filename = f'{report_type}_report_{generated_date}.{format_type}'
 
         if format_type == 'csv':
-            buffer = io.StringIO()
-            writer = csv.writer(buffer)
-            writer.writerow(['report_type', report_type])
-            writer.writerow(['generated_at', timezone.now().isoformat()])
-            if isinstance(data, dict):
-                for key, value in data.items():
-                    writer.writerow([key, value])
-            else:
-                writer.writerow(['data'])
-                for row in data:
-                    writer.writerow([row])
-            response = HttpResponse(buffer.getvalue(), content_type='text/csv')
-            response['Content-Disposition'] = f'attachment; filename="{report_type}.csv"'
-            log_audit_event(
-                user=request.user,
-                action='REPORT_GENERATION',
-                description=f'{
-                    request.user.email} generated a {report_type} report in CSV format.',
-                ip_address=getattr(
-                    request,
-                    'client_ip',
-                    None),
-                extra_data={
-                    'report_type': report_type,
-                    'format': 'csv'},
-            )
-            return response
+            response = self._csv_response(report_type, data, filename)
+        else:
+            response = self._pdf_response(report_type, data, filename)
 
-        if format_type == 'pdf':
-            lines = [
-                f'Report Type: {report_type}',
-                f'Generated At: {timezone.now().isoformat()}',
-                '',
-                str(data),
-            ]
-            response = HttpResponse(
-                build_minimal_pdf(lines),
-                content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="{report_type}.pdf"'
-            log_audit_event(
-                user=request.user,
-                action='REPORT_GENERATION',
-                description=f'{
-                    request.user.email} generated a {report_type} report in PDF format.',
-                ip_address=getattr(
-                    request,
-                    'client_ip',
-                    None),
-                extra_data={
-                    'report_type': report_type,
-                    'format': 'pdf'},
-            )
-            return response
+        log_audit_event(
+            user=request.user,
+            action='REPORT_GENERATION',
+            description=(
+                f'{request.user.email} generated a {report_type} report '
+                f'in {format_type.upper()} format.'
+            ),
+            ip_address=getattr(request, 'client_ip', None),
+            extra_data={'report_type': report_type, 'format': format_type},
+        )
+        return response
 
-        return Response({'error': 'Invalid format'}, status=400)
+    def _csv_response(self, report_type, data, filename):
+        buffer = io.StringIO()
+        writer = csv.writer(buffer)
+        writer.writerow(['report_type', report_type])
+        writer.writerow(['generated_at', timezone.now().isoformat()])
+        writer.writerow([])
+        writer.writerow(['section', 'data'])
+
+        if isinstance(data, dict):
+            for key, value in data.items():
+                writer.writerow([key, json.dumps(value, default=str)])
+        else:
+            for row in data:
+                writer.writerow([report_type, json.dumps(row, default=str)])
+
+        response = HttpResponse(buffer.getvalue(), content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+
+    def _pdf_response(self, report_type, data, filename):
+        from reportlab.lib.pagesizes import letter
+        from reportlab.pdfgen import canvas
+
+        buffer = io.BytesIO()
+        pdf = canvas.Canvas(buffer, pagesize=letter)
+        width, height = letter
+        y = height - 50
+        lines = [
+            f'Report Type: {report_type}',
+            f'Generated At: {timezone.now().isoformat()}',
+            '',
+            json.dumps(data, default=str, indent=2),
+        ]
+        for block in lines:
+            for line in str(block).splitlines() or ['']:
+                if y < 50:
+                    pdf.showPage()
+                    y = height - 50
+                pdf.drawString(50, y, line[:110])
+                y -= 14
+        pdf.save()
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response

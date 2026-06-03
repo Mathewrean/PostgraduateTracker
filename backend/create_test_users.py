@@ -97,20 +97,21 @@ for user_data in test_users:
                 'last_name': user_data['last_name'],
                 'role': user_data['role'],
                 'admission_number': user_data['admission_number'],
-                'phone': '+254700000000',
+                'phone': f'+254700000{len(User.objects.all())}',
             }
         )
+        phone = f'+254700{user.id:06d}'
 
         if created:
             user.first_name = user_data['first_name']
             user.last_name = user_data['last_name']
             user.role = user_data['role']
-            user.phone = '+254700000000'
+            user.phone = phone
         else:
             user.first_name = user_data['first_name']
             user.last_name = user_data['last_name']
             user.role = user_data['role']
-            user.phone = '+254700000000'
+            user.phone = phone
         user.set_password(user_data['password'])
         user.save()
 

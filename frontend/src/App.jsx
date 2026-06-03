@@ -10,6 +10,7 @@ import { getHomePath, getNotificationAppPath } from './utils/navigation'
 // Pages
 import { LoginPage } from './pages/auth/LoginPage'
 import { RegisterPage } from './pages/auth/RegisterPage'
+import { VerifyOtpPage } from './pages/auth/VerifyOtpPage'
 import { LandingPage } from './pages/LandingPage'
 import { UnauthorizedPage } from './pages/UnauthorizedPage'
 
@@ -218,6 +219,7 @@ export const App = () => {
           <Route path="/" element={token ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
           <Route path="/login" element={token ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
           <Route path="/register" element={token ? <Navigate to="/dashboard" replace /> : <RegisterPage />} />
+          <Route path="/verify-otp" element={token ? <Navigate to="/dashboard" replace /> : <VerifyOtpPage />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
           {/* Student Routes */}

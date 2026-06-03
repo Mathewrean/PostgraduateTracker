@@ -10,3 +10,4 @@ redis==5.0.1
 argon2-cffi==23.1.0
 dj-database-url==2.1.0
 celery==5.3.6
+reportlab==4.2.5

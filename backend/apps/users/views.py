@@ -6,13 +6,57 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import User, normalize_role_value
+from .models import EmailOTP, User, normalize_role_value
 from .serializers import UserSerializer, UserRegistrationSerializer, UserDetailSerializer, UserProfileUpdateSerializer
 from .permissions import RoleBasedPermission
 from apps.audit.services import log_audit_event
 import logging
+import random
 
 logger = logging.getLogger(__name__)
+
+
+INVALID_CREDENTIALS_MESSAGE = (
+    'Invalid credentials. No account found with that email or phone number.'
+)
+
+
+def issue_tokens_for_user(user, request):
+    refresh = RefreshToken.for_user(user)
+    user.update_last_login(
+        request.client_ip if hasattr(request, 'client_ip') else None)
+    log_audit_event(
+        user=user,
+        action='LOGIN',
+        description='User logged into the PST platform.',
+        ip_address=getattr(request, 'client_ip', None),
+    )
+    return {
+        'user': UserSerializer(user, context={'request': request}).data,
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }
+
+
+def generate_otp():
+    return f'{random.SystemRandom().randint(0, 999999):06d}'
+
+
+def send_registration_otp(user):
+    from .tasks import send_otp_email
+
+    code = generate_otp()
+    EmailOTP.objects.update_or_create(
+        user=user,
+        defaults={'code': code, 'expires_at': EmailOTP.expiry_time()},
+    )
+    try:
+        send_otp_email.delay(user.email, code)
+    except Exception as exc:
+        logger.warning(
+            'Celery OTP dispatch unavailable; sending OTP synchronously: %s',
+            exc)
+        send_otp_email(user.email, code)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -84,11 +128,10 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=data)
         if serializer.is_valid():
             user = serializer.save()
-            refresh = RefreshToken.for_user(user)
+            send_registration_otp(user)
             return Response({
                 'user': UserSerializer(user).data,
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
+                'message': 'Registration successful. Check your email for the verification code.',
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -111,34 +154,24 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def login(self, request):
         """Legacy login endpoint (for non-OIDC flows)"""
-        email = request.data.get('email')
+        identifier = (
+            request.data.get('identifier')
+            or request.data.get('email')
+            or request.data.get('phone')
+        )
         password = request.data.get('password')
 
-        if not email or not password:
+        if not identifier or not password:
             return Response({
-                'error': 'Email and password are required'
+                'error': 'Email or phone number and password are required'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        user = authenticate(request, email=email, password=password)
+        user = authenticate(request, identifier=identifier, password=password)
         if user:
-            refresh = RefreshToken.for_user(user)
-            user.update_last_login(
-                request.client_ip if hasattr(
-                    request, 'client_ip') else None)
-            log_audit_event(
-                user=user,
-                action='LOGIN',
-                description='User logged into the PST platform.',
-                ip_address=getattr(request, 'client_ip', None),
-            )
-            return Response({
-                'user': UserSerializer(user, context={'request': request}).data,
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            })
+            return Response(issue_tokens_for_user(user, request))
 
         return Response({
-            'error': 'Invalid credentials'
+            'error': INVALID_CREDENTIALS_MESSAGE
         }, status=status.HTTP_401_UNAUTHORIZED)
 
     @action(detail=False, methods=['post'])
@@ -165,33 +198,81 @@ class AuthLoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data.get('email')
+        identifier = (
+            request.data.get('identifier')
+            or request.data.get('email')
+            or request.data.get('phone')
+        )
         password = request.data.get('password')
 
-        if not email or not password:
-            return Response({'error': 'Email and password are required'},
+        if not identifier or not password:
+            return Response({'error': 'Email or phone number and password are required'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        user = authenticate(request, email=email, password=password)
+        user = authenticate(request, identifier=identifier, password=password)
         if not user:
-            return Response({'error': 'Invalid credentials'},
+            return Response({'error': INVALID_CREDENTIALS_MESSAGE},
                             status=status.HTTP_401_UNAUTHORIZED)
 
-        refresh = RefreshToken.for_user(user)
-        user.update_last_login(
-            request.client_ip if hasattr(
-                request, 'client_ip') else None)
-        log_audit_event(
-            user=user,
-            action='LOGIN',
-            description='User logged into the PST platform.',
-            ip_address=getattr(request, 'client_ip', None),
-        )
+        return Response(issue_tokens_for_user(user, request))
+
+
+class VerifyOTPView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        code = request.data.get('otp') or request.data.get('code')
+
+        if not email or not code:
+            return Response({'error': 'Email and OTP are required'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email__iexact=email)
+            otp = user.email_otp
+        except (User.DoesNotExist, EmailOTP.DoesNotExist):
+            return Response({'error': 'Invalid or expired code'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        if otp.is_expired:
+            return Response(
+                {'error': 'Code expired. Please register again or request a new code.'},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        if otp.code != str(code).strip():
+            return Response({'error': 'Invalid or expired code'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        user.is_active = True
+        user.save(update_fields=['is_active', 'updated_at'])
+        otp.delete()
         return Response({
-            'user': UserSerializer(user, context={'request': request}).data,
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
+            'message': 'Account verified successfully.',
+            **issue_tokens_for_user(user, request),
         })
+
+
+class ResendOTPView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({'error': 'Email is required'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            return Response({'error': 'Invalid or expired code'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        if user.is_active:
+            return Response({'message': 'Account is already verified.'})
+
+        send_registration_otp(user)
+        return Response({'message': 'Verification code resent.'})
 
 
 class AuthLogoutView(APIView):

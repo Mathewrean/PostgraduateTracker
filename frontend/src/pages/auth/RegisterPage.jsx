@@ -1,39 +1,42 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { authService } from '../../services'
-import { useAuthStore, useUIStore } from '../../context/store'
-import { setCookie } from '../../services/api'
-import { getHomePath } from '../../utils/navigation'
+import { useUIStore } from '../../context/store'
 import { TopbarBrand } from '../../components/TopbarBrand'
 import toast from 'react-hot-toast'
 
 export const RegisterPage = () => {
   const [formData, setFormData] = useState({
+    full_name: '',
     email: '',
     admission_number: '',
     phone: '',
-    first_name: '',
-    last_name: '',
     password: '',
     password_confirm: '',
     role: 'student'
   })
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-  const setToken = useAuthStore((state) => state.setToken)
-  const setUser = useAuthStore((state) => state.setUser)
   const isDark = useUIStore((state) => state.isDark)
   const toggleTheme = useUIStore((state) => state.toggleTheme)
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+      ...(name === 'role' && value === 'lecturer' ? { admission_number: '' } : {})
+    }))
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!formData.email || !formData.admission_number || !formData.phone) {
-      toast.error('Email, admission number, and phone are required')
+    if (!formData.full_name || !formData.email || !formData.phone) {
+      toast.error('Full name, email, and phone are required')
+      return
+    }
+    if (formData.role === 'student' && !formData.admission_number) {
+      toast.error('Admission number is required for students')
       return
     }
     if (formData.password.length < 8) {
@@ -47,22 +50,16 @@ export const RegisterPage = () => {
     setLoading(true)
     try {
       const response = await authService.register({
+        full_name: formData.full_name,
         email: formData.email,
-        admission_number: formData.admission_number,
+        admission_number: formData.role === 'student' ? formData.admission_number : '',
         phone: formData.phone,
-        first_name: formData.first_name || '',
-        last_name: formData.last_name || '',
         password: formData.password,
         password_confirm: formData.password_confirm,
         role: formData.role
       })
-      setCookie('pst_access_token', response.data.access)
-      setCookie('pst_refresh_token', response.data.refresh)
-      setToken(response.data.access)
-      setUser(response.data.user)
-      toast.success('Registration successful! Redirecting to dashboard...')
-      const destination = getHomePath(response.data.user?.role)
-      navigate(destination, { replace: true })
+      toast.success(response.data?.message || 'Registration successful. Check your email for the code.')
+      navigate('/verify-otp', { replace: true, state: { email: formData.email } })
     } catch (error) {
       const errMsg = error.response?.data?.detail ||
                      error.response?.data?.email?.[0] ||
@@ -110,16 +107,32 @@ export const RegisterPage = () => {
         <form onSubmit={handleSubmit} className="panel">
           <div className="space-y-4">
             <div>
+              <label className="block font-medium mb-2 text-sm" style={{ color: 'var(--text-primary)' }}>Full Name *</label>
+              <input type="text" name="full_name" value={formData.full_name} onChange={handleChange}
+                className={inputCls} placeholder="John Doe" required />
+            </div>
+
+            <div>
               <label className="block font-medium mb-2 text-sm" style={{ color: 'var(--text-primary)' }}>Email Address *</label>
               <input type="email" name="email" value={formData.email} onChange={handleChange}
                 className={inputCls} placeholder="student@university.edu" required />
             </div>
 
             <div>
-              <label className="block font-medium mb-2 text-sm" style={{ color: 'var(--text-primary)' }}>Admission Number *</label>
-              <input type="text" name="admission_number" value={formData.admission_number} onChange={handleChange}
-                className={inputCls} placeholder="e.g., PG/2024/001" required />
+              <label className="block font-medium mb-2 text-sm" style={{ color: 'var(--text-primary)' }}>Role *</label>
+              <select name="role" value={formData.role} onChange={handleChange} className={inputCls}>
+                <option value="student">Student</option>
+                <option value="lecturer">Lecturer</option>
+              </select>
             </div>
+
+            {formData.role === 'student' && (
+              <div>
+                <label className="block font-medium mb-2 text-sm" style={{ color: 'var(--text-primary)' }}>Admission Number *</label>
+                <input type="text" name="admission_number" value={formData.admission_number} onChange={handleChange}
+                  className={inputCls} placeholder="e.g., PG/2024/001" required />
+              </div>
+            )}
 
             <div>
               <label className="block font-medium mb-2 text-sm" style={{ color: 'var(--text-primary)' }}>Phone Number *</label>
@@ -129,30 +142,6 @@ export const RegisterPage = () => {
               <p className="text-xs mt-1" style={{ color: formData.phone.length > 15 ? 'var(--color-warning)' : 'var(--text-secondary)' }}>
                 {formData.phone.length}/20 characters
               </p>
-            </div>
-
-            <div>
-              <label className="block font-medium mb-2 text-sm" style={{ color: 'var(--text-primary)' }}>First Name</label>
-              <input type="text" name="first_name" value={formData.first_name} onChange={handleChange}
-                className={inputCls} placeholder="John" />
-            </div>
-
-            <div>
-              <label className="block font-medium mb-2 text-sm" style={{ color: 'var(--text-primary)' }}>Last Name</label>
-              <input type="text" name="last_name" value={formData.last_name} onChange={handleChange}
-                className={inputCls} placeholder="Doe" />
-            </div>
-
-            <div>
-              <label className="block font-medium mb-2 text-sm" style={{ color: 'var(--text-primary)' }}>Role *</label>
-              <select name="role" value={formData.role} onChange={handleChange} className={inputCls}>
-                <option value="student">Student</option>
-                <option value="supervisor">Supervisor</option>
-                <option value="coordinator">Coordinator</option>
-                <option value="dean">Dean</option>
-                <option value="cod">COD</option>
-                <option value="director_bps">Director BPS</option>
-              </select>
             </div>
 
             <div>
@@ -189,12 +178,6 @@ export const RegisterPage = () => {
           </div>
         </form>
 
-        {/* Info */}
-        <div className="mt-6 panel">
-          <p className="text-sm" style={{ color: 'var(--text-primary)' }}>
-            <strong>Note:</strong> You'll need an admission number to register. Contact your institution if you don't have one.
-          </p>
-        </div>
       </div>
     </div>
   )
