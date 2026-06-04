@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { TopbarBrand } from '../../components/TopbarBrand'
@@ -14,15 +14,26 @@ export const VerifyOtpPage = () => {
   const [otp, setOtp] = useState('')
   const [loading, setLoading] = useState(false)
   const [resending, setResending] = useState(false)
+  const [resendCooldown, setResendCooldown] = useState(0)
+  const [errorMessage, setErrorMessage] = useState('')
   const setToken = useAuthStore((state) => state.setToken)
   const setUser = useAuthStore((state) => state.setUser)
   const isDark = useUIStore((state) => state.isDark)
   const toggleTheme = useUIStore((state) => state.toggleTheme)
 
+  useEffect(() => {
+    if (resendCooldown <= 0) return undefined
+    const timer = window.setInterval(() => {
+      setResendCooldown((seconds) => Math.max(seconds - 1, 0))
+    }, 1000)
+    return () => window.clearInterval(timer)
+  }, [resendCooldown])
+
   const handleSubmit = async (event) => {
     event.preventDefault()
+    setErrorMessage('')
     if (!email || otp.length !== 6) {
-      toast.error('Enter your email and 6-digit code')
+      setErrorMessage('Enter your email and 6-digit code')
       return
     }
     setLoading(true)
@@ -35,23 +46,25 @@ export const VerifyOtpPage = () => {
       toast.success('Account verified successfully')
       navigate(getHomePath(response.data.user?.role), { replace: true })
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Verification failed')
+      setErrorMessage(error.response?.data?.error || 'Verification failed')
     } finally {
       setLoading(false)
     }
   }
 
   const handleResend = async () => {
+    setErrorMessage('')
     if (!email) {
-      toast.error('Enter your email first')
+      setErrorMessage('Enter your email first')
       return
     }
     setResending(true)
     try {
       const response = await authService.resendOtp(email)
       toast.success(response.data?.message || 'Verification code resent')
+      setResendCooldown(60)
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Could not resend code')
+      setErrorMessage(error.response?.data?.error || 'Could not resend code')
     } finally {
       setResending(false)
     }
@@ -108,12 +121,23 @@ export const VerifyOtpPage = () => {
               placeholder="123456"
               required
             />
+            {errorMessage && (
+              <p className="text-sm mt-2" style={{ color: 'var(--color-danger)' }}>
+                {errorMessage}
+              </p>
+            )}
           </div>
           <button type="submit" disabled={loading} className="w-full btn-primary font-semibold" style={{ opacity: loading ? 0.6 : 1 }}>
             {loading ? 'Verifying...' : 'Submit'}
           </button>
-          <button type="button" onClick={handleResend} disabled={resending} className="w-full btn-secondary font-semibold" style={{ opacity: resending ? 0.6 : 1 }}>
-            {resending ? 'Sending...' : 'Resend Code'}
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={resending || resendCooldown > 0}
+            className="w-full btn-secondary font-semibold"
+            style={{ opacity: resending || resendCooldown > 0 ? 0.6 : 1 }}
+          >
+            {resending ? 'Sending...' : resendCooldown > 0 ? `Resend Code (${resendCooldown}s)` : 'Resend Code'}
           </button>
         </form>
 

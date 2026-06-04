@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth import authenticate
+from django.utils import timezone
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import EmailOTP, User, normalize_role_value
 from .serializers import UserSerializer, UserRegistrationSerializer, UserDetailSerializer, UserProfileUpdateSerializer
@@ -52,10 +53,8 @@ def send_registration_otp(user):
     )
     try:
         send_otp_email.delay(user.email, code)
-    except Exception as exc:
-        logger.warning(
-            'Celery OTP dispatch unavailable; sending OTP synchronously: %s',
-            exc)
+    except Exception:
+        logger.warning('Celery unavailable. Sending OTP email synchronously.')
         send_otp_email(user.email, code)
 
 
@@ -235,7 +234,7 @@ class VerifyOTPView(APIView):
             return Response({'error': 'Invalid or expired code'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        if otp.is_expired:
+        if otp.expires_at < timezone.now():
             return Response(
                 {'error': 'Code expired. Please register again or request a new code.'},
                 status=status.HTTP_400_BAD_REQUEST)
@@ -265,8 +264,8 @@ class ResendOTPView(APIView):
         try:
             user = User.objects.get(email__iexact=email)
         except User.DoesNotExist:
-            return Response({'error': 'Invalid or expired code'},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'No user exists with that email.'},
+                            status=status.HTTP_404_NOT_FOUND)
 
         if user.is_active:
             return Response({'message': 'Account is already verified.'})
