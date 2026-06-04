@@ -157,8 +157,25 @@ class DocumentViewSet(BaseStageFileViewSet):
             },
         )
 
+        thesis_started = False
         if stage.stage_type == 'THESIS':
-            stage.check_thesis_submission_complete()
+            thesis_started = stage.check_thesis_submission_complete()
+
+        if thesis_started:
+            notify(
+                recipient=stage.student.user,
+                message=(
+                    'Your thesis has been submitted successfully. Your stage '
+                    'is now in progress.'
+                ),
+                notification_type='SUPERVISOR_APPROVAL',
+                link='/dashboard',
+                email_subject='Thesis Submission Received — PST JOOUST',
+                email_message=(
+                    'Your thesis has been submitted successfully. Your stage '
+                    'is now In Progress. The review period lasts 3 months.'
+                ),
+            )
 
         if stage.student.assigned_supervisor:
             notify(
@@ -170,6 +187,11 @@ class DocumentViewSet(BaseStageFileViewSet):
                 ),
                 notification_type='DOCUMENT_UPLOAD',
                 link='/supervisor/approvals',
+                email_subject='Document Uploaded — PST JOOUST',
+                email_message=(
+                    f'{stage.student.user.get_full_name() or stage.student.user.email} '
+                    'has uploaded a document for review. Login to view it.'
+                ),
             )
 
         log_audit_event(
@@ -310,6 +332,11 @@ class MinutesViewSet(BaseStageFileViewSet):
                 ),
                 notification_type='DOCUMENT_UPLOAD',
                 link='/supervisor/approvals',
+                email_subject='Document Uploaded — PST JOOUST',
+                email_message=(
+                    f'{stage.student.user.get_full_name() or stage.student.user.email} '
+                    'has uploaded a document for review. Login to view it.'
+                ),
             )
 
         log_audit_event(
@@ -348,6 +375,12 @@ class MinutesViewSet(BaseStageFileViewSet):
             message='Your Minutes of Presentation have been approved.',
             notification_type='MINUTES_APPROVAL',
             link='/dashboard',
+            email_subject='Minutes Approved — PST JOOUST',
+            email_message=(
+                'Your minutes of presentation for the '
+                f'{minutes.stage.get_stage_type_display()} stage have been '
+                'approved by your supervisor.'
+            ),
         )
 
         log_audit_event(

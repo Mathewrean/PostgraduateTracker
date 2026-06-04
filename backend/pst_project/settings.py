@@ -222,6 +222,7 @@ CORS_EXPOSE_HEADERS = [
     'content-type',
     'x-csrftoken',
 ]
+FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:5173')
 
 # Channels
 CHANNEL_LAYERS = {

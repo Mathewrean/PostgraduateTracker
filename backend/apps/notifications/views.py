@@ -106,7 +106,12 @@ class MeetingViewSet(viewsets.ModelViewSet):
             recipient=supervisor,
             message=f'Meeting request from {request.user.email}',
             notification_type='MEETING_REQUEST',
-            link='/supervisor/students'
+            link='/supervisor/students',
+            email_subject='Meeting Request — PST JOOUST',
+            email_message=(
+                f'A student has requested a meeting with you on '
+                f'{scheduled_date}. Login to confirm.'
+            ),
         )
 
         serializer = self.get_serializer(meeting)

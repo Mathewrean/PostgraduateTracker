@@ -16,7 +16,8 @@ export const ProfilePage = () => {
     email: user?.email || '',
     phone: '',
     first_name: user?.first_name || '',
-    last_name: user?.last_name || ''
+    last_name: user?.last_name || '',
+    email_notifications_enabled: user?.email_notifications_enabled ?? true
   })
   const [supervisorOptions, setSupervisorOptions] = useState([])
   const [loading, setLoading] = useState(false)
@@ -39,7 +40,8 @@ export const ProfilePage = () => {
         email: user?.email || '',
         phone: user?.phone || '',
         first_name: user?.first_name || '',
-        last_name: user?.last_name || ''
+        last_name: user?.last_name || '',
+        email_notifications_enabled: user?.email_notifications_enabled ?? true
       }))
       setSupervisorOptions(response.data.preferred_supervisor_options || [])
     } catch (error) {
@@ -65,7 +67,8 @@ export const ProfilePage = () => {
         preferred_supervisor: profile.preferred_supervisor || null,
         preferred_supervisor_option: profile.preferred_supervisor_option || null,
         preferred_supervisor_other: profile.preferred_supervisor_other,
-        phone: profile.phone
+        phone: profile.phone,
+        email_notifications_enabled: profile.email_notifications_enabled
       })
       setUser(response.data)
       setMessage({ type: 'success', text: 'Profile updated successfully' })
@@ -127,6 +130,18 @@ export const ProfilePage = () => {
               <input type="text" name="phone" value={profile.phone}
                 onChange={handleChange} className="input-field" />
             </div>
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                name="email_notifications_enabled"
+                checked={profile.email_notifications_enabled}
+                onChange={(e) => setProfile({
+                  ...profile,
+                  email_notifications_enabled: e.target.checked
+                })}
+              />
+              <span>Receive email notifications</span>
+            </label>
             <div>
               <label className="block text-sm font-medium mb-1">Project Title</label>
               <input type="text" name="project_title" value={profile.project_title}

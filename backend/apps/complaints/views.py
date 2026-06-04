@@ -55,7 +55,12 @@ class ComplaintViewSet(viewsets.ModelViewSet):
                     recipient=recipient,
                     message=f'New complaint submitted by {student.user.email}',
                     notification_type='COMPLAINT_RECEIVED',
-                    link='/coordinator/complaints'
+                    link='/coordinator/complaints',
+                    email_subject='New Student Complaint — PST JOOUST',
+                    email_message=(
+                        'A new complaint has been submitted by a student. '
+                        'Login to review it.'
+                    ),
                 )
 
             log_audit_event(
@@ -118,7 +123,12 @@ class ComplaintViewSet(viewsets.ModelViewSet):
             recipient=complaint.student.user,
             message='Your complaint has been responded to',
             notification_type='COMPLAINT_RESPONSE',
-            link='/messages'
+            link='/messages',
+            email_subject='Response to Your Complaint — PST JOOUST',
+            email_message=(
+                'A response has been sent to your complaint. Login to read '
+                'it in your Messages tab.'
+            ),
         )
 
         log_audit_event(

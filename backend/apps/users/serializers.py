@@ -26,6 +26,7 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'role',
             'is_active',
+            'email_notifications_enabled',
             'date_joined',
             'last_login',
             'current_stage',
@@ -190,6 +191,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
             'last_name',
             'role',
             'is_active',
+            'email_notifications_enabled',
             'date_joined',
             'last_login',
             'last_login_ip']
@@ -217,6 +219,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'phone',
+            'email_notifications_enabled',
             'project_title',
             'preferred_supervisor',
             'preferred_supervisor_option',

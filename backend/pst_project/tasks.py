@@ -89,7 +89,12 @@ def check_complaint_escalation():
                 message=f'Complaint from {
                     complaint.student.user.email} is now overdue (14+ days without response)',
                 notification_type='COMPLAINT_OVERDUE',
-                link='/coordinator/complaints')
+                link='/coordinator/complaints',
+                email_subject='Overdue Complaint Alert — PST JOOUST',
+                email_message=(
+                    'A student complaint has not received a response in over '
+                    '14 days. Immediate attention required.'
+                ))
 
         logger.info(f'Complaint {complaint.id} marked as overdue')
 

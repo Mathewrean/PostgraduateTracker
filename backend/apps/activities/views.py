@@ -103,6 +103,11 @@ class ActivityViewSet(viewsets.ModelViewSet):
                     message=f'New activity assigned by {request.user.email}: {activity.title}',
                     notification_type='ACTIVITY_REMINDER',
                     link='/activities',
+                    email_subject='New Activity Assigned — PST JOOUST',
+                    email_message=(
+                        'Your supervisor has assigned a new activity to you: '
+                        f'{activity.title}. Login to view details.'
+                    ),
                 )
 
             serializer = self.get_serializer(activity)

@@ -1,27 +1,27 @@
-from apps.notifications.models import Notification
-from apps.notifications.tasks import send_notification_email_task
-import threading
 import logging
+
+from django.conf import settings
+
+from apps.notifications.models import Notification
+from apps.notifications.tasks import dispatch_notification_email
 
 logger = logging.getLogger(__name__)
 
 
-def _dispatch_notification_email(notification_id):
-    try:
-        send_notification_email_task.delay(notification_id)
-    except Exception as exc:
-        logger.error(f'Error dispatching notification email task: {str(exc)}')
+def _default_subject(notification_type):
+    label = notification_type.replace('_', ' ').title()
+    return f'PST Notification — {label}'
 
 
-def notify(recipient, message, notification_type, link=None):
+def notify(
+        recipient,
+        message,
+        notification_type,
+        link=None,
+        email_subject=None,
+        email_message=None):
     """
-    Create a notification record and dispatch an async email task.
-
-    Args:
-        recipient: User object who will receive the notification
-        message: str - The notification message
-        notification_type: str - One of the NOTIFICATION_TYPES choices
-        link: str (optional) - URL link for the notification
+    Create an in-app notification and send the matching email notification.
     """
     try:
         notification = Notification.objects.create(
@@ -31,17 +31,16 @@ def notify(recipient, message, notification_type, link=None):
             link=link or ''
         )
 
-        # Dispatch the Celery handoff in a background thread so broker latency
-        # never slows down the API response path.
-        threading.Thread(
-            target=_dispatch_notification_email,
-            args=(notification.id,),
-            daemon=True,
-        ).start()
+        if recipient.email_notifications_enabled:
+            subject = email_subject or _default_subject(notification_type)
+            body = email_message or (
+                f'{message}\n\nLogin to PST to view details: '
+                f'{settings.FRONTEND_URL}'
+            )
+            dispatch_notification_email(recipient.email, subject, body)
 
         logger.info(
-            f'Notification created for {
-                recipient.email}: {notification_type}')
+            f'Notification created for {recipient.email}: {notification_type}')
         return notification
     except Exception as e:
         logger.error(f'Error creating notification: {str(e)}')
