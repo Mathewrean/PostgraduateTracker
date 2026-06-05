@@ -184,7 +184,7 @@ SIMPLE_JWT = {
     'ALGORITHM': config(
         'JWT_ALGORITHM',
         default='HS256'),
-    'SIGNING_KEY': SECRET_KEY,
+    'SIGNING_KEY': config('JWT_SECRET_KEY', default=SECRET_KEY),
 }
 
 # CORS - Allow all localhost ports for development
