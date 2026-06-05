@@ -110,25 +110,6 @@ export const LoginPage = () => {
           </p>
         </div>
 
-        {/* Test Credentials */}
-        <div className="mt-6 panel">
-          <p className="font-semibold mb-3 text-sm">Demo Credentials:</p>
-          <div className="space-y-2 text-sm">
-            <div>
-              <p style={{ color: 'var(--text-secondary)' }}>Student</p>
-              <p className="font-mono text-xs" style={{ color: 'var(--text-primary)' }}>student@test.com / student123</p>
-            </div>
-            <div>
-              <p style={{ color: 'var(--text-secondary)' }}>Supervisor</p>
-              <p className="font-mono text-xs" style={{ color: 'var(--text-primary)' }}>supervisor@test.com / supervisor123</p>
-            </div>
-            <div>
-              <p style={{ color: 'var(--text-secondary)' }}>Coordinator</p>
-              <p className="font-mono text-xs" style={{ color: 'var(--text-primary)' }}>coordinator@test.com / coordinator123</p>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
   )
