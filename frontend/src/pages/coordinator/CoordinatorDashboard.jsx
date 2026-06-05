@@ -30,7 +30,7 @@ export const CoordinatorDashboard = () => {
           reportService.getStudentProgress(),
           reportService.getSupervisorReport(),
           reportService.getComplaintReport(),
-          reportService.getStageTransitionReport(),
+          reportService.getStageTransitions(),
           activityService.getAll()
         ])
         

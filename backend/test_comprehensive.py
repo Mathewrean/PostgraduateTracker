@@ -572,11 +572,10 @@ class TestSuite:
     def run_report_tests(self):
         """Test report endpoints"""
 
-        # Student progress report
         self.test_endpoint(
             "GET Student Progress Report",
             "GET",
-            "/api/reports/student_progress/",
+            "/api/reports/students/",
             user_type='coordinator',
             expected_status=200
         )
@@ -585,7 +584,7 @@ class TestSuite:
         self.test_endpoint(
             "GET Supervisor Activity Report",
             "GET",
-            "/api/reports/supervisor_report/",
+            "/api/reports/supervisors/",
             user_type='coordinator',
             expected_status=200
         )
@@ -594,34 +593,16 @@ class TestSuite:
         self.test_endpoint(
             "GET Complaint Report",
             "GET",
-            "/api/reports/complaint_report/",
-            user_type='coordinator',
-            expected_status=200
-        )
-
-        # Activity log
-        self.test_endpoint(
-            "GET Activity Audit Log",
-            "GET",
-            "/api/reports/activity_log/",
-            user_type='coordinator',
-            expected_status=200
-        )
-
-        # Login history
-        self.test_endpoint(
-            "GET Login History Report",
-            "GET",
-            "/api/reports/login_history/",
+            "/api/reports/complaints/",
             user_type='coordinator',
             expected_status=200
         )
 
         # Stage transition report
         self.test_endpoint(
-            "GET Stage Transition Report",
+            "GET Stage Transitions Report",
             "GET",
-            "/api/reports/stage_transition_report/",
+            "/api/reports/stage-transitions/",
             user_type='coordinator',
             expected_status=200
         )
@@ -661,7 +642,7 @@ class TestSuite:
         response = self.test_endpoint(
             "RBAC: Student cannot access reports",
             "GET",
-            "/api/reports/student_progress/",
+            "/api/reports/students/",
             user_type='student'
         )
 
@@ -677,7 +658,7 @@ class TestSuite:
         response = self.test_endpoint(
             "RBAC: Coordinator can access reports",
             "GET",
-            "/api/reports/student_progress/",
+            "/api/reports/students/",
             user_type='coordinator',
             expected_status=200
         )

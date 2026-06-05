@@ -136,25 +136,19 @@ export const notificationService = {
 export const reportService = {
   getStudentProgress: (params = {}) =>
     api.get('/reports/students/', { params }),
-  
+
   getSupervisorReport: (params = {}) =>
     api.get('/reports/supervisors/', { params }),
-  
-  getLoginHistory: (params = {}) =>
-    api.get('/reports/login_history/', { params }),
 
   getUserReport: (params = {}) =>
     api.get('/reports/users/', { params }),
-  
+
   getComplaintReport: (params = {}) =>
     api.get('/reports/complaints/', { params }),
-  
-  getActivityLog: (params = {}) =>
-    api.get('/reports/activity_log/', { params }),
-  
-  getStageTransitionReport: () =>
-    api.get('/reports/stage_transition_report/'),
-  
+
+  getStageTransitions: () =>
+    api.get('/reports/stage-transitions/'),
+
   export: (type, params = {}) =>
     api.get('/reports/export/', {
       params: { type, ...params },

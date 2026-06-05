@@ -277,38 +277,8 @@ class ReportViewSet(viewsets.ViewSet):
     def complaints(self, request):
         return Response(self._complaint_report_payload(request))
 
-    @action(detail=False, methods=['get'], url_path='student_progress')
-    def student_progress(self, request):
-        return self.students(request)
-
-    @action(detail=False, methods=['get'], url_path='supervisor_report')
-    def supervisor_report(self, request):
-        return self.supervisors(request)
-
-    @action(detail=False, methods=['get'], url_path='complaint_report')
-    def complaint_report(self, request):
-        return self.complaints(request)
-
-    @action(detail=False, methods=['get'], url_path='login_history')
-    def login_history(self, request):
-        return Response(self._user_report_payload(request)['login_history'])
-
-    @action(detail=False, methods=['get'], url_path='activity_log')
-    def activity_log(self, request):
-        logs = AuditLog.objects.all().order_by('-timestamp')
-        logs = self._filter_queryset_by_date(logs, 'timestamp', request)
-        return Response([
-            {
-                'user': log.user.email if log.user else 'System',
-                'action': log.action,
-                'description': log.description,
-                'timestamp': log.timestamp,
-            }
-            for log in logs[:200]
-        ])
-
-    @action(detail=False, methods=['get'], url_path='stage_transition_report')
-    def stage_transition_report(self, request):
+    @action(detail=False, methods=['get'], url_path='stage-transitions')
+    def stage_transitions(self, request):
         return Response(
             {
                 'concept_to_proposal': Stage.objects.filter(

@@ -341,7 +341,7 @@ class UserFlowTester:
         endpoints = [
             ("/users/", "All Users"),
             ("/students/", "All Students"),
-            ("/reports/student_progress/", "Student Progress Report"),
+            ("/reports/students/", "Student Progress Report"),
         ]
         
         for endpoint, name in endpoints:

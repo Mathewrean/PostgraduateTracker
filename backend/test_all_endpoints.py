@@ -390,7 +390,7 @@ class RBACTests(APITestCase):
     def test_student_cannot_access_reports(self):
         """Test student cannot access admin reports"""
         self.client.force_authenticate(user=self.student)
-        response = self.client.get('/api/reports/student_progress/')
+        response = self.client.get('/api/reports/students/')
         # Handle potential redirect
         if response.status_code == 301:
             response = self.client.get(response['Location'])
@@ -402,7 +402,7 @@ class RBACTests(APITestCase):
     def test_coordinator_can_access_reports(self):
         """Test coordinator can access reports"""
         self.client.force_authenticate(user=self.coordinator)
-        response = self.client.get('/api/reports/student_progress/')
+        response = self.client.get('/api/reports/students/')
         # Handle potential redirect
         if response.status_code == 301:
             response = self.client.get(response['Location'])
@@ -428,7 +428,7 @@ class ReportTests(APITestCase):
 
     def test_student_progress_report(self):
         """Test student progress report"""
-        response = self.client.get('/api/reports/student_progress/')
+        response = self.client.get('/api/reports/students/')
         # Handle potential redirect
         if response.status_code == 301:
             response = self.client.get(response['Location'])
@@ -438,7 +438,7 @@ class ReportTests(APITestCase):
 
     def test_complaint_report(self):
         """Test complaint statistics report"""
-        response = self.client.get('/api/reports/complaint_report/')
+        response = self.client.get('/api/reports/complaints/')
         # Handle potential redirect
         if response.status_code == 301:
             response = self.client.get(response['Location'])
