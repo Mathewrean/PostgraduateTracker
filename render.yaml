@@ -4,8 +4,8 @@
 # One-platform plan:
 #   - Web Service -> Django API + React SPA (SPA is built in build.sh and served by
 #                    Django/WhiteNoise at /, API at /api/*)  -> same origin, no CORS
-#   - Worker      -> Celery
-#   - Redis       -> Celery broker/results (declared as a service)
+#   - Redis       -> Celery broker/results (declared as a service; free tier has no
+#                    background worker, so Celery tasks queue but aren't consumed)
 #   - PostgreSQL  -> primary database (declared under databases:, NOT services:)
 #
 # Free-tier caveats: services spin down after 15 min idle (cold start ~30-60s),
@@ -48,37 +48,6 @@ services:
       - key: EMAIL_HOST_USER
         sync: false
       - key: EMAIL_HOST_PASSWORD
-        sync: false
-      - key: CELERY_BROKER_URL
-        fromService:
-          type: redis
-          name: pst-redis
-          property: connectionString
-      - key: CELERY_RESULT_BACKEND
-        fromService:
-          type: redis
-          name: pst-redis
-          property: connectionString
-
-  - type: worker
-    name: pst-worker
-    runtime: python
-    rootDir: backend
-    plan: free
-    buildCommand: bash build.sh
-    startCommand: celery -A pst_project worker -l info
-    envVars:
-      - key: DEBUG
-        value: "false"
-      - key: PYTHON_VERSION
-        value: "3.11"
-      - key: DATABASE_URL
-        fromDatabase:
-          name: pst-db
-          property: connectionString
-      - key: SECRET_KEY
-        sync: false
-      - key: JWT_SECRET_KEY
         sync: false
       - key: CELERY_BROKER_URL
         fromService:
