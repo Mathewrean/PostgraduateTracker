@@ -2,39 +2,21 @@
 # from a single repo and a single free account. No Vercel needed.
 #
 # One-platform plan:
-#   - Static Site  -> React SPA (frontend/) served from the same *.onrender.com domain
-#   - Web Service  -> Django API (backend/)  on  /api/*
-#   - Worker       -> Celery
-#   - Redis        -> Celery broker/results
-#   - PostgreSQL   -> primary database
+#   - Web Service -> Django API + React SPA (SPA is built in build.sh and served by
+#                    Django/WhiteNoise at /, API at /api/*)  -> same origin, no CORS
+#   - Worker      -> Celery
+#   - Redis       -> Celery broker/results
+#   - PostgreSQL  -> primary database
 #
 # Free-tier caveats: services spin down after 15 min idle (cold start ~30-60s),
 # and the free Postgres/Redis have usage caps. Fine for demos / small use.
-
-staticSites:
-  - name: pst-frontend
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    outputDirectory: dist
-    # Use a backend-relative API path so the SPA calls the same origin (no CORS needed).
-    # If you prefer an explicit URL, set VITE_API_URL instead (Render env var on this site).
-    envVars:
-      - key: VITE_API_URL
-        value: "/api"
-    routes:
-      - source: /((?!api|_vercel|.*\\..*).*)
-        destination: /index.html
-    headers:
-      - path: /assets/*
-        name: Cache-Control
-        value: public, max-age=31536000, immutable
 
 services:
   - type: web
     name: pst-api
     runtime: python
     rootDir: backend
-    plan: starter
+    plan: free
     buildCommand: bash build.sh
     startCommand: gunicorn pst_project.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
     healthCheckPath: /api/health/
@@ -52,9 +34,9 @@ services:
       - key: JWT_SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
-        value: ".onrender.com,pst-api.onrender.com,pst-frontend.onrender.com,localhost,127.0.0.1"
+        value: ".onrender.com,localhost,127.0.0.1"
       - key: CORS_ALLOWED_ORIGINS
-        value: "https://pst-frontend.onrender.com,http://localhost:5173,http://localhost:3000"
+        value: "http://localhost:5173,http://localhost:3000"
       - key: EMAIL_BACKEND
         value: "django.core.mail.backends.smtp.EmailBackend"
       - key: EMAIL_HOST
@@ -82,7 +64,7 @@ services:
     name: pst-worker
     runtime: python
     rootDir: backend
-    plan: starter
+    plan: free
     buildCommand: bash build.sh
     startCommand: celery -A pst_project worker -l info
     envVars:
@@ -111,11 +93,11 @@ services:
 
   - type: redis
     name: pst-redis
-    plan: starter
+    plan: free
     ipAllowList: []
 
-  - type: postgres
+  - type: psql
     name: pst-db
-    plan: starter
+    plan: free
     databaseName: pst
     user: pst
