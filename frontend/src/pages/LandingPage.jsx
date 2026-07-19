@@ -130,7 +130,7 @@ export const LandingPage = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { step: '01', title: 'Create an Account', desc: 'Register with your institutional email and verify with the code sent to your inbox.' },
+                { step: '01', title: 'Create an Account', desc: 'Register with your institutional email and phone, then log in to start tracking.' },
                 { step: '02', title: 'Track Your Stages', desc: 'Move through Concept, Proposal, and Thesis stages with supervisor approvals.' },
                 { step: '03', title: 'Stay Informed', desc: 'Receive notifications, upload documents, and generate progress reports anytime.' },
               ].map((item, idx) => (

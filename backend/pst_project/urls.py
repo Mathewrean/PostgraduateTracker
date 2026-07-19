@@ -95,18 +95,20 @@ urlpatterns = [
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
-# Serve the built SPA's static assets (/assets/*) directly from the Vite build output.
+def _spa_static_or_index(request, path=''):
+    # Serve real files from the Vite build output (icons, manifest, service-worker,
+    # assets, etc.). Only fall back to index.html for paths that are NOT files, so
+    # client-side routing works and the logo/favicon actually load.
+    candidate = FRONTEND_DIST / path
+    if path and candidate.exists() and candidate.is_file():
+        return static_serve(request, path, document_root=str(FRONTEND_DIST))
+    return _spa_index(request)
+
+
 urlpatterns += [
     re_path(
-        r'^assets/(?P<path>.*)$',
-        static_serve,
-        {'document_root': FRONTEND_DIST / 'assets'},
-        name='spa-assets',
+        r'^(?!(api/|admin/|static/|media/))(?P<path>.*)$',
+        _spa_static_or_index,
+        name='spa-catch-all',
     ),
-]
-
-# SPA fallback: serve index.html for any non-API, non-static, non-assets route so
-# client-side routing works on the same origin. Must be LAST.
-urlpatterns += [
-    re_path(r'^(?!api/|admin/|static/|media/|assets/).*$', _spa_index, name='spa-index'),
 ]

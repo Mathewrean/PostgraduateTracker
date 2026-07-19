@@ -58,8 +58,8 @@ export const RegisterPage = () => {
         password_confirm: formData.password_confirm,
         role: formData.role
       })
-      toast.success(response.data?.message || 'Registration successful. Check your email for the code.')
-      navigate('/verify-otp', { replace: true, state: { email: formData.email } })
+      toast.success('Registration successful. You can now log in.')
+      navigate('/login', { replace: true })
     } catch (error) {
       const errMsg = error.response?.data?.detail ||
                      error.response?.data?.email?.[0] ||
