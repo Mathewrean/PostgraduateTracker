@@ -121,27 +121,33 @@ export const LandingPage = () => {
           </div>
         </section>
 
-        {/* Test Accounts Section */}
+        {/* How It Works Section */}
         <section className="py-16">
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-12">
-              <h3 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Test Accounts</h3>
-              <p style={secondaryTextStyle}>Try the application with pre-configured accounts</p>
+              <h3 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>How It Works</h3>
+              <p style={secondaryTextStyle}>Get started in three simple steps</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { role: 'Student', email: 'student@test.com', pass: 'student123' },
-                { role: 'Student', email: 'student@example.com', pass: 'password123' },
-                { role: 'Supervisor', email: 'supervisor@test.com', pass: 'supervisor123' },
-                { role: 'Coordinator', email: 'coordinator@test.com', pass: 'coordinator123' },
-                { role: 'Admin', email: 'admin@test.com', pass: 'admin123' },
-              ].map((account, idx) => (
-                <div key={idx} className="p-4 rounded-lg border" style={cardStyle}>
-                  <p className="text-sm font-semibold w-fit px-2 py-1 rounded mb-2" style={{ backgroundColor: 'var(--bg-surface)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}>{account.role}</p>
-                  <p className="text-sm font-mono" style={{ ...secondaryTextStyle, wordBreak: 'break-all', marginBottom: '0.25rem' }}>{account.email}</p>
-                  <p className="text-sm font-mono" style={secondaryTextStyle}>{account.pass}</p>
+                { step: '01', title: 'Create an Account', desc: 'Register with your institutional email and verify with the code sent to your inbox.' },
+                { step: '02', title: 'Track Your Stages', desc: 'Move through Concept, Proposal, and Thesis stages with supervisor approvals.' },
+                { step: '03', title: 'Stay Informed', desc: 'Receive notifications, upload documents, and generate progress reports anytime.' },
+              ].map((item, idx) => (
+                <div key={idx} className="p-6 rounded-lg border" style={cardStyle}>
+                  <p className="text-3xl font-bold mb-3" style={{ color: 'var(--color-brand)' }}>{item.step}</p>
+                  <h4 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{item.title}</h4>
+                  <p style={secondaryTextStyle}>{item.desc}</p>
                 </div>
               ))}
+            </div>
+            <div className="text-center mt-12">
+              <button
+                onClick={() => navigate('/register')}
+                className="btn-primary px-8 py-3 text-lg font-semibold"
+              >
+                Get Started
+              </button>
             </div>
           </div>
         </section>
