@@ -17,5 +17,5 @@ def send_otp_email(self, email, otp_code):
             fail_silently=False,
         )
     except Exception as exc:
+        # Do not re-raise: email delivery must never break registration/login.
         logger.error(f'OTP email failed for {email}: {exc}')
-        raise self.retry(exc=exc, countdown=30)

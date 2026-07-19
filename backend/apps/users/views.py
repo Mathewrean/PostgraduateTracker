@@ -53,9 +53,9 @@ def send_registration_otp(user):
     )
     try:
         send_otp_email.delay(user.email, code)
-    except Exception:
-        logger.warning('Celery unavailable. Sending OTP email synchronously.')
-        send_otp_email(user.email, code)
+    except Exception as exc:
+        logger.warning('OTP email could not be sent (Celery/SMTP): %s', exc)
+
 
 
 class UserViewSet(viewsets.ModelViewSet):
