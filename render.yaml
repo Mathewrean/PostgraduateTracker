@@ -5,8 +5,8 @@
 #   - Web Service -> Django API + React SPA (SPA is built in build.sh and served by
 #                    Django/WhiteNoise at /, API at /api/*)  -> same origin, no CORS
 #   - Worker      -> Celery
-#   - Redis       -> Celery broker/results
-#   - PostgreSQL  -> primary database
+#   - Redis       -> Celery broker/results (declared as a service)
+#   - PostgreSQL  -> primary database (declared under databases:, NOT services:)
 #
 # Free-tier caveats: services spin down after 15 min idle (cold start ~30-60s),
 # and the free Postgres/Redis have usage caps. Fine for demos / small use.
@@ -96,8 +96,8 @@ services:
     plan: free
     ipAllowList: []
 
-  - type: postgres
-    name: pst-db
+databases:
+  - name: pst-db
     plan: free
     databaseName: pst
     user: pst
