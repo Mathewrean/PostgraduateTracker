@@ -143,7 +143,11 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-STATICFILES_DIRS = [BASE_DIR / 'static'] if (BASE_DIR / 'static').exists() else []
+# Include the built React SPA so a single Django service can serve both the API and the UI.
+STATICFILES_DIRS = [
+    p for p in [BASE_DIR / 'static', BASE_DIR.parent / 'frontend' / 'dist']
+    if p.exists()
+]
 
 # Media files
 MEDIA_URL = '/media/'

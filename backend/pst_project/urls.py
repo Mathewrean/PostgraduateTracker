@@ -1,7 +1,9 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import TemplateView
+from django.http import HttpResponse
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,6 +12,16 @@ from apps.users.views import AuthLoginView, AuthLogoutView, AuthProfileView, Res
 from apps.notifications.views import MeetingViewSet
 from apps.audit.views import AuditLogViewSet
 from apps.documents.views import MinutesViewSet
+
+
+def _spa_index(request):
+    index_path = settings.BASE_DIR.parent / 'frontend' / 'dist' / 'index.html'
+    if index_path.exists():
+        return HttpResponse(index_path.read_text(), content_type='text/html')
+    return HttpResponse(
+        '<h1>PST API Server Running</h1><p>Frontend build not found. Set VITE_API_URL to the API origin.</p>',
+        content_type='text/html',
+    )
 
 
 class APIRootView(APIView):
@@ -78,3 +90,10 @@ urlpatterns = [
     path('api/logs/', AuditLogViewSet.as_view({'get': 'list'}), name='audit-log-list'),
     path('api/logs/<int:pk>/', AuditLogViewSet.as_view({'get': 'retrieve'}), name='audit-log-detail'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+# SPA fallback: serve index.html for any non-API, non-static route so client-side
+# routing works on the same origin. Must be LAST.
+urlpatterns += [
+    re_path(r'^(?!api/|admin/|static/|media/).*$', _spa_index, name='spa-index'),
+]
