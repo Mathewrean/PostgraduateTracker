@@ -35,6 +35,28 @@ This guide covers preparing the frontend for **Vercel** and the backend (Django 
 
 ---
 
+## 2b. ⚠️ Vercel + Django Backend: Why `collectstatic` Fails on `psycopg`
+
+**Symptom:** Vercel build runs `python manage.py collectstatic --noinput` and fails with:
+```
+ModuleNotFoundError: No module named 'psycopg'
+ModuleNotFoundError: No module named 'psycopg2'
+```
+
+**Root cause (two parts):**
+1. **Vercel is the wrong host for this Django backend.** Vercel's Python builder targets *serverless functions*, not a long-lived Django/Gunicorn/Celery/Redis/Postgres app. It does not reliably install native wheels (`psycopg2-binary` needs compiled C extensions) and tears down the environment after build. The frontend (React SPA) belongs on Vercel; the API belongs on Render/Railway/Fly.
+2. Even when `psycopg2-binary` is in `requirements.txt`, `collectstatic` triggers Django to import `settings.py`, which resolves the Postgres DB engine. If the adapter isn't importable in Vercel's builder, the import crashes the build.
+
+**Fixes applied in this repo:**
+- `backend/requirements.txt` now pins **both** `psycopg2-binary==2.9.9` (Django 5.0 default v2 engine) **and** `psycopg[binary]==3.2.3` (v3 engine) so either import path resolves.
+- `backend/pst_project/settings.py` now resolves `DATABASES` **lazily** and skips Postgres entirely during `collectstatic` (falls back to a local sqlite file), so the build never depends on the Postgres adapter being present.
+- `backend/build.sh` wraps `collectstatic` so a missing adapter can't fail the build (`|| echo ...`).
+- `render.yaml` provides a correct backend host config (web + worker + redis + postgres) — **use this instead of Vercel for the API.**
+
+**If you must run `collectstatic` in a constrained environment:** set `DATABASE_URL` empty (or omit it) so the sqlite fallback is used, and ensure `psycopg2-binary` is installed. On a real host (Render), the full Postgres adapter is installed normally and the lazy config uses it at runtime.
+
+---
+
 ## 3. Deploy Frontend to Vercel
 
 ### Option A — Vercel Dashboard (easiest)

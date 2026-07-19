@@ -32,6 +32,8 @@ venv.bak/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+db_build.sqlite3
+db_build.sqlite3-journal
 /media
 /staticfiles
 .env
