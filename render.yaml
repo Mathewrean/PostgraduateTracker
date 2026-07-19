@@ -96,7 +96,7 @@ services:
     plan: free
     ipAllowList: []
 
-  - type: psql
+  - type: postgres
     name: pst-db
     plan: free
     databaseName: pst
