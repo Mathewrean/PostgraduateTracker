@@ -49,6 +49,8 @@ services:
         sync: false
       - key: EMAIL_HOST_PASSWORD
         sync: false
+      - key: CELERY_WORKER_ENABLED
+        value: "false"
       - key: CELERY_BROKER_URL
         fromService:
           type: redis

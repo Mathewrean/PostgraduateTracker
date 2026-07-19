@@ -227,6 +227,14 @@ CELERY_TIMEZONE = 'UTC'
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
+# Free-tier fallback: when no Celery worker is running (e.g. Render free plan, which
+# has no background worker), run tasks synchronously (inline) so emails/notifications
+# still execute. Set CELERY_WORKER_ENABLED=true only when a real worker consumes the queue.
+CELERY_WORKER_ENABLED = config('CELERY_WORKER_ENABLED', default='false').lower() in ('1', 'true', 'yes')
+if not CELERY_WORKER_ENABLED:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
+
 CELERY_BEAT_SCHEDULE = {
     'check-overdue-complaints': {
         'task': 'pst_project.tasks.check_complaint_escalation',
