@@ -197,10 +197,11 @@ class DocumentViewSet(BaseStageFileViewSet):
         log_audit_event(
             user=request.user,
             action='DOCUMENT_UPLOAD',
-            description=f'{
-                request.user.email} uploaded {
-                document.get_doc_type_display()} for stage {
-                stage.stage_type}.',
+            description=(
+                f'{request.user.email} uploaded '
+                f'{document.get_doc_type_display()} for stage '
+                f'{stage.stage_type}.'
+            ),
             ip_address=getattr(
                 request,
                 'client_ip',
@@ -340,9 +341,10 @@ class MinutesViewSet(BaseStageFileViewSet):
             )
 
         log_audit_event(
-            user=request.user, action='MINUTES_UPLOAD', description=f'{
-                request.user.email} uploaded Minutes of Presentation for stage {
-                stage.stage_type}.', ip_address=getattr(
+            user=request.user, action='MINUTES_UPLOAD', description=(
+                f'{request.user.email} uploaded Minutes of Presentation '
+                f'for stage {stage.stage_type}.'
+            ), ip_address=getattr(
                 request, 'client_ip', None), extra_data={
                     'minutes_id': minutes.id, 'stage_id': stage.id}, )
 
@@ -384,9 +386,10 @@ class MinutesViewSet(BaseStageFileViewSet):
         )
 
         log_audit_event(
-            user=request.user, action='MINUTES_APPROVAL', description=f'{
-                request.user.email} approved Minutes of Presentation for {
-                minutes.student.user.email}.', ip_address=getattr(
+            user=request.user, action='MINUTES_APPROVAL', description=(
+                f'{request.user.email} approved Minutes of Presentation '
+                f'for {minutes.student.user.email}.'
+            ), ip_address=getattr(
                 request, 'client_ip', None), extra_data={
                     'minutes_id': minutes.id, 'stage_id': minutes.stage.id}, )
 

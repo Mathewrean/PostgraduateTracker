@@ -162,10 +162,11 @@ class StageViewSet(viewsets.ModelViewSet):
         log_audit_event(
             user=request.user,
             action='STAGE_APPROVAL',
-            description=f'{
-                request.user.email} approved the {
-                stage.stage_type} stage for {
-                stage.student.user.email}.',
+            description=(
+                f'{request.user.email} approved the '
+                f'{stage.stage_type} stage for '
+                f'{stage.student.user.email}.'
+            ),
             ip_address=getattr(
                 request,
                 'client_ip',
@@ -179,9 +180,10 @@ class StageViewSet(viewsets.ModelViewSet):
             log_audit_event(
                 user=request.user,
                 action='STAGE_TRANSITION',
-                description=f'{
-                    stage.student.user.email} moved from {
-                    stage.stage_type} to {next_stage_type}.',
+                description=(
+                    f'{stage.student.user.email} moved from '
+                    f'{stage.stage_type} to {next_stage_type}.'
+                ),
                 ip_address=getattr(
                     request,
                     'client_ip',
