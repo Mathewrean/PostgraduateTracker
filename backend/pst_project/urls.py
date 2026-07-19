@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.static import serve as static_serve
 from django.views.generic import TemplateView
 from django.http import HttpResponse
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -14,8 +15,11 @@ from apps.audit.views import AuditLogViewSet
 from apps.documents.views import MinutesViewSet
 
 
+FRONTEND_DIST = settings.BASE_DIR.parent / 'frontend' / 'dist'
+
+
 def _spa_index(request):
-    index_path = settings.BASE_DIR.parent / 'frontend' / 'dist' / 'index.html'
+    index_path = FRONTEND_DIST / 'index.html'
     if index_path.exists():
         return HttpResponse(index_path.read_text(), content_type='text/html')
     return HttpResponse(
@@ -58,7 +62,6 @@ class HealthCheckView(APIView):
 
 
 urlpatterns = [
-    path('', APIRootView.as_view(), name='api-root'),
     path('api/', APIRootView.as_view(), name='api-root-alt'),
     path('admin/', admin.site.urls),
     path('api/auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -92,8 +95,18 @@ urlpatterns = [
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
-# SPA fallback: serve index.html for any non-API, non-static route so client-side
-# routing works on the same origin. Must be LAST.
+# Serve the built SPA's static assets (/assets/*) directly from the Vite build output.
 urlpatterns += [
-    re_path(r'^(?!api/|admin/|static/|media/).*$', _spa_index, name='spa-index'),
+    re_path(
+        r'^assets/(?P<path>.*)$',
+        static_serve,
+        {'document_root': FRONTEND_DIST / 'assets'},
+        name='spa-assets',
+    ),
+]
+
+# SPA fallback: serve index.html for any non-API, non-static, non-assets route so
+# client-side routing works on the same origin. Must be LAST.
+urlpatterns += [
+    re_path(r'^(?!api/|admin/|static/|media/|assets/).*$', _spa_index, name='spa-index'),
 ]
