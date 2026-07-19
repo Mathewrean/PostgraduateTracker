@@ -18,7 +18,7 @@ services:
     rootDir: backend
     plan: free
     buildCommand: bash build.sh
-    startCommand: gunicorn pst_project.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
+    startCommand: bash start.sh
     healthCheckPath: /api/health/
     envVars:
       - key: DEBUG
