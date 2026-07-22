@@ -42,3 +42,4 @@ whitenoise==6.7.0
 gunicorn==21.2.0
 uvicorn==0.27.1
 uvicorn-worker==0.1.0
+django-resend

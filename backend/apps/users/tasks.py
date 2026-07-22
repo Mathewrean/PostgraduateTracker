@@ -19,9 +19,9 @@ BODIES = {
 
 @shared_task(bind=True, max_retries=3)
 def send_otp_email(self, email, otp_code, purpose='registration'):
-    # Skip entirely if SMTP is not configured (free-tier / no email creds).
-    if not settings.EMAIL_HOST_USER:
-        logger.info('OTP email skipped for %s (%s, EMAIL_HOST_USER not configured)', email, purpose)
+    # Skip entirely if no mail provider is configured.
+    if not (settings.RESEND_API_KEY or settings.EMAIL_HOST_USER):
+        logger.info('OTP email skipped for %s (%s, no mail provider configured)', email, purpose)
         return
 
     try:
