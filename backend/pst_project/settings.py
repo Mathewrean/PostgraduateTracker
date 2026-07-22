@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+    'anymail',
     'django_filters',
     'apps.users',
     'apps.students',
@@ -250,19 +251,12 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 # Email Configuration
-# Primary: Resend HTTP API (recommended on Render free tier, no SMTP outbound needed).
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='django_resend.backends.ResendBackend')
+# Primary: Resend via Anymail (recommended on Render free tier, no SMTP outbound needed).
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='anymail.backends.resend.EmailBackend')
+ANYMAIL = {
+    'RESEND_API_KEY': config('RESEND_API_KEY', default=''),
+}
 RESEND_API_KEY = config('RESEND_API_KEY', default='')
-
-# Legacy Gmail/SMTP settings retained as a fallback reference.
-# If you need to switch back to SMTP, set:
-# EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-# EMAIL_HOST=smtp.gmail.com
-# EMAIL_PORT=587
-# EMAIL_USE_TLS=True
-# EMAIL_HOST_USER=your-email@gmail.com
-# EMAIL_HOST_PASSWORD=your-app-password
-# DEFAULT_FROM_EMAIL=your-email@gmail.com
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@pst-tracker.onrender.com')
 
 # Recovered missing file upload variables
