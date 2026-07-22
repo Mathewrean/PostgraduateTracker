@@ -175,9 +175,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         validated_data.setdefault('first_name', '')
         validated_data.setdefault('last_name', '')
         validated_data.setdefault('role', 'student')
-        # Activate immediately: OTP email verification is disabled on the free tier,
-        # so new accounts must be usable for login right after registration.
-        validated_data['is_active'] = True
+        # Inactive until email OTP is verified.
+        validated_data['is_active'] = False
         return User.objects.create_user(**validated_data)
 
 
