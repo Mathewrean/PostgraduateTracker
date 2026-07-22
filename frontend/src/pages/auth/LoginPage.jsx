@@ -98,6 +98,11 @@ export const LoginPage = () => {
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
+          <div className="text-center">
+            <Link to="/forgot-password" className="text-sm" style={{ color: 'var(--color-brand)' }}>
+              Forgot password?
+            </Link>
+          </div>
         </form>
 
         {/* Registration Link */}
