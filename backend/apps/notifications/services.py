@@ -37,7 +37,9 @@ def notify(
                 f'{message}\n\nLogin to PST to view details: '
                 f'{settings.FRONTEND_URL}'
             )
-            dispatch_notification_email(recipient.email, subject, body)
+            dispatch_notification_email(
+                recipient.email, subject, body, link or settings.FRONTEND_URL
+            )
 
         logger.info(
             f'Notification created for {recipient.email}: {notification_type}')

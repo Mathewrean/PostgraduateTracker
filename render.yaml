@@ -1,6 +1,4 @@
-# Render.com — deploy the WHOLE app (frontend + backend + worker + redis + postgres)
-# from a single repo and a single free account. No Vercel needed.
-#
+
 # One-platform plan:
 #   - Web Service -> Django API + React SPA (SPA is built in build.sh and served by
 #                    Django/WhiteNoise at /, API at /api/*)  -> same origin, no CORS
@@ -37,23 +35,18 @@ services:
         value: ".onrender.com,localhost,127.0.0.1"
       - key: CORS_ALLOWED_ORIGINS
         value: "http://localhost:5173,http://localhost:3000"
-      - key: EMAIL_BACKEND
-        value: "anymail.backends.resend.EmailBackend"
-      - key: DEFAULT_FROM_EMAIL
-        value: "noreply@pst-tracker.onrender.com"
-      # Legacy Gmail/SMTP fallback remains in code/comments only.
-      # - key: EMAIL_HOST
-      #   sync: false
-      # - key: EMAIL_PORT
-      #   value: "587"
-      # - key: EMAIL_USE_TLS
-      #   value: "true"
-      # - key: EMAIL_HOST_USER
-      #   sync: false
-      # - key: EMAIL_HOST_PASSWORD
-      #   sync: false
-      - key: RESEND_API_KEY
+      - key: EMAIL_HOST
+        value: "smtp.gmail.com"
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USE_TLS
+        value: "true"
+      - key: EMAIL_HOST_USER
         sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        value: "mathewrean@gmail.com"
       - key: CELERY_WORKER_ENABLED
         value: "false"
       # Set these in the Render dashboard to provision an admin/superuser on next

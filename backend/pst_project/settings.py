@@ -1,4 +1,3 @@
-import os
 import sys
 from pathlib import Path
 from datetime import timedelta
@@ -47,7 +46,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    'anymail',
     'django_filters',
     'apps.users',
     'apps.students',
@@ -251,13 +249,18 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 # Email Configuration
-# Primary: Resend via Anymail (recommended on Render free tier, no SMTP outbound needed).
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='anymail.backends.resend.EmailBackend')
-ANYMAIL = {
-    'RESEND_API_KEY': config('RESEND_API_KEY', default=''),
-}
-RESEND_API_KEY = config('RESEND_API_KEY', default='')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@pst-tracker.onrender.com')
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='')
+
+# Set EMAIL_BACKEND - Gmail SMTP if configured, otherwise console (no email sent)
+if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Recovered missing file upload variables
 MAX_FILE_SIZE = config('MAX_FILE_SIZE', default=104857600, cast=int)
