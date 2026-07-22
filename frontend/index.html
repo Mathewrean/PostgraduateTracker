@@ -12,7 +12,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="PST" />
     <script>
-      // Apply theme preference before the app renders to avoid flash
       (function() {
         try {
           var saved = localStorage.getItem('pst-theme')
@@ -24,7 +23,6 @@
             document.documentElement.setAttribute('data-theme', 'dark')
           }
         } catch (e) {
-          // ignore
         }
       })();
     </script>

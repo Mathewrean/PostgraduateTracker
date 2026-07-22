@@ -158,20 +158,27 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class EmailOTP(models.Model):
+    OTP_PURPOSES = (
+        ('registration', 'Registration'),
+        ('password_reset', 'Password Reset'),
+    )
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
         related_name='email_otp')
     code = models.CharField(max_length=6)
+    purpose = models.CharField(max_length=20, choices=OTP_PURPOSES, default='registration')
     expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'email_otps'
         indexes = [
-            models.Index(fields=['code']),
-            models.Index(fields=['expires_at']),
+            models.Index(fields=['code'], name='email_otps_code_c4f8cb_idx'),
+            models.Index(fields=['expires_at'], name='email_otps_expires_040e75_idx'),
+            models.Index(fields=['purpose'], name='email_otps_purpose_idx'),
         ]
 
     @classmethod
@@ -181,3 +188,7 @@ class EmailOTP(models.Model):
     @property
     def is_expired(self):
         return timezone.now() > self.expires_at
+
+    @property
+    def is_used(self):
+        return self.used_at is not None

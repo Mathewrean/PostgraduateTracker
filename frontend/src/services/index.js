@@ -13,6 +13,12 @@ export const authService = {
   resendOtp: (email) =>
     api.post('/auth/resend-otp/', { email }),
   
+  requestPasswordReset: (email) =>
+    api.post('/auth/password-reset/', { email }),
+  
+  confirmPasswordReset: (data) =>
+    api.post('/auth/password-reset/confirm/', data),
+  
   logout: (refreshToken) =>
     api.post('/auth/logout/', { refresh: refreshToken }),
   

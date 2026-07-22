@@ -11,6 +11,8 @@ import { getHomePath, getNotificationAppPath } from './utils/navigation'
 import { LoginPage } from './pages/auth/LoginPage'
 import { RegisterPage } from './pages/auth/RegisterPage'
 import { VerifyOtpPage } from './pages/auth/VerifyOtpPage'
+import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage'
+import { ResetPasswordPage } from './pages/auth/ResetPasswordPage'
 import { LandingPage } from './pages/LandingPage'
 import { UnauthorizedPage } from './pages/UnauthorizedPage'
 
@@ -220,6 +222,8 @@ export const App = () => {
           <Route path="/login" element={token ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
           <Route path="/register" element={token ? <Navigate to="/dashboard" replace /> : <RegisterPage />} />
           <Route path="/verify-otp" element={token ? <Navigate to="/dashboard" replace /> : <VerifyOtpPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
           {/* Student Routes */}
@@ -253,7 +257,7 @@ export const App = () => {
           <Route path="/student/notifications/:notificationId" element={<PrivateRoute allowedRoles={['student']}><NotificationsPage /></PrivateRoute>} />
           <Route path="/messages" element={<PrivateRoute allowedRoles={['student']}><MessagesPage /></PrivateRoute>} />
           <Route path="/student/messages" element={<PrivateRoute allowedRoles={['student']}><MessagesPage /></PrivateRoute>} />
-          <Route path="/profile" element={<PrivateRoute allowedRoles={['student']}><ProfilePage /></PrivateRoute>} />
+          <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
           <Route path="/student/profile" element={<PrivateRoute allowedRoles={['student']}><ProfilePage /></PrivateRoute>} />
           <Route path="/meetings" element={<PrivateRoute allowedRoles={['student']}><MeetingsPage /></PrivateRoute>} />
           <Route path="/student/meetings" element={<PrivateRoute allowedRoles={['student']}><MeetingsPage /></PrivateRoute>} />

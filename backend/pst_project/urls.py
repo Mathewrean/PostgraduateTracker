@@ -9,7 +9,15 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
-from apps.users.views import AuthLoginView, AuthLogoutView, AuthProfileView, ResendOTPView, VerifyOTPView
+from apps.users.views import (
+    AuthLoginView,
+    AuthLogoutView,
+    AuthProfileView,
+    ResendOTPView,
+    VerifyOTPView,
+    PasswordResetRequestView,
+    PasswordResetConfirmView,
+)
 from apps.notifications.views import MeetingViewSet
 from apps.audit.views import AuditLogViewSet
 from apps.documents.views import MinutesViewSet
@@ -71,6 +79,8 @@ urlpatterns = [
     path('api/auth/profile/', AuthProfileView.as_view(), name='auth-profile'),
     path('api/auth/verify-otp/', VerifyOTPView.as_view(), name='auth-verify-otp'),
     path('api/auth/resend-otp/', ResendOTPView.as_view(), name='auth-resend-otp'),
+    path('api/auth/password-reset/', PasswordResetRequestView.as_view(), name='auth-password-reset'),
+    path('api/auth/password-reset/confirm/', PasswordResetConfirmView.as_view(), name='auth-password-reset-confirm'),
     path('api/health/', HealthCheckView.as_view(), name='health-check'),
     path('api/users/', include('apps.users.urls')),
     path('api/students/', include('apps.students.urls')),

@@ -107,7 +107,6 @@ if DATABASE_URL and not _collectstatic:
             'default': dj_database_url.config(
                 default=DATABASE_URL,
                 conn_max_age=600,
-                ssl_require=True
             )
         }
     except Exception:
