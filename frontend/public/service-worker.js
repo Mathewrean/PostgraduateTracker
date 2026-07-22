@@ -1,14 +1,10 @@
-const CACHE_NAME = 'pst-pwa-cache-v2';
+const CACHE_NAME = 'pst-pwa-cache-v3';
 const API_CACHE_NAME = 'pst-api-cache-v1';
-const ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.webmanifest'
-];
+const JS_CSS_PATTERN = /\.(js|css|woff2?|png|jpg|jpeg|gif|svg|ico)$/;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(['/', '/index.html', '/manifest.webmanifest']))
   );
   self.skipWaiting();
 });
@@ -18,7 +14,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME) {
+          if (key !== CACHE_NAME && key !== API_CACHE_NAME) {
             return caches.delete(key);
           }
           return null;
@@ -61,26 +57,23 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  const isStaticAsset = JS_CSS_PATTERN.test(url.pathname);
+
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request)
-        .then((response) => {
-          if (!response || response.status !== 200) {
-            return response;
-          }
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+    fetch(event.request)
+      .then((response) => {
+        if (!response || response.status !== 200) {
           return response;
-        })
-        .catch(() => {
-          if (event.request.mode === 'navigate') {
-            return caches.match('/index.html');
-          }
-          return caches.match('/');
-        });
-    })
+        }
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+        return response;
+      })
+      .catch(() => {
+        if (event.request.mode === 'navigate') {
+          return caches.match('/index.html');
+        }
+        return caches.match('/');
+      })
   );
 });
